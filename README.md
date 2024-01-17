@@ -86,9 +86,6 @@ Your ranker should accept a list of social media posts and comments, each with a
                 "upvote": 3,
                 "downvote": 5
             }
-        },
-        {
-            (etc)
         }
     ]
 }
@@ -100,8 +97,7 @@ Your ranker should return an ordered list of IDs. You can also remove items by r
 {
     "ranked_ids": [
         "de83fc78-d648-444e-b20d-853bf05e4f0e",
-        "571775f3-2564-4cf5-b01c-f4cb6bab461b",
-        (etc)
+        "571775f3-2564-4cf5-b01c-f4cb6bab461b"
     ],
     "new_items": [
         {
