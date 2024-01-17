@@ -53,30 +53,40 @@ We will test the winning rankers with real users across three different platform
 
 ## Submitting an entry
 
-(how to submit)
+Instructions coming soon!
 
 ## Request/response format
 
 NOTE: This is provisional, and will almost certainly change.
 
-Your ranker should accept a list of social media posts, each with a corresponding ID, in JSON format:
+Your ranker should accept a list of social media posts and comments, each with a corresponding ID, in JSON format:
 
 ```json
 {
-    "posts": [
+    "items": [
         {
             "id": "de83fc78-d648-444e-b20d-853bf05e4f0e",
             "title": "this is the post title, available only on reddit",
             "text": "this is a social media post",
             "author_name_hash": "60b46b7370f80735a06b7aa8c4eb6bd588440816b086d5ef7355cf202a118305",
-            "author_link_hash": "992c7f2cae7e746838b83ad11de1c61c798df5fd2cd8a8c7bbfb3b85650c0431",
             "type": "post",
             "platform": "reddit",
             "enagements": {
                 "upvote": 34,
                 "downvote": 27
             }
-        }.
+        },
+        {
+            "id": "a4c08177-8db2-4507-acc1-1298220be98d",
+            "text": "this is a comment, by the author of the post",
+            "author_name_hash": "60b46b7370f80735a06b7aa8c4eb6bd588440816b086d5ef7355cf202a118305",
+            "type": "comment",
+            "platform": "reddit",
+            "enagements": {
+                "upvote": 3,
+                "downvote": 5
+            }
+        },
         {
             (etc)
         }
@@ -84,7 +94,7 @@ Your ranker should accept a list of social media posts, each with a correspondin
 }
 ```
 
-Your ranker should return an ordered list of IDs. You can also remove posts by removing an ID, or add posts by inserting a new ID that you generate. For new posts, the post content should be included in a separate portion of the response.
+Your ranker should return an ordered list of IDs. You can also remove items by removing an ID, or add items by inserting a new ID that you generate. For new items, the data to display should be included in a separate portion of the response.
 
 ```json
 {
@@ -93,7 +103,7 @@ Your ranker should return an ordered list of IDs. You can also remove posts by r
         "571775f3-2564-4cf5-b01c-f4cb6bab461b",
         (etc)
     ],
-    "new_posts": [
+    "new_items": [
         {
             "id": "571775f3-2564-4cf5-b01c-f4cb6bab461b",
             "title": "this is the post title, available only on reddit",
@@ -111,15 +121,23 @@ Your ranker should return an ordered list of IDs. You can also remove posts by r
 }
 ```
 
-You do not need to return the same number of posts as you received. However, keep in mind that making a significant change in the number of posts returned could have a negative impact on the user experience.
+You do not need to return the same number of content items as you received. However, keep in mind that making a significant change in the number of items could have a negative impact on the user experience.
 
 ### Platform-specific fields
 
-Some fields are only available
+Some fields are only available for a subset of platforms and content types:
+
+`title` is only available on Reddit posts (not comments)
+
+Engagements:
+
+- Reddit, `upvote, downvote`.
+- X (Twitter): `comment, repost, like, view`
+- Facebook: `like, love, care, haha, wow, sad, angry, comment, share`
 
 ## Available infrastructure
 
-Winning classifiers will be executed in an environment that can provide the following infrastructure (let us know which you'll need):
+Winning classifiers will be run during the experiment in an environment that can provide the following infrastructure (let us know which you'll need):
 
 ### Endpoint
 
@@ -129,9 +147,12 @@ We will host your classifier endpoint. GPU is available if needed.
 
 A database of historical post metadata for your users, updated as often as is practical, into which you can also write your own data. If needed, we can provide an interface for writing data from a process that you run outside our infrastructure, but we cannot allow that process to make queries.
 
-### Offline Worker
+### Offline Workers
 
-A sandboxed offline worker (GPU-equipped if needed) that has read/write access to the database.
+We will provide for two types of worker (GPU equipped, if needed):
+
+- Sandboxed: no internet connectivity, but has read/write access to the database.
+- Open: has internet connectivity, and write-only access to the database.
 
 ### Latency: 750ms
 
