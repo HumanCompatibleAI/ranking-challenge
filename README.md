@@ -1,6 +1,6 @@
 # Prosocial Ranking Challenge
 
-The Prosocial Ranking Challenge is designed to inspire, fund, and test the best algorithms to improve social cohesion on social media. We will use our browser extension to re-order the feeds of paid participants on Facebook, Reddit, and X (Twitter) for three months, moving pro-social content to the top and anti-social content to the bottom, and measure changes in attitudes and behavior, including toxic polarization, dehumanization, and anti-democratic attitudes.
+The Prosocial Ranking Challenge is designed to inspire, fund, and test the best algorithms to improve well-being, polarization, and factual knowledge for social media users. We will use our browser extension to re-order the feeds of paid participants on Facebook, Reddit, and X (Twitter) for three months, moving pro-social content to the top and anti-social content to the bottom, and measure changes in attitudes and behavior, including toxic polarization, dehumanization, and anti-democratic attitudes.
 
 [More about the project here](https://link-to-website) (TODO: get link)
 
