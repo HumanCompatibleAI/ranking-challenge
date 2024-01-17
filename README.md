@@ -132,8 +132,13 @@ Some fields are only available for a subset of platforms and content types:
 Engagements:
 
 - Reddit, `upvote, downvote`.
-- X (Twitter): `comment, repost, like, view`
+- X (Twitter): `reply, repost, like, view`
 - Facebook: `like, love, care, haha, wow, sad, angry, comment, share`
+
+Content types:
+
+- Reddit and Facebook: `post, comment`
+- X (Twitter): `post`
 
 ## Available infrastructure
 
@@ -166,6 +171,7 @@ As this experiment handles a considerable amount of Personal Identifiable Inform
 
 - Classifiers and offline workers will be executed in a sandbox and prevented from making outgoing network connections.
 - Classifier outputs will be validated.
+- Direct identifiers of study participants will be hashed wherever practical.
 - You will not personally have access to any user-level data about the participants in your study arm. Only aggregate data will be made available during the study. De-identified data may be made available after the study period, if it can be sufficiently de-identified.
 - Our team will audit your code.
 
