@@ -1,12 +1,16 @@
 # Prosocial Ranking Challenge
 
-The Prosocial Ranking Challenge is designed to inspire, fund, and test the best algorithms to improve social cohesion on social media. We will use our browser extension to re-order the feeds of paid participants on Facebook, Reddit, and X (Twitter) for three months, moving pro-social content to the top and anti-social content to the bottom, and measure changes in attitudes and behavior, including toxic polarization, dehumanization, and anti-democratic attitudes.
+The Prosocial Ranking Challenge: inspire, fund, and test the best algorithms to improve social cohesion on social media.
+
+We will use your ranking algorithm with our browser extension to re-order the social media feeds of paid participants for three months. By moving pro-social content to the top of the feed, and anti-social content to the bottom, we hope to measure changes in attitudes and behavior, including toxic polarization, dehumanization, and anti-democratic attitudes.
+
+The experiment will run on three platforms: Facebook, Reddit, and X (Twitter)
 
 [More about the project here](https://link-to-website) (TODO: get link)
 
-We are soliciting ranking algorithms to test, with a $10,000 prize for each of five winners, and $1000 for each of ten finalists.
+How do we identify pro- and anti-social content? That's where you come in! We are soliciting ranking algorithms to test, with a $10,000 prize for each of five winners (as selected by our panel of experts), and $1000 for each of ten finalists.
 
-## How to submit
+## 📅 Submission timeline and requirements
 
 Submissions will take place in two rounds: prototype and production.
 
@@ -51,11 +55,13 @@ We will rebuild your container using the audited code before running it in produ
 
 We will test the winning rankers with real users across three different platforms for five months.
 
-## Submitting an entry
+## 📨 Submitting an entry
 
 Instructions coming soon!
 
-## Request/response format
+## 🛠 Building a ranker
+
+### Request/response format
 
 NOTE: This is provisional, and will almost certainly change.
 
@@ -119,7 +125,7 @@ Your ranker should return an ordered list of IDs. You can also remove items by r
 
 You do not need to return the same number of content items as you received. However, keep in mind that making a significant change in the number of items could have a negative impact on the user experience.
 
-### Platform-specific fields
+#### Platform-specific fields
 
 Some fields are only available for a subset of platforms and content types:
 
@@ -136,7 +142,7 @@ Content types:
 - Reddit and Facebook: `post, comment`
 - X (Twitter): `post`
 
-## Available infrastructure
+## 🏭 Available infrastructure
 
 Winning classifiers will be run during the experiment in an environment that can provide the following infrastructure (let us know which you'll need):
 
@@ -159,9 +165,13 @@ We will provide for two types of worker (GPU equipped, if needed):
 
 There is no latency requirement for initial submissions.
 
-Finalists must finish returning their result using a standardized test set on our infrastructure within 750ms. We will test this vigorously, since latency can have an enormous impact on overall outcomes. If your classifier is too slow, we will let you know as quickly as possible, to give you time to improve your submission before the deadline.
+Finalists must finish returning their result using a standardized test set on our infrastructure within 750ms.
 
-## Security model
+We will test this vigorously. Latency can have an enormous impact on overall outcomes, and to properly control for it all study arms must be delayed to match the performance of the slowest ranker.
+
+If your classifier is too slow, we will let you know as quickly as possible, to give you time to improve your submission before the deadline.
+
+## 🔐 Security model
 
 As this experiment handles a considerable amount of Personal Identifiable Information (PII) to which your code will have unfettered access, we must take steps to prevent data exfiltration. These will include, among other things:
 
@@ -180,3 +190,10 @@ Coming soon!
 In the coming weeks, we will update this git repo with an example ranker written in Python.
 
 We will also provide a containerization example for finalist submissions.
+
+## Contacting us
+
+[Join our Discord!](https://discord.com/invite/VB2uZJ5w)
+
+Technical questions: Ian Baker <raindrift@berkeley.edu>
+All other enquiries: Jonathan Stray <jonathanstray@berkeley.edu>
