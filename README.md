@@ -1,20 +1,16 @@
 # Prosocial Ranking Challenge
 
-The Prosocial Ranking Challenge is designed to inspire, fund, and test the best algorithms to improve well-being, polarization, and factual knowledge for social media users. We will use our browser extension to re-order the feeds of paid participants on Facebook, Reddit, and X (Twitter) for three months, moving pro-social content to the top and anti-social content to the bottom, and measure changes in attitudes and behavior, including toxic polarization, dehumanization, and anti-democratic attitudes.
+The Prosocial Ranking Challenge is designed to inspire, fund, and test the best algorithms to improve well-being, polarization, and factual knowledge for social media users. We will use our browser extension to re-order the feeds of paid U.S. participants on Facebook, Reddit, and X (Twitter) for four months, and measure changes in attitudes and behavior.
 
-[More about the project here](https://link-to-website) (TODO: get link)
+[More about the project here](https://humancompatible.ai/news/2024/01/18/the-prosocial-ranking-challenge-60000-in-prizes-for-better-social-media-algorithms/)
 
-How do we identify pro- and anti-social content? That's where you come in! We are soliciting ranking algorithms to test, with a $10,000 prize for each of five winners (as selected by our panel of experts), and $1000 for each of ten finalists.
+How do we identify pro- and anti-social content? That's where you come in! We are soliciting ranking algorithms to test, with a $60,000 in prize money to be split between ten finalists (as selected by our panel of experts).
 
-## 📅 Submission timeline and requirements
+### First-round deadline: April 1, 2024
 
-Submissions will take place in two rounds: prototype and production.
-
-### First-round: March 1, 2024
+Submissions will take place in two rounds: prototype and production. See the [contest announcement](https://humancompatible.ai/news/2024/01/18/the-prosocial-ranking-challenge-60000-in-prizes-for-better-social-media-algorithms/).
 
 Each submission will include documentation describing how the algorithm works, what outcome(s) it is expected to change, and why it is significant to test, plus a prototype implementation (running as a live API endpoint that you host).
-
-Ten finalists will be announced March 15, 2024. Each wins a $1000 prize.
 
 #### First-round submission requirements
 
@@ -23,19 +19,19 @@ For your initial submission, you will need:
 - A description of how the algorithm works, what outcome(s) it is expected to change, and why it is significant to test
 - A prototype implementation. We do not need your code at this stage.
 - A description of how the prototype was built, the language used, and its dependencies.
-- A URL for an endpoint that hosts your algorithm, using the API specified below.
+- A URL for live endpoint that hosts your algorithm, using the API specified below.
 
 You may submit code written in any programming language or combination of languages, but we will supply example code in Python.
 
 At this stage, it is acceptable for you to use external services, hosted models, etc.
 
-### Finalist submissions: Apr 15, 2024
+### Finalist submissions: May 15, 2024
 
 This time your ranker will need to be delivered in a Docker container, along with complete source code and build instructions. It will need to meet certain performance and security requirements.
 
 At this point your code must be self-contained. Submissions that rely on external services will be disqualified.
 
-Five winners will be announced May 1, 2024. Each wins a $10,000 prize, in addition to their first-round prize.
+Five winners will be announced June 1, 2024. 
 
 #### Finalist submission requirements
 
@@ -53,7 +49,7 @@ We will test the winning rankers with real users across three different platform
 
 ## 📨 Submitting an entry
 
-Instructions coming soon!
+There's a [submission form](https://forms.gle/tcRvtoFyhGeFyZup7).
 
 ## 🛠 Building a ranker
 
@@ -157,11 +153,11 @@ We will provide for two types of worker (GPU equipped, if needed):
 - Sandboxed: no internet connectivity, but has read/write access to the database.
 - Open: has internet connectivity, and write-only access to the database.
 
-### Latency: 750ms
+### Latency: 500ms
 
 There is no latency requirement for initial submissions.
 
-Finalists must finish returning their result using a standardized test set on our infrastructure within 750ms.
+Finalists must finish returning their result using a standardized test set on our infrastructure within 500ms.
 
 We will test this vigorously. Latency can have an enormous impact on overall outcomes, and to properly control for it all study arms must be delayed to match the performance of the slowest ranker.
 
