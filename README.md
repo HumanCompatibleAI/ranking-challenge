@@ -69,20 +69,17 @@ There's a [submission form](https://forms.gle/tcRvtoFyhGeFyZup7).
 
 ### Request/response format
 
-_NOTE: This is provisional, and will almost certainly change._
-
 Your ranker should accept a list of social media posts and comments, each with a corresponding ID, in JSON format:
 
 ```json
 {
+    // Abbreviated for clarity, see api reference
     "items": [
         {
             "id": "de83fc78-d648-444e-b20d-853bf05e4f0e",
             "title": "this is the post title, available only on reddit",
             "text": "this is a social media post",
-            "author_name_hash": "60b46b7370f80735a06b7aa8c4eb6bd588440816b086d5ef7355cf202a118305",
             "type": "post",
-            "platform": "reddit",
             "enagements": {
                 "upvote": 34,
                 "downvote": 27
@@ -91,9 +88,7 @@ Your ranker should accept a list of social media posts and comments, each with a
         {
             "id": "a4c08177-8db2-4507-acc1-1298220be98d",
             "text": "this is a comment, by the author of the post",
-            "author_name_hash": "60b46b7370f80735a06b7aa8c4eb6bd588440816b086d5ef7355cf202a118305",
             "type": "comment",
-            "platform": "reddit",
             "enagements": {
                 "upvote": 3,
                 "downvote": 5
@@ -119,8 +114,6 @@ Your ranker should return an ordered list of IDs. You can also remove items by r
     ]
 }
 ```
-
-You do not need to return the same number of content items as you received. However, keep in mind that making a significant change in the number of items could have a negative impact on the user experience.
 
 Additional details can be found in [`docs/api_reference.md`](/docs/api_reference.md)
 

@@ -15,6 +15,7 @@ Your ranker should accept a list of social media posts and comments, each with a
     "session": {
         "user_id": "193a9e01-8849-4e1f-a42a-a859fa7f2ad3",
         "user_name_hash": "6511c5688bbb87798128695a283411a26da532df06e6e931a53416e379ddda0e",
+        "platform": "reddit",
         "current_time": "2024-01-20 18:41:20",
     },
     "items": [
@@ -24,7 +25,6 @@ Your ranker should accept a list of social media posts and comments, each with a
             "text": "this is a social media post",
             "author_name_hash": "60b46b7370f80735a06b7aa8c4eb6bd588440816b086d5ef7355cf202a118305",
             "type": "post",
-            "platform": "reddit",
             "created_at": "2023-12-06 17:02:11",
             "enagements": {
                 "upvote": 34,
@@ -36,7 +36,6 @@ Your ranker should accept a list of social media posts and comments, each with a
             "text": "this is a comment, by the author of the post",
             "author_name_hash": "60b46b7370f80735a06b7aa8c4eb6bd588440816b086d5ef7355cf202a118305",
             "type": "comment",
-            "platform": "reddit",
             "created_at": "2023-12-08 11:32:12",
             "enagements": {
                 "upvote": 3,
@@ -72,6 +71,7 @@ You do not need to return the same number of content items as you received. Howe
 
 - `user_id`: A unique ID for this study participant.
 - `user_name_hash`: A (salted) hash of the user's username. We'll do our best to make it match the `author_name_hash` on posts authored by the current user.
+- `platform`: One of `reddit`, `twitter`, `facebook`
 - `current_time`: The current time according to the user's browser, in UTC, in `YYYY-MM-DD hh:mm:ss` format.
 
 ### Content items
@@ -80,7 +80,6 @@ You do not need to return the same number of content items as you received. Howe
 - `text`: The text of the content item. Assume UTF-8, and that leading and trailing whitespace have been trimmed.
 - `author_name_hash`: A hash of the author's name (salted). Use this to determine which posts are by the same author. When the post is by the current user, this should match `user_name_hash`.
 - `type`: Whether the content item is a `post` or `comment`
-- `platform`: One of `reddit`, `twitter`, `facebook`
 - `created_at`: The time that the item was created in UTC, in `YYYY-MM-DD hh:mm:ss` format, at the highest resolution available (which may be as low as the hour).
 
 #### Engagements
