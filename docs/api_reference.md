@@ -2,11 +2,11 @@
 
 ## Endpoint
 
-Your ranker should be implemented as a service that accepts an HTTP POST request at `/rank`. The request and result are JSON.
+Your ranker should be implemented as a service that accepts an HTTP POST request at `/rank`. The request and response are JSON.
 
 ## Request/response format
 
-NOTE: This is provisional, and will almost certainly change.
+_NOTE: This is provisional, and will almost certainly change._
 
 Your ranker should accept a list of social media posts and comments, each with a corresponding ID, in JSON format:
 
@@ -47,7 +47,7 @@ Your ranker should accept a list of social media posts and comments, each with a
 }
 ```
 
-Your ranker should return an ordered list of IDs. You can also remove items by removing an ID, or add items by inserting a new ID that you generate. For new items, the data to display should be included in a separate portion of the response.
+Your ranker should return an ordered list of IDs. You can also remove items by removing an ID, or add items by inserting a new ID that you generate. For new posts (only posts insertion is supported), also provide the post URL.
 
 ```json
 {
@@ -71,12 +71,12 @@ You do not need to return the same number of content items as you received. Howe
 ### Session fields
 
 - `user_id`: A unique ID for this study participant.
-- `user_name_hash`: A (salted) hash of the user's username. Should match the `author_name_hash` on posts authored by the current user.
+- `user_name_hash`: A (salted) hash of the user's username. We'll do our best to make it match the `author_name_hash` on posts authored by the current user.
 - `current_time`: The current time according to the user's browser, in UTC, in `YYYY-MM-DD hh:mm:ss` format.
 
 ### Content items
 
-- `id`: A unique ID describing a specific piece of content. We will do our best to make this ID persist between requests, but that property is not guaranteed.
+- `id`: A unique ID describing a specific piece of content. We will do our best to make an ID for a given item persist between requests, but that property is not guaranteed.
 - `text`: The text of the content item. Assume UTF-8, and that leading and trailing whitespace have been trimmed.
 - `author_name_hash`: A hash of the author's name (salted). Use this to determine which posts are by the same author. When the post is by the current user, this should match `user_name_hash`.
 - `type`: Whether the content item is a `post` or `comment`
@@ -125,7 +125,7 @@ At present, we expect content item insertion to only work for posts. If you need
 
 ## HTTP response codes
 
-In general, the caller will log any non-success response code. Returning a correct code and error may help with debugging. Some codes you could consider returning:
+In general, our caller will log any non-success response code. Returning a correct code and error may help with debugging. Some codes you could consider returning:
 
 - `200`: Success. Everything worked and the response should be considered valid
 - `400`: Bad request. You validated or attempted to parse the input and it failed.a
@@ -136,4 +136,4 @@ In general, the caller will log any non-success response code. Returning a corre
 
 The caller will not follow redirects.
 
-For the initial submission you may use an external service. If you receive an error from that service, you can also pass it along with the same response code.
+For the initial submission you may use an external service. If you receive an error from that service, you can also forward it along with its response code.
