@@ -10,7 +10,7 @@ The Prosocial Ranking Challenge is designed to inspire, fund, and test the best 
 
 [More about the project here](https://humancompatible.ai/news/2024/01/18/the-prosocial-ranking-challenge-60000-in-prizes-for-better-social-media-algorithms/)
 
-How do we identify pro- and anti-social content? That's where you come in! We are soliciting ranking algorithms to test, with a $60,000 in prize money to be split between ten finalists (as selected by our panel of experts).
+How do we identify pro- and anti-social content? That's where you come in! We are soliciting ranking algorithms to test, with $60,000 in prize money to be split between ten finalists (as selected by our panel of experts).
 
 ---
 
@@ -69,7 +69,7 @@ There's a [submission form](https://forms.gle/tcRvtoFyhGeFyZup7).
 
 ### Request/response format
 
-NOTE: This is provisional, and will almost certainly change.
+_NOTE: This is provisional, and will almost certainly change._
 
 Your ranker should accept a list of social media posts and comments, each with a corresponding ID, in JSON format:
 
@@ -103,7 +103,7 @@ Your ranker should accept a list of social media posts and comments, each with a
 }
 ```
 
-Your ranker should return an ordered list of IDs. You can also remove items by removing an ID, or add items by inserting a new ID that you generate. To insert posts, we will also need you to supply us the URL for the post.
+Your ranker should return an ordered list of IDs. You can also remove items by removing an ID, or add items by inserting a new ID that you generate. To insert posts, we will also need you to supply the URL for the post.
 
 ```json
 {
@@ -123,23 +123,6 @@ Your ranker should return an ordered list of IDs. You can also remove items by r
 You do not need to return the same number of content items as you received. However, keep in mind that making a significant change in the number of items could have a negative impact on the user experience.
 
 Additional details can be found in [`docs/api_reference.md`](/docs/api_reference.md)
-
-#### Platform-specific fields
-
-Some fields are only available for a subset of platforms and content types:
-
-`title` is only available on Reddit posts (not comments)
-
-Engagements:
-
-- Reddit, `upvote, downvote`.
-- X (Twitter): `reply, repost, like, view`
-- Facebook: `like, love, care, haha, wow, sad, angry, comment, share`
-
-Content types:
-
-- Reddit and Facebook: `post, comment`
-- X (Twitter): `post`
 
 ---
 
