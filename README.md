@@ -1,10 +1,18 @@
 # Prosocial Ranking Challenge
 
+<p align="center">
+    ![Ranking Challenge Logo](/docs/img/prc-logo.png?raw=true "Prosocial Ranking Challenge")
+</p>
+
 The Prosocial Ranking Challenge is designed to inspire, fund, and test the best algorithms to improve well-being, polarization, and factual knowledge for social media users. We will use our browser extension to re-order the feeds of paid U.S. participants on Facebook, Reddit, and X (Twitter) for four months, and measure changes in attitudes and behavior.
 
 [More about the project here](https://humancompatible.ai/news/2024/01/18/the-prosocial-ranking-challenge-60000-in-prizes-for-better-social-media-algorithms/)
 
 How do we identify pro- and anti-social content? That's where you come in! We are soliciting ranking algorithms to test, with a $60,000 in prize money to be split between ten finalists (as selected by our panel of experts).
+
+---
+
+## 📅 Submission timeline and requirements
 
 ### First-round deadline: April 1, 2024
 
@@ -31,7 +39,7 @@ This time your ranker will need to be delivered in a Docker container, along wit
 
 At this point your code must be self-contained. Submissions that rely on external services will be disqualified.
 
-Five winners will be announced June 1, 2024. 
+Five winners will be announced June 1, 2024.
 
 #### Finalist submission requirements
 
@@ -47,9 +55,13 @@ We will rebuild your container using the audited code before running it in produ
 
 We will test the winning rankers with real users across three different platforms for five months.
 
+---
+
 ## 📨 Submitting an entry
 
 There's a [submission form](https://forms.gle/tcRvtoFyhGeFyZup7).
+
+---
 
 ## 🛠 Building a ranker
 
@@ -89,7 +101,7 @@ Your ranker should accept a list of social media posts and comments, each with a
 }
 ```
 
-Your ranker should return an ordered list of IDs. You can also remove items by removing an ID, or add items by inserting a new ID that you generate. For new items, the data to display should be included in a separate portion of the response.
+Your ranker should return an ordered list of IDs. You can also remove items by removing an ID, or add items by inserting a new ID that you generate. To insert posts, we will also need you to supply us the URL for the post.
 
 ```json
 {
@@ -100,22 +112,15 @@ Your ranker should return an ordered list of IDs. You can also remove items by r
     "new_items": [
         {
             "id": "571775f3-2564-4cf5-b01c-f4cb6bab461b",
-            "title": "this is the post title, available only on reddit",
-            "text": "this is a new post to inject into the results",
-            "author_name": "newguy",
-            "author_link": "/u/newguy",
-            "type": "post",
-            "platform": "reddit",
-            "enagements": {
-                "upvote": 12,
-                "downvote": 8
-            }
+            "url": "https://reddit.com/r/PRCExample/comments/1f33ead/example_to_insert",
         }
     ]
 }
 ```
 
 You do not need to return the same number of content items as you received. However, keep in mind that making a significant change in the number of items could have a negative impact on the user experience.
+
+Additional details can be found in `docs/api_reference.md`
 
 #### Platform-specific fields
 
@@ -133,6 +138,8 @@ Content types:
 
 - Reddit and Facebook: `post, comment`
 - X (Twitter): `post`
+
+---
 
 ## 🏭 Available infrastructure
 
@@ -163,6 +170,8 @@ We will test this vigorously. Latency can have an enormous impact on overall out
 
 If your classifier is too slow, we will let you know as quickly as possible, to give you time to improve your submission before the deadline.
 
+---
+
 ## 🔐 Security model
 
 As this experiment handles a considerable amount of Personal Identifiable Information (PII) to which your code will have unfettered access, we must take steps to prevent data exfiltration. These will include, among other things:
@@ -175,6 +184,8 @@ As this experiment handles a considerable amount of Personal Identifiable Inform
 
 If your team needs a greater level of access to user data, that may be possible if you are working within an instution that has its own IRB and can independently review your contributions. Talk to us and we'll see if we can find a way.
 
+---
+
 ## Example code
 
 Coming soon!
@@ -182,6 +193,8 @@ Coming soon!
 In the coming weeks, we will update this git repo with an example ranker written in Python.
 
 We will also provide a containerization example for finalist submissions.
+
+---
 
 ## Contacting us
 
