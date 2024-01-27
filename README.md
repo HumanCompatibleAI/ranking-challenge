@@ -120,7 +120,7 @@ Your ranker should return an ordered list of IDs. You can also remove items by r
 
 You do not need to return the same number of content items as you received. However, keep in mind that making a significant change in the number of items could have a negative impact on the user experience.
 
-Additional details can be found in `docs/api_reference.md`
+Additional details can be found in [`docs/api_reference.md`](/docs/api_reference.md)
 
 #### Platform-specific fields
 
