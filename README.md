@@ -71,7 +71,7 @@ There's a [submission form](https://forms.gle/tcRvtoFyhGeFyZup7).
 
 Your ranker should accept a list of social media posts and comments, each with a corresponding ID, in JSON format:
 
-```json
+```jsonc
 {
     // Abbreviated for clarity, see api reference
     "items": [
@@ -100,7 +100,7 @@ Your ranker should accept a list of social media posts and comments, each with a
 
 Your ranker should return an ordered list of IDs. You can also remove items by removing an ID, or add items by inserting a new ID that you generate. To insert posts, we will also need you to supply the URL for the post.
 
-```json
+```jsonc
 {
     "ranked_ids": [
         "de83fc78-d648-444e-b20d-853bf05e4f0e",

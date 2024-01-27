@@ -10,7 +10,7 @@ _NOTE: This is provisional, and will almost certainly change._
 
 Your ranker should accept a list of social media posts and comments, each with a corresponding ID, in JSON format:
 
-```json
+```jsonc
 {
     "session": {
         "user_id": "193a9e01-8849-4e1f-a42a-a859fa7f2ad3",
@@ -48,7 +48,7 @@ Your ranker should accept a list of social media posts and comments, each with a
 
 Your ranker should return an ordered list of IDs. You can also remove items by removing an ID, or add items by inserting a new ID that you generate. For new posts (only posts insertion is supported), also provide the post URL.
 
-```json
+```jsonc
 {
     "ranked_ids": [
         "de83fc78-d648-444e-b20d-853bf05e4f0e",
