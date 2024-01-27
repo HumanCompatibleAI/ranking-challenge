@@ -1,7 +1,9 @@
 # Prosocial Ranking Challenge
 
 <p align="center">
-    ![Ranking Challenge Logo](/docs/img/prc-logo.png?raw=true "Prosocial Ranking Challenge")
+
+![Prosocial Ranking Challenge](/docs/img/prc-logo.png?raw=true)
+
 </p>
 
 The Prosocial Ranking Challenge is designed to inspire, fund, and test the best algorithms to improve well-being, polarization, and factual knowledge for social media users. We will use our browser extension to re-order the feeds of paid U.S. participants on Facebook, Reddit, and X (Twitter) for four months, and measure changes in attitudes and behavior.

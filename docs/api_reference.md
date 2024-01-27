@@ -104,8 +104,8 @@ Some fields are only available for a subset of platforms and content types:
 
 ## Response fields
 
-`ranked_ids`: A list of the content item IDs, in the order in which you would like them to be ranked.
-`new_items`: A list of new content items to insert into the results.
+- `ranked_ids`: A list of the content item IDs, in the order in which you would like them to be ranked.
+- `new_items`: A list of new content items to insert into the results.
 
 ### Inserting new content items
 
