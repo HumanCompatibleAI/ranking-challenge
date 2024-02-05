@@ -12,7 +12,7 @@ data = {
         {
             "id": "de83fc78-d648-444e-b20d-853bf05e4f0e",
             "title": "this is the post title, available only on reddit",
-            "text": "this is a social media post",
+            "text": "this is the worst thing I have ever seen!",
             "author_name_hash": "60b46b7370f80735a06b7aa8c4eb6bd588440816b086d5ef7355cf202a118305",
             "type": "post",
             "platform": "reddit",
@@ -24,7 +24,19 @@ data = {
         },
         {
             "id": "a4c08177-8db2-4507-acc1-1298220be98d",
-            "text": "this is a comment, by the author of the post",
+            "text": "this thing is ok.",
+            "author_name_hash": "60b46b7370f80735a06b7aa8c4eb6bd588440816b086d5ef7355cf202a118305",
+            "type": "comment",
+            "platform": "reddit",
+            "created_at": "2023-12-08 11:32:12",
+            "enagements": {
+                "upvote": 3,
+                "downvote": 5
+            }
+        }, 
+        {
+            "id": "s5ad13266-8abk4-5219-kre5-2811022l7e43dv",
+            "text": "this is amazing!",
             "author_name_hash": "60b46b7370f80735a06b7aa8c4eb6bd588440816b086d5ef7355cf202a118305",
             "type": "comment",
             "platform": "reddit",
@@ -34,6 +46,7 @@ data = {
                 "downvote": 5
             }
         }
+
     ]
 }
 

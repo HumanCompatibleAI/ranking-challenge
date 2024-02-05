@@ -10,7 +10,7 @@ analyzer = SentimentIntensityAnalyzer()
 
 @app.route('/')
 def index():
-    return 'Welcome to The Pro-Social Ranking Challenge'
+    return 'Welcome to The Pro-Social Ranking Challenge!'
 
 @app.route('/analyze_sentiment', methods=['POST'])  # Allow POST requests for this endpoint
 def analyze_sentiment():
