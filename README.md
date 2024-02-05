@@ -176,8 +176,8 @@ We will also provide a containerization example for finalist submissions.
 
 ## Contacting us
 
-[Subscribe for Updates!](https://rankingchallenge.substack.com/)
-[Join our Discord!](https://discord.com/invite/VB2uZJ5w)
+- [Subscribe for Updates!](https://rankingchallenge.substack.com/)
+- [Join our Discord!](https://discord.gg/JRmuHSj8XK)
 
-Technical questions: Ian Baker <raindrift@berkeley.edu>
-All other enquiries: Jonathan Stray <jonathanstray@berkeley.edu>
+- Technical questions: Ian Baker <raindrift@berkeley.edu>
+- All other enquiries: Jonathan Stray <jonathanstray@berkeley.edu>
