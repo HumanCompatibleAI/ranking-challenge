@@ -166,9 +166,9 @@ If your team needs a greater level of access to user data, that may be possible 
 
 ## Example code
 
-Coming soon!
+A simple Python example that uses nltk to rank items can be found in [examples/basic](/examples/basic)
 
-In the coming weeks, we will update this git repo with an example ranker written in Python.
+In the coming weeks, we will add sample rankers that
 
 We will also provide a containerization example for finalist submissions.
 
