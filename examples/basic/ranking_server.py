@@ -3,6 +3,8 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
+from sample_data import NEW_POSTS
+
 nltk.download("vader_lexicon")
 
 app = Flask(__name__)
@@ -31,7 +33,21 @@ def analyze_sentiment():
     ranked_results.sort(key=lambda x: x["scores"]["compound"], reverse=True)
     ranked_ids = [content.get("id", None) for content in ranked_results]
 
-    return jsonify(ranked_ids)
+    # Add a new post (not part of the candidate set) to the top of the result
+    new_post = NEW_POSTS[0]
+    ranked_ids.insert(0, new_post["id"])
+
+    result = {
+        "ranked_ids": ranked_ids,
+        "new_items": [
+            {
+                "id": new_post["id"],
+                "url": new_post["url"],
+            }
+        ],
+    }
+
+    return jsonify(result)
 
 
 if __name__ == "__main__":

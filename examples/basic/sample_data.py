@@ -41,3 +41,15 @@ BASIC_EXAMPLE = {
         },
     ],
 }
+
+# some new posts that can be added to the response
+NEW_POSTS = [
+    {
+        "id": "571775f3-2564-4cf5-b01c-f4cb6bab461b",
+        "url": "https://reddit.com/r/PRCExample/comments/1f33ead/example_to_insert",
+    },
+    {
+        "id": "1fcbb164-f81f-4532-b068-2561941d0f63",
+        "url": "https://reddit.com/r/PRCExample/comments/ef56a23/another_example_to_insert",
+    },
+]

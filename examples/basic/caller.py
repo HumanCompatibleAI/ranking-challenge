@@ -1,4 +1,5 @@
 import time
+from pprint import pprint
 
 import requests
 
@@ -18,7 +19,7 @@ if response.status_code == 200:
     try:
         # Attempt to parse the JSON response
         json_response = response.json()
-        print(json_response)
+        pprint(json_response)
     except requests.exceptions.JSONDecodeError:
         print("Failed to parse JSON response. Response may be empty.")
 else:
