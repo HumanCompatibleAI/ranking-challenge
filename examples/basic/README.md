@@ -13,4 +13,4 @@ Just run `pytest`
 
 ## Executing your server outside of a unit test
 
-You can start the server (`python ranking_server.py`), and then run `app_caller.py` to send it data
+You can start the server (`python ranking_server.py`), and then run `caller.py` to send it data
