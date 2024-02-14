@@ -33,7 +33,22 @@ Your ranker should accept a list of social media posts and comments, each with a
         },
         {
             "id": "a4c08177-8db2-4507-acc1-1298220be98d",
+            "parent_id": "", // this is a top-level comment
+            "post_id": "de83fc78-d648-444e-b20d-853bf05e4f0e",
             "text": "this is a comment, by the author of the post",
+            "author_name_hash": "60b46b7370f80735a06b7aa8c4eb6bd588440816b086d5ef7355cf202a118305",
+            "type": "comment",
+            "created_at": "2023-12-08 11:32:12",
+            "enagements": {
+                "upvote": 3,
+                "downvote": 5
+            }
+        },
+        {
+            "id": "06fb0b62-2501-40f1-a152-db019d03d2e6",
+            "parent_id": "a4c08177-8db2-4507-acc1-1298220be98d",
+            "post_id": "de83fc78-d648-444e-b20d-853bf05e4f0e",
+            "text": "this is a reply to the first comment",
             "author_name_hash": "60b46b7370f80735a06b7aa8c4eb6bd588440816b086d5ef7355cf202a118305",
             "type": "comment",
             "created_at": "2023-12-08 11:32:12",
@@ -77,6 +92,8 @@ You do not need to return the same number of content items as you received. Howe
 ### Content items
 
 - `id`: A unique ID describing a specific piece of content. We will do our best to make an ID for a given item persist between requests, but that property is not guaranteed.
+- `parent_id`: For threaded comments, this identifies the comment to which this one is a reply. Blank for top-level comments.
+- `post_id`: The ID of the post to which this comment belongs. Useful for linking comments to their post when comments are shown in a feed. Currently this only happens on Facebook.
 - `text`: The text of the content item. Assume UTF-8, and that leading and trailing whitespace have been trimmed.
 - `author_name_hash`: A hash of the author's name (salted). Use this to determine which posts are by the same author. When the post is by the current user, this should match `user_name_hash`.
 - `type`: Whether the content item is a `post` or `comment`
@@ -101,6 +118,14 @@ Some fields are only available for a subset of platforms and content types:
 
 `title` is only available on Reddit posts (not comments)
 
+### Comment threading
+
+All platforms display comments in threads. If you would like to construct the reply graph, use the `parent_id` field.
+
+When you return a ranking, comments will be sorted according to that ranking, but without breaking the underlying thread structure. Essentially, we will use your global ranking of comments to sort each level of a thread separately.
+
+If you remove a comment, the browser extension will remove its children as well. This is necessary to preserve the integrity of the user experience.
+
 ## Response fields
 
 - `ranked_ids`: A list of the content item IDs, in the order in which you would like them to be ranked.
@@ -108,7 +133,7 @@ Some fields are only available for a subset of platforms and content types:
 
 ### Inserting new content items
 
-To add an item, the item must be public (or accessible to the current user). The extension will fetch the item and insert it into the user's feed. This limitation exists for a few reasons:
+You don't have to add new content items to the feed, but you can if you like. To add an item, the item must be public (or accessible to the current user). The extension will fetch the item and insert it into the user's feed. This limitation exists for a few reasons:
 
 1. For the content item to function, there must be a representation of it on the platform. We can't just make a new fake item because all the links and buttons on it would not work.
 2. We rely on the platform's access controls to guarantee that the user is allowed to see the content.
@@ -117,7 +142,7 @@ If you have specific items you would like to insert as part of the experiment, y
 
 Fields
 
-- `id`: A unique ID for this post. This can be a platform-generated ID, or you can generate it. It just needs to be unique.
+- `id`: A unique ID for this post. This can be a platform-generated ID, or you can generate it. It just needs to be unique, and must not contain PII. A GUID is fine.
 - `url`: The full URL for the content item.
 
 At present, we expect content item insertion to only work for posts. If you need to be able to insert comments as well, talk to us.
