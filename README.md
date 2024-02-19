@@ -121,7 +121,7 @@ Additional details can be found in [`docs/api_reference.md`](/docs/api_reference
 
 ## 🏭 Available infrastructure
 
-Winning classifiers will be run during the experiment in an environment that can provide the following infrastructure (let us know which you'll need):
+Winning classifiers will be run during the experiment in an environment that can provide the following infrastructure (let us know which you'll need). Note that this applies to second-round submissions only. For first round submissions, you must host the ranker and can use whatever infrastructure you like, but it must be imeplementable on our [background process architecture](https://rankingchallenge.substack.com/p/background-processes-databases-scrapers) to be eligible to win.
 
 ### Endpoint
 
@@ -129,20 +129,23 @@ We will host your classifier endpoint. GPU is available if needed.
 
 ### Database
 
-A database of historical post metadata for your users, updated as often as is practical, into which you can also write your own data. If needed, we can provide an interface for writing data from a process that you run outside our infrastructure, but we cannot allow that process to make queries.
+A database of historical post metadata for your users, updated as often as is practical, into which you can also write your own data. This will probably 
 
-### Offline Workers
+### Workers
 
-We will provide for two types of worker (GPU equipped, if needed):
+We will provide for three types of worker (GPU equipped, if needed):
 
-- Sandboxed: no internet connectivity, but has read/write access to the database.
-- Open: has internet connectivity, and write-only access to the database.
+- Background: no internet connectivity, but has read/write access to the database.
+- Scraper: has internet connectivity, and write-only access to the database.
+- Scorer: one or more processes that take posts in parallel and return a JSON output for each one
+
+See [this post](https://rankingchallenge.substack.com/p/background-processes-databases-scrapers) for an explanation of the architecture.
 
 ### Latency: 500ms
 
 There is no latency requirement for initial submissions.
 
-Finalists must finish returning their result using a standardized test set on our infrastructure within 500ms.
+Finalists must finish returning their result using a standardized test set on our infrastructure within 500ms, for 95% of requests.
 
 We will test this vigorously. Latency can have an enormous impact on overall outcomes, and to properly control for it all study arms must be delayed to match the performance of the slowest ranker.
 
