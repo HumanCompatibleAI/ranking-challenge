@@ -129,7 +129,7 @@ We will host your classifier endpoint. GPU is available if needed.
 
 ### Database
 
-A database of historical post metadata for your users, updated as often as is practical, into which you can also write your own data. This will probably 
+We will provide a database of historical post metadata for your users, updated as often as is practical, into which you can also write whatever data you want to store. This will probably be Redis.
 
 ### Workers
 
@@ -139,7 +139,7 @@ We will provide for three types of worker (GPU equipped, if needed):
 - Scraper: has internet connectivity, and write-only access to the database.
 - Scorer: one or more processes that take posts in parallel and return a JSON output for each one
 
-See [this post](https://rankingchallenge.substack.com/p/background-processes-databases-scrapers) for an explanation of the architecture.
+See [this post](https://rankingchallenge.substack.com/p/background-processes-databases-scrapers) for an explanation of the architecture. If you want to run any of these processes you must provide them inside the same submitted Docker container that holds your ranker process.
 
 ### Latency: 500ms
 
