@@ -1,96 +1,91 @@
-**INTRODUCTION**
+# Introduction
 
 Our sample data folder consists of two .py files:
 
-- **Data_Pull.py:**
+## `data_pull.py`
 
-  - This defines our function ‘Data Puller’ which takes a single
-    argument (‘platform’) and returns a sample of our data in the
-    required json format
+- This defines our function ‘Data Puller’ which takes a single
+argument (‘platform’) and returns a sample of our data in the
+required json format
 
-- **Preprocessing.py:**
+## `preprocessing.py`
 
-  - Here is where we preprocess our data, specifically:
+- Here is where we preprocess our data, specifically:
 
-    - Removing errors where found
+- Removing errors where found
 
-    - Merging sets and removing irrelevant columns
+- Merging sets and removing irrelevant columns
 
-    - Hashing columns that require hashing
+- Hashing columns that require hashing
 
-      **PROCESS**
-      This file should run as is, and only requires a few steps in order
-      to work.
+## Process
 
-      Clone the repository and run the **Preprocessing.py** file. This
-      should take our data sources, clean them and then create the
-      processed** **files which you will create a sample feed from
-      All data has been saved in the respective folders, i.e Twitter
-      data is stored in ‘Twitter Data’.
+This file should run as is, and only requires a few steps in order
+to work.
 
-      Once this has been run, you can run the** Data_Pull.py** file.
-      This contains the single function **data_puller **which takes one
-      argument and requires 3 inputs. Specifically:
+Clone the repository and run the `preprocessing.py` file. This
+should take our data sources, clean them and then create the
+processed files which you will create a sample feed from
+All data has been saved in the respective folders, i.e Twitter
+data is stored in `twitter_data`.
 
+Once this has been run, you can run the  `data_pull.py` file.
+This contains the single function `data_puller` which takes one
+argument and requires 3 inputs. Specifically:
 
+## Argument
 
-- **Argument:**
+- Platform, which is either ‘reddit’, ‘facebook’ or ’twitter’. It is
+not case sensitive
 
-  - Platform, which is either ‘reddit’, ‘facebook’ or ’twitter’. It is
-    not case sensitive
+## Inputs
 
+- Sample Size (recommend ~30-50k)
 
+- Seed no
 
-- **Inputs:**
+- Username (This is whatever you like, it will be hashed)
 
-  - Sample Size (recommend ~30-50k)
+Once run, this will create a file named “**final\_{platform}\_data”
+**which will contain the sample feed.
 
-  - Seed no
+### Important Notes
 
-  - Username (This is whatever you like, it will be hashed)
+There are several important things to consider before running this
+file:
 
-    Once run, this will create a file named “**final\_{platform}\_data”
-    **which will contain the sample feed.
+1. Our data _is not perfect,_ and there may be erroneous values and
+data points that we currently do not have data for. We are in the
+process of fixing each of these:
 
-    **IMPORTANT NOTES**
-    There are several important things to consider before running this
-    file:
+    - **Erroneous values:** We have filtered for a number of these but
+        we may miss some. If you find anything that seems incorrect or
+        causes errors, please let us know! We will endeavour to fix it as
+        quickly as possible
 
-1.  Our data **is not perfect, **and there may be erroneous values and
-    data points that we currently do not have data for. We are in the
-    process of fixing each of these:
+    - **Missing fields:** Each of our platforms has some data fields
+        that are missing. We will aim to get data that matches all fields,
+        so our sample data may update over time to incorporate additional
+        fields
 
-    - **Erroneous values: **We have filtered for a number of these but
-      we may miss some. If you find anything that seems incorrect or
-      causes errors, please let us know! We will endeavour to fix it as
-      quickly as possible
+        - **Reddit:** Missing posts
 
-    - **Missing fields: **Each of our platforms has some data fields
-      that are missing. We will aim to get data that matches all fields,
-      so our sample data may update over time to incorporate additional
-      fields
-
-      - **Reddit: **Missing posts
-
-      - **Facebook: **Missing comment threads and care reacts.
+        - **Facebook:** Missing comment threads and care reacts.
         Additionally posts are not easily linked to their comments
 
-      - **Twitter: **Missing threads and views. Currently includes
+        - **Twitter:** Missing threads and views. Currently includes
         quotes as a substitute. However, all of these appear blank.
 
+1. Our data is also from various times, but should be fairly general
+thematically i.e Not leaning towards particular demographics
 
+## Data
 
-1.  Our data is also from various times, but should be fairly general
-    thematically i.e Not leaning towards particular demographics
+The datasets used are:
 
+### Twitter
 
-    **DATA **
-
-    The datasets used are:
-
-    **<u>Twitter</u>**
-
-    **Tweets from Jan 1st 2023:**
+Tweets from Jan 1st 2023
 
 - Our dataset consists of randomly selected tweets from the millions of
   tweets that were posted on the 1st of Jan 2023.
@@ -105,16 +100,14 @@ Our sample data folder consists of two .py files:
   We will assess additional sources for this information. Additionally,
   lots of quotes, replies, reposts are all 0
 
-- **Sourced from:**
+Sourced from
+
   https://archive.org/download/archiveteam-twitter-stream-2023-01
 
 
-  <u>Reddit</u>
-
+### Reddit
 
   **Pushshift.io**:
-
-
 
 - Dataset has been sampled from all possible comments and posts for
   April 2023
@@ -127,14 +120,13 @@ Our sample data folder consists of two .py files:
 
 - Comments have been linked to posts randomly.
 
-- **Sourced From:
-  **https://academictorrents.com/details/9c263fc85366c1ef8f5bb9da0203f4c8c8db75f4
+Sourced From:
 
-  **<u>Facebook</u>**
+  https://academictorrents.com/details/9c263fc85366c1ef8f5bb9da0203f4c8c8db75f4
+
+### Facebook
 
   2017 News Data:
-
-
 
 - Consists of ~20,000 posts from 83 pages, with approximately ~1m
   comments
@@ -150,6 +142,6 @@ Our sample data folder consists of two .py files:
 - Comments have been linked where possible to posts (Due to random
   sampling, comments may be selected without the post being selected)
 
-- **Sourced from**:
-  https://github.com/jbencina/facebook-news/blob/master/README.md
+Sourced from
 
+  https://github.com/jbencina/facebook-news/blob/master/README.md
