@@ -7,6 +7,7 @@ import os
 import hashlib
 from datetime import datetime
 import json
+import argparse
 
 script_dir = os.path.dirname(__file__)
 
@@ -43,7 +44,7 @@ def data_puller(platform):
     if platform.upper() not in (name.upper() for name in platforms):
         print("Not an applicable platform. Try again")
 
-    x = int(input("Please input how many data points you wish to sample (suggested: 50k):"))
+    x = int(input(f"Please input how many data points you wish to sample for {platform} (suggested: 50000):"))
     seed_no = int(input("Please input a seed number:"))
     np.random.seed(seed_no)
 
@@ -219,3 +220,11 @@ def data_puller(platform):
     with open(os.path.join(os.path.dirname(__file__), f'final_{platform}_data.json'), 'w', encoding='utf-8') as file:
         json.dump(static_json, file, indent=4)
 
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Sample data from platforms')
+    parser.add_argument('-p', '--platform', type=str, help='Platform to pull data from')
+    args = parser.parse_args()
+    platform = args.platform
+
+    data_puller(platform)
