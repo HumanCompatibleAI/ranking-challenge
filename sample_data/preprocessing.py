@@ -98,14 +98,16 @@ post_file_path = os.path.join(script_dir, fb_post_relative_path)
 comments = pd.read_csv(comment_file_path)
 posts = pd.read_csv(post_file_path)
 
+
+
 # We need to split our columns to isolate comment and post post_ids
 comments['type'] = "Comment"
 posts['type'] = 'Post'
 comments[['from_id', 'c_post_id']] = comments['post_name'].str.split('_', expand=True)
 posts[['post_name', 'p_post_id']] = posts['post_id'].str.split('_', expand=True)
 
-merged = pd.concat([posts, comments], axis=0)
-
+merged = pd.concat([posts, comments], axis=0, ignore_index=True)
+assert merged.index.is_unique
 # To create author_ids, we will need to use from_id for comments and page_id from posts
 merged['author_name_hash'] = merged['page_id'].combine_first(merged['from_id'])
 merged['all_post_ids'] = merged['p_post_id'].combine_first(merged['c_post_id'])

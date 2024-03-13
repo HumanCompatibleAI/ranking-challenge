@@ -68,13 +68,11 @@ process of fixing each of these:
         so our sample data may update over time to incorporate additional
         fields
 
-        - **Reddit:** Missing posts
-
-        - **Facebook:** Missing comment threads and care reacts.
-        Additionally posts are not easily linked to their comments
+        - **Facebook:** Missing care reacts.
 
         - **Twitter:** Missing threads and views. Currently includes
-        quotes as a substitute. However, all of these appear blank.
+        quotes as a substitute. However, all of these appear blank. We
+        have subsequently simulated threads with random assignment.
 
 1. Our data is also from various times, but should be fairly general
 thematically i.e Not leaning towards particular demographics
