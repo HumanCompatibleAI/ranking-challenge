@@ -18,38 +18,39 @@ required json format
 
 - Hashing columns that require hashing
 
-## Process
+## To Use
 
-This file should run as is, and only requires a few steps in order
-to work.
+### In short
+```
+python preprocess.py
+python data_pull.py -p reddit -n 50
+```
+will get you json for a batch of 50 reddit posts, to stdout. 
 
-Clone the repository and run the `preprocessing.py` file. This
+
+### Longer
+Clone the repository and run the `preprocessing.py` file. You should only have to do this once. This
 should take our data sources, clean them and then create the
 processed files which you will create a sample feed from
 All data has been saved in the respective folders, i.e Twitter
 data is stored in `twitter_data`.
 
 Once this has been run, you can run the  `data_pull.py` file.
-This contains the single function `data_puller` which takes one
-argument and requires 3 inputs. Specifically:
+This contains the single function `data_puller` which takes a
+required platform argument and three optional arguments
 
-## Argument
-
-- Platform, which is either ‘reddit’, ‘facebook’ or ’twitter’. It is
+- -p --platform, required, must be ‘reddit’, ‘facebook’ or ’twitter’. It is
 not case sensitive
 
-## Inputs
+- -n or --numposts, number of posts to generate
 
-- Sample Size (recommend ~30-50k)
+- -r or --randomseed, set this to different values to get different pots
 
-- Seed no
+- -u or --username, This is whatever you like, it will be hashed
 
-- Username (This is whatever you like, it will be hashed)
+It outputs to stdout.
 
-Once run, this will create a file named “**final\_{platform}\_data”
-**which will contain the sample feed.
-
-### Important Notes
+## Notes
 
 There are several important things to consider before running this
 file:

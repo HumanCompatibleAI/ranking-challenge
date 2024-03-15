@@ -4,6 +4,7 @@ import random
 import pandas as pd
 from pathlib import Path
 import os
+import sys
 import hashlib
 from datetime import datetime
 import json
@@ -15,15 +16,13 @@ platforms = ['facebook', 'reddit', 'twitter']
 
 
 
-def data_puller(platform):
+def data_puller(platform, x, seed_no, username):
     '''
     This function seeks to convert our sample data into the appropriate JSON format.
     It will download this file to "os.path.dirname(__file__)" under the name 'final_{platform}_data.json'
 
     Args:
     Platform -> String : ['Facebook', 'Reddit', 'Twitter']
-
-    Inputs:
     x -> Int
     seed_no -> Int
     username -> String
@@ -44,11 +43,7 @@ def data_puller(platform):
     if platform.upper() not in (name.upper() for name in platforms):
         print("Not an applicable platform. Try again")
 
-    x = int(input(f"Please input how many data points you wish to sample for {platform} (suggested: 100):"))
-    seed_no = int(input("Please input a seed number:"))
     np.random.seed(seed_no)
-
-    username = input("Please select a username to be hashed. This is how we can identify posts authored by the current user:")
 
     # We must create a hashed user_id and hashed_username
     hasher = hashlib.sha256()
@@ -209,16 +204,17 @@ def data_puller(platform):
 
         static_json["items"] = transformed_data
 
-    with open(os.path.join(os.path.dirname(__file__), f'final_{platform}_data.json'), 'w', encoding='utf-8') as file:
-        json.dump(static_json, file, indent=4)
+    # done, output    
+    json.dump(static_json, sys.stdout, indent=4)
+
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Sample data from platforms')
     parser.add_argument('-p', '--platform', type=str, help='Platform to pull data from')
+    parser.add_argument('-n', '--numposts', type=int, help='number of posts to generate', nargs='?', const=100, default=100)
+    parser.add_argument('-r', '--randomseed', type=int, help='random seed', nargs='?', const=1, default=1)
+    parser.add_argument('-u', '--username', type=str, help='username', nargs='?', const="username", default="username")
     args = parser.parse_args()
-    platform = args.platform
 
-    data_puller(platform)
-    
-
+    data_puller(args.platform, args.numposts, args.randomseed, args.username)
