@@ -71,14 +71,13 @@ def data_puller(platform, x, seed_no, username):
         df = pd.read_csv(os.path.join(script_dir, 'facebook_data/processed/filtered_comment_post.csv'))
 
         # We randomly sample x values and then group our comments by 'all_post_ids'
-        sample = df.sample(n=x, random_state=seed_no)
-        comments_grouped_by_post_id = sample[sample['type'] == 'Comment'].groupby('all_post_ids')
+        posts = df[df['type'] == 'Post'].sample(n=x, random_state=seed_no)
+        comments_grouped_by_post_id = df[df['type'] == 'Comment'].groupby('all_post_ids')
 
         # Instantiate empty list and set
         final_items = []
-        processed_post_ids = set()
 
-        for index, row in sample.iterrows():
+        for index, row in posts.iterrows():
             item = row.to_dict()
             # General structure for engagement metrics
             engagements = {
@@ -94,45 +93,37 @@ def data_puller(platform, x, seed_no, username):
             item['engagements'] = engagements
 
             # General structure for posts
-            if item['type'] == 'Post':
-                post_id = item.pop('all_post_ids')
-                item['id'] = post_id
-                item.pop('post_id', None)
-                item.pop('parent_id', None)
-                final_items.append(item)
-                processed_post_ids.add(post_id)
+            item['engagements'] = engagements
+            post_id = item.pop('all_post_ids')
+            item['id'] = post_id
+            item.pop('post_id', None)
+            item.pop('parent_id', None)
+            final_items.append(item)
+            # processed_post_ids.add(post_id)
 
                 # Include related comments directly after their respective post
-                if post_id in comments_grouped_by_post_id.groups:
-                    related_comments = comments_grouped_by_post_id.get_group(post_id)
-                    for _, comment_row in related_comments.iterrows():
-                        comment_item = comment_row.to_dict()
-                        comment_item['post_id'] = comment_item.pop('all_post_ids')  # Rename 'all_post_ids' to 'post_id'
-                        final_items.append(comment_item)
-
-        # Append orphan comments (not attached to any processed post) at the end
-        for _, comment_row in sample[sample['type'] == 'Comment'].iterrows():
-            comment_item = comment_row.to_dict()
-            if comment_item.get('all_post_ids') not in processed_post_ids:
-                comment_item['post_id'] = comment_item.pop('all_post_ids')  # Ensure 'post_id' is correctly set
-                final_items.append(comment_item)
+            if post_id in comments_grouped_by_post_id.groups:
+                related_comments = comments_grouped_by_post_id.get_group(post_id)
+                for _, comment_row in related_comments.iterrows():
+                    comment_item = comment_row.to_dict()
+                    comment_item['post_id'] = comment_item.pop('all_post_ids')  # Rename 'all_post_ids' to 'post_id'
+                    final_items.append(comment_item)
 
         static_json['items'] = final_items
 
 
     if platform.upper() == 'REDDIT':
-        df = pd.read_csv(os.path.join(script_dir,'reddit_data/processed/filtered_reddit_data.csv'))
-
+        df = pd.read_csv(os.path.join(script_dir,'reddit_data/processed/filtered_reddit_data.csv'), low_memory=False)
+        
         # We will sample from our dataset and then split into posts and comments
-        sample = df.sample(n=x, random_state=seed_no)
-        posts_df = sample[sample['type'] == 'Post']
-        comments_df = sample[sample['type'] == 'Comment']
-
+        posts_df =  df[df['type'] == 'Post']
+        sample = posts_df.sample(n=x, random_state=seed_no)
+        
         # Initialize the list to store final items
         final_items = []
 
         # Iterate through each post in the posts DataFrame
-        for _, post_row in posts_df.iterrows():
+        for _, post_row in sample.iterrows(): # change made here, was posts_df before
             # General structure for posts
             post_item = post_row.to_dict()
             post_item.pop('parent_id', None)
@@ -142,7 +133,8 @@ def data_puller(platform, x, seed_no, username):
             final_items.append(post_item)
 
             # Find and append related comments
-            related_comments = comments_df[comments_df['post_id'] == post_item['id']]
+            # related_comments = comments_df[comments_df['post_id'] == post_item['id']]
+            related_comments = df[(df['type'] == 'Comment') & (df['post_id'] == post_item['id'])]
             for _, comment_row in related_comments.iterrows():
                 comment_item = comment_row.to_dict()
                 comment_item.pop('title', None)
