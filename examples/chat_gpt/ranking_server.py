@@ -1,6 +1,6 @@
 from openai import OpenAI
 
-client = OpenAI(api_key="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")
+client = OpenAI(api_key="YOUR-OPENAI-API-KEY-HERE") #insert your openAI API key here!
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
@@ -16,7 +16,7 @@ def generate_rankings(items):
     for item in items:
         prompt += f"{item['text']}\n"
 
-    response = client.completions.create(engine="text-davinci-003",
+    response = client.completions.create(model= "gpt-3.5-turbo",
     prompt=prompt,
     max_tokens=len(items),
     n=1,
