@@ -7,7 +7,7 @@ from sample_data import NEW_POSTS
 app = Flask(__name__)
 CORS(app)
 
-openai.api_key = "YOUR_OPENAI_API_KEY"  # Replace with your actual OpenAI API key
+openai.api_key = "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"  # Replace with your actual OpenAI API key
 
 def generate_rankings(items):
     prompt = "Rank the following items based on their emotional valence:\n"
