@@ -1,4 +1,6 @@
-import openai
+from openai import OpenAI
+
+client = OpenAI(api_key="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")
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
@@ -7,20 +9,18 @@ from sample_data import NEW_POSTS
 app = Flask(__name__)
 CORS(app)
 
-openai.api_key = "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"  # Replace with your actual OpenAI API key
+  # Replace with your actual OpenAI API key
 
 def generate_rankings(items):
     prompt = "Rank the following items based on their emotional valence:\n"
     for item in items:
         prompt += f"{item['text']}\n"
 
-    response = openai.Completion.create(
-        engine="text-davinci-003",
-        prompt=prompt,
-        max_tokens=len(items),
-        n=1,
-        stop=None
-    )
+    response = client.completions.create(engine="text-davinci-003",
+    prompt=prompt,
+    max_tokens=len(items),
+    n=1,
+    stop=None)
 
     rankings = response.choices[0].text.strip().split("\n")
     return rankings
