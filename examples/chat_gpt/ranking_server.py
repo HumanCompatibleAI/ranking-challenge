@@ -1,28 +1,58 @@
-from openai import OpenAI
+import json
+import os
 
-client = OpenAI(api_key="YOUR-OPENAI-API-KEY-HERE") #insert your openAI API key here!
+from dotenv import load_dotenv
 from flask import Flask, jsonify, request
 from flask_cors import CORS
+from openai import OpenAI
 
 from sample_data import NEW_POSTS
 
+load_dotenv()  # if a .env file exists, load environment variables from it
+
+client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 app = Flask(__name__)
 CORS(app)
 
-  # Replace with your actual OpenAI API key
-
 def generate_rankings(items):
-    prompt = "Rank the following items based on their emotional valence:\n"
-    for item in items:
-        prompt += f"{item['text']}\n"
+    prompt = ""
+    for i, item in enumerate(items):
+        prompt += f"ITEM: {i}:\n{item['text']}\n\n"
 
-    response = client.completions.create(model= "gpt-3.5-turbo",
-    prompt=prompt,
-    max_tokens=len(items),
-    n=1,
-    stop=None)
+    response = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {
+                "role": "system",
+                "content": 'You are a helpful assistant that processes text and returns results in JSON format. Reorder the items you are given in terms of their positivity, with the most positive item first, and include your reasoning. Give me a JSON array in the following format: [ {"item_idx": int, "reason": str} ]',
+            },
+            {
+                "role": "user",
+                "content": "ITEM 0:\nI love you.\n\nITEM 1:\nI hate you.\n\nITEM 2:\nI am indifferent to you.\nITEM 3:\nI like soup\n\n",
+            },
+            {
+                "role": "assistant",
+                "content": '[ {"item_idx": 0, "reason": "The statement is very positive."}, {"item_idx": 3, "reason": "The statement is somewhat positive."}, {"item_idx": 2, "reason": "The statement is neutral."}, {"item_idx": 1, "reason": "The statement is negative."} ]',
+            },
+            {
+                "role": "user",
+                "content": prompt,
+            },
+        ],
+        # n=1,
+        # stop=None
+    )
 
-    rankings = response.choices[0].text.strip().split("\n")
+    json_results = response.choices[0].message.content.strip()
+
+    # From the docs
+    # Warning: Be cautious when parsing JSON data from untrusted sources. A malicious JSON string may cause the decoder to
+    # consume considerable CPU and memory resources. Limiting the size of data to be parsed is recommended.
+    results = json.loads(json_results)
+
+    indices = [item["item_idx"] for item in results]
+    rankings = [items[i]["id"] for i in indices]
+
     return rankings
 
 @app.route("/rank", methods=["POST"])  # Allow POST requests for this endpoint
