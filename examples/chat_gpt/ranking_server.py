@@ -14,6 +14,7 @@ client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 app = Flask(__name__)
 CORS(app)
 
+
 def generate_rankings(items):
     prompt = ""
     for i, item in enumerate(items):
@@ -39,8 +40,6 @@ def generate_rankings(items):
                 "content": prompt,
             },
         ],
-        # n=1,
-        # stop=None
     )
 
     json_results = response.choices[0].message.content.strip()
@@ -54,6 +53,7 @@ def generate_rankings(items):
     rankings = [items[i]["id"] for i in indices]
 
     return rankings
+
 
 @app.route("/rank", methods=["POST"])  # Allow POST requests for this endpoint
 def rank_items():
@@ -71,6 +71,7 @@ def rank_items():
     }
 
     return jsonify(result)
+
 
 if __name__ == "__main__":
     app.run(port=5001, debug=True)

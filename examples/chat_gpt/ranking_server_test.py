@@ -1,12 +1,13 @@
-from datetime import datetime
 import sys
+from datetime import datetime
 
 sys.path.append(".")  # allows for importing from the current directory
+
+from unittest.mock import patch
 
 import pytest
 from openai.types.chat import ChatCompletionMessage
 from openai.types.chat.chat_completion import ChatCompletion, Choice
-from unittest.mock import patch
 
 import ranking_server
 import sample_data
