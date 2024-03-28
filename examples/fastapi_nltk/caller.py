@@ -6,7 +6,7 @@ import requests
 import sample_data
 
 # This is a simple script that sends a POST request to the API and prints the response.
-# Your server should be running on localhost:5001
+# Your server should be running on localhost:8000
 
 # Wait for the Flask app to start up
 time.sleep(2)
