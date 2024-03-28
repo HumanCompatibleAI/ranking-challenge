@@ -152,7 +152,7 @@ At present, we expect content item insertion to only work for posts. If you need
 In general, our caller will log any non-success response code. Returning a correct code and error may help with debugging. Some codes you could consider returning:
 
 - `200`: Success. Everything worked and the response should be considered valid
-- `400`: Bad request. You validated or attempted to parse the input and it failed.a
+- `400`: Bad request. You validated or attempted to parse the input and it failed.
 - `413`: Request too long. You have a limit to the amount of data you can receive and it was exceeded.
 - `429`: Too many requests. There is a rate-limit (potentially upstream) that was exceeded.
 - `500`: Internal Server Error. Something failed in your application.
