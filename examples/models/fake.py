@@ -13,7 +13,7 @@ sys.path.insert(0, parentdir)
 
 from faker import Faker
 
-fake = Faker()
+fake = Faker(locale="la")  # remove locale to get rid of the fake latin
 
 from models.request import ContentItem, RankingRequest, Session
 from models.response import RankingResponse
@@ -45,8 +45,29 @@ def fake_item():
         },
     )
 
-def fake_response(n_items=1):
+def fake_response(ids, n_new_items=1):
+    new_items = [fake_new_item() for _ in range(n_new_items)]
+
+    ids = list(ids) + [item["id"] for item in new_items]
+
     return RankingResponse(
-        ranked_ids=[str(uuid4()) for _ in range(n_items)],
+        ranked_ids=ids,
+        new_items=new_items
     )
 
+def fake_new_item():
+    return {
+        "id": str(uuid4()),
+        "url": fake.url(),
+    }
+
+# if run from command line
+if __name__ == "__main__":
+    request = fake_request(3)
+    print("Request:")
+    print(request.model_dump_json(indent=2))
+
+    # use ids from request
+    response = fake_response([item.id for item in request.items], 2)
+    print("\nResponse:")
+    print(response.model_dump_json(indent=2))

@@ -1,7 +1,7 @@
 from typing import Optional
 from uuid import uuid4
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, HttpUrl
 
 
 class NewItem(BaseModel):
@@ -11,7 +11,7 @@ class NewItem(BaseModel):
         description="A unique ID for the content item. You can generate this.",
         default_factory=uuid4,
     )
-    url: str = Field(description="The publicly-accessible URL of the content item.")
+    url: HttpUrl = Field(description="The publicly-accessible URL of the content item.")
 
 
 class RankingResponse(BaseModel):

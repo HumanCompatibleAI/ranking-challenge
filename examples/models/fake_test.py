@@ -19,10 +19,10 @@ def test_fake_request():
     assert len(set(item.id for item in request.items)) == 5
 
 def test_fake_response():
-    # this test's purpose is mostly to run the code to make sure it doesn't
-    # have any validation errors
-    response = fake.fake_response(5)
-    assert len(response.ranked_ids) == 5
+    ids = [str(i) for i in range(5)]
+
+    response = fake.fake_response(ids, 2)
+    assert len(response.ranked_ids) == 7
 
     # all ids are unique
-    assert len(set(id for id in response.ranked_ids)) == 5
+    assert len(set(id for id in response.ranked_ids)) == 7
