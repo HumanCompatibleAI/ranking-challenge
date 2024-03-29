@@ -151,7 +151,7 @@ for col in hash_col:
 
 # Lastly, we export our data out
 filtered_facebook = merged[['id','parent_id','all_post_ids','text','author_name_hash','type','created_at','like', 'love', 'haha', 'wow', 'sad', 'angry', 'comments','shares']]
-# filtered_facebook.to_csv(os.path.join(script_dir,'facebook_data/rrocfbsed/filtered_comment_post.csv'), index=False)
+filtered_facebook.to_csv(os.path.join(script_dir,'facebook_data/rrocfbsed/filtered_comment_post.csv'), index=False)
 
 
 # TWITTER PREPROCESSING
