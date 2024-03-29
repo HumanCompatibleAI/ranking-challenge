@@ -235,13 +235,12 @@ def data_puller(platform, x, seed_no, username):
 
 
 
-# if __name__ == "__main__":
-#     parser = argparse.ArgumentParser(description='Sample data from platforms')
-#     parser.add_argument('-p', '--platform', type=str, help='Platform to pull data from')
-#     parser.add_argument('-n', '--numposts', type=int, help='number of posts to generate', nargs='?', const=100, default=100)
-#     parser.add_argument('-r', '--randomseed', type=int, help='random seed', nargs='?', const=1, default=1)
-#     parser.add_argument('-u', '--username', type=str, help='username', nargs='?', const="username", default="username")
-#     args = parser.parse_args()
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Sample data from platforms')
+    parser.add_argument('-p', '--platform', type=str, help='Platform to pull data from')
+    parser.add_argument('-n', '--numposts', type=int, help='number of posts to generate', nargs='?', const=100, default=100)
+    parser.add_argument('-r', '--randomseed', type=int, help='random seed', nargs='?', const=1, default=1)
+    parser.add_argument('-u', '--username', type=str, help='username', nargs='?', const="username", default="username")
+    args = parser.parse_args()
 
-#     data_puller(args.platform, args.numposts, args.randomseed, args.username)
-data_puller('twitter', 10,120,'jeff')
+    data_puller(args.platform, args.numposts, args.randomseed, args.username)
