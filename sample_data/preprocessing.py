@@ -151,7 +151,7 @@ for col in hash_col:
 
 # Lastly, we export our data out
 filtered_facebook = merged[['id','parent_id','all_post_ids','text','author_name_hash','type','created_at','like', 'love', 'haha', 'wow', 'sad', 'angry', 'comments','shares']]
-filtered_facebook.to_csv(os.path.join(script_dir,'facebook_data/rrocfbsed/filtered_comment_post.csv'), index=False)
+# filtered_facebook.to_csv(os.path.join(script_dir,'facebook_data/rrocfbsed/filtered_comment_post.csv'), index=False)
 
 
 # TWITTER PREPROCESSING
@@ -167,8 +167,11 @@ for file_name in files:
     with open(file_path, 'r', encoding='utf-8') as json_file:
         for line in json_file:
             json_obj = json.loads(line.strip())
-            if 'data' in json_obj:
+            if 'data' in json_obj and 'includes' in json_obj:
                 data_part = json_obj['data']
+                includes = json_obj['includes']
+
+                # Preprocess ID, author_id, and created_at
                 if 'id' in data_part:
                     data_part['id'] = hashed(data_part['id'])
                 if 'author_id' in data_part:
@@ -176,7 +179,27 @@ for file_name in files:
                 if 'created_at' in data_part:
                     created = datetime.strptime(data_part['created_at'], '%Y-%m-%dT%H:%M:%S.%fZ')
                     data_part['created_at'] = str(created.strftime('%Y-%m-%d %H:%M:%S'))
-                jsons.append(data_part)
+
+                # Check for expanded_url
+                entities = data_part.get('entities', {})
+                urls = entities.get('urls', [])
+                expanded_url = urls[0].get('expanded_url', None) if urls else None
+
+                # Extracting user metrics from the first user in includes.users
+                users = includes.get('users', [])
+                user_metrics = users[0].get('public_metrics', {}) if users else None
+
+                # Only append if expanded_url is not None or user_metrics is not None and has content
+                if expanded_url or (user_metrics and any(user_metrics.values())):
+                    data_part['expanded_url'] = expanded_url
+                    if user_metrics:
+                        data_part.update({
+                            'followers_count': user_metrics.get('followers_count', 0),
+                            'following_count': user_metrics.get('following_count', 0),
+                            'tweet_count': user_metrics.get('tweet_count', 0),
+                            'listed_count': user_metrics.get('listed_count', 0),
+                        })
+                    jsons.append(data_part)
 
 with open(os.path.join(script_dir,'twitter_data/processed/filtered_jan_2023.json'), 'w', encoding='utf-8') as output_file:
     json.dump(jsons, output_file, indent=4)

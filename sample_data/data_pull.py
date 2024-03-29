@@ -185,19 +185,45 @@ def data_puller(platform, x, seed_no, username):
 
         # Our structure for tweets. Without 'posts' as a concept, only one structure is needed
         transformed_data = []
+        
+        # Randomisation of engagement metrics (current data is majority zero, this will change if we come across improved data)
+        # Randomisation will combine a proportional amount of follower count with a random noise variable on top
+        reply_seed = 1
+        repost_seed = 2
+        like_seed = 3
+        quote_seed = 4
+        noise_std = 1
+        
+        np.random.seed(reply_seed)
+        sample['simulated_replies'] = round((sample['followers_count'] * 0.001) + np.random.normal(loc=0, scale=noise_std, size=len(sample)), 0).clip(lower=0).astype(int)
+        np.random.seed(repost_seed)
+        sample['simulated_reposts'] = round((sample['followers_count'] * 0.005) + np.random.normal(loc=0, scale=noise_std, size=len(sample)), 0).clip(lower=0).astype(int)
+        np.random.seed(like_seed)
+        sample['simulated_likes'] = round((sample['followers_count'] * 0.01) + np.random.normal(loc=0, scale=noise_std, size=len(sample)), 0).clip(lower=0).astype(int)
+        np.random.seed(quote_seed)
+        sample['simulated_quotes'] = round((sample['followers_count'] * 0.005) + np.random.normal(loc=0, scale=noise_std, size=len(sample)), 0).clip(lower=0).astype(int)
+
+        # Grab relevant fields     
         for _, row in sample.iterrows():
             transformed_row = {
                 "id": row['id'],
                 "parent_id": row.get('parent_id', ''),
                 "text": row['text'],
+                "expanded_url": row.get('expanded_url',None),
                 "author_name_hash": row['author_id'],
-                "type": "tweet",
+                "type": 'tweet',
                 "created_at": row['created_at'].strftime('%Y-%m-%d %H:%M:%S') if pd.notnull(row['created_at']) else '',
                 "engagements": {
-                    'reply': row.get('reply_count', 0),
-                    'repost': row.get('retweet_count', 0),
-                    'like': row.get('like_count', 0),
-                    'quote': row.get('quote_count', 0)
+                    'reply': row.get('simulated_replies', 0),
+                    'repost': row.get('simulated_reposts', 0),
+                    'like': row.get('simulated_likes', 0),
+                    'quote': row.get('simulated_quotes', 0)
+                },
+                "user_metrics": {
+                    "followers": row.get('followers_count', 0),
+                    "following": row.get('following_count', 0),
+                    "tweet_count": row.get('tweet_count', 0),
+                    "listed_count": row.get('listed_count', 0),
                 }
             }
             transformed_data.append(transformed_row)

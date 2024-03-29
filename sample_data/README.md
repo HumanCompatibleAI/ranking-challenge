@@ -73,7 +73,8 @@ process of fixing each of these:
 
         - **Twitter:** Missing threads and views. Currently includes
         quotes as a substitute. However, all of these appear blank. We
-        have subsequently simulated threads with random assignment.
+        have subsequently simulated threads with random assignment. In addition,
+        we have also randomly simulated engagement metrics
 
 1. Our data is also from various times, but should be fairly general
 thematically i.e Not leaning towards particular demographics
@@ -97,7 +98,8 @@ Tweets from Jan 1st 2023
 
 - Unfortunately this set does not contain views per individual tweets.
   We will assess additional sources for this information. Additionally,
-  lots of quotes, replies, reposts are all 0
+  because lots of quotes, replies and reposts are all 0 we have simulated
+  random engagement metrics based on follower counts
 
 Sourced from
 
