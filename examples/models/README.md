@@ -2,7 +2,7 @@
 
 You can use these models in your Python code, both to generate valid data, and to parse incoming data.
 
-Using the models ensures that your data has been at least somewhat validated. If the schema changes your code needs an update, you're more likely to be able to tell right away.
+Using the models ensures that your data has been at least somewhat validated. If the schema changes and your code needs an update, you're more likely to be able to tell right away.
 
 ## Parsing a request
 
@@ -23,6 +23,8 @@ def rank(ranking_request: RankingRequest) -> RankingResponse:
 
 If you specify `RankingResponse` as your reeturn type, you will get validation of your response for free.
 
+For a complete example, check out `../fastapi_nltk/`
+
 ### Otherwise
 
 If you'd like to parse a request directly, here is how:
@@ -35,7 +37,7 @@ loaded_request = RankingRequest.model_validate_json(json_data)
 
 ## Generating fake data
 
-There is a fake data generator in `fake.py`. If you run it, it will print some. You can also import it
+There is a fake data generator in `fake.py`. If you run it directly it'll print some. You can also import it and run `fake_request()` or `fake_response()`. Take a look at the test for a usage example.
 
 ## More
 
