@@ -18,31 +18,62 @@ fake = Faker(locale="la")  # remove locale to get rid of the fake latin
 from models.request import ContentItem, RankingRequest, Session
 from models.response import RankingResponse
 
-def fake_request(n_items=1):
+def fake_request(n_posts=1, n_comments=0, platform="reddit"):
+    posts = [fake_item(platform=platform, type="post") for _ in range(n_posts)]
+    comments = []
+    for post in posts:
+        last_comment_id = None
+        for _ in range(n_comments):
+            comments.append(fake_item(platform=platform, type="comment", post_id=post.id, parent_id=last_comment_id))
+            last_comment_id = comments[-1].id
+
     return RankingRequest(
         session=Session(
             user_id=str(uuid4()),
             user_name_hash=hashlib.sha256(fake.name().encode()).hexdigest(),
-            platform="reddit",
+            platform=platform,
             current_time=time.time(),
         ),
-        items=[fake_item() for _ in range(n_items)]
-
+        items=posts + comments,
     )
 
-def fake_item():
-    return ContentItem(
-        id=str(uuid4()),
-        text=fake.text(),
-        author_name_hash=hashlib.sha256(fake.name().encode()).hexdigest(),
-        type="post",
-        created_at=time.time(),
-        engagements={
+def fake_item(platform="reddit", type="post", post_id=None, parent_id=None):
+    if platform == "reddit":
+        engagements = {
             "upvote": randint(0, 50),
             "downvote": randint(0, 50),
             "comment": randint(0, 50),
-            "award": randint(0, 50)
-        },
+            "award": randint(0, 50)}
+    elif platform == "twitter":
+        engagements = {
+            "like": randint(0, 50),
+            "retweet": randint(0, 50),
+            "comment": randint(0, 50),
+            "share": randint(0, 50)}
+    elif platform == "facebook":
+        engagements = {
+            "like": randint(0, 50),
+            "love": randint(0, 50),
+            "care": randint(0, 50),
+            "haha": randint(0, 50),
+            "wow": randint(0, 50),
+            "sad": randint(0, 50),
+            "angry": randint(0, 50),
+            "comment": randint(0, 50),
+            "share": randint(0, 50)
+        }
+    else:
+        raise ValueError(f"Unknown platform: {platform}")
+
+    return ContentItem(
+        id=str(uuid4()),
+        text=fake.text(),
+        post_id=post_id,
+        parent_id=parent_id,
+        author_name_hash=hashlib.sha256(fake.name().encode()).hexdigest(),
+        type=type,
+        created_at=time.time(),
+        engagements=engagements,
     )
 
 def fake_response(ids, n_new_items=1):
@@ -63,7 +94,7 @@ def fake_new_item():
 
 # if run from command line
 if __name__ == "__main__":
-    request = fake_request(3)
+    request = fake_request(n_posts=1, n_comments=2)
     print("Request:")
     print(request.model_dump_json(indent=2))
 
