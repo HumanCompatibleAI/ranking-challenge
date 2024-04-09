@@ -6,79 +6,105 @@ Your ranker should be implemented as a service that accepts an HTTP POST request
 
 ## Request/response format
 
-_NOTE: This is provisional, and will almost certainly change._
-
 Your ranker should accept a list of social media posts and comments, each with a corresponding ID, in JSON format:
+
+### Request
+
+(this example is a single post with two threaded comments)
 
 ```jsonc
 {
-    "session": {
-        "user_id": "193a9e01-8849-4e1f-a42a-a859fa7f2ad3",
-        "user_name_hash": "6511c5688bbb87798128695a283411a26da532df06e6e931a53416e379ddda0e",
-        "platform": "reddit",
-        "current_time": "2024-01-20 18:41:20",
+  "session": {
+    "user_id": "1cfe49e5-02b6-4e58-a376-4b254a62650e",
+    "user_name_hash": "0af8c7486e97a23b4631283970f55a3c51338cbf7a7748ca39449a895822be84",
+    "platform": "reddit",
+    "current_time": "2024-04-09T19:29:38.072017Z"
+  },
+  "items": [
+    {
+      "id": "fde9c535-2d98-45db-b2d9-c3f8c4de0330",
+      "post_id": null,
+      "parent_id": null,
+      "title": null,
+      "text": "Sed error repellat minima ex. Numquam recusandae unde perspiciatis quasi suscipit. Natus repellat voluptate nostrum vel.",
+      "author_name_hash": "2e7a2066f0d892ecfd656fa64c1081aa9c6778fb0d22217240a62377435c9ace",
+      "type": "post",
+      "created_at": "2024-04-09T19:29:38.071245Z",
+      "engagements": {
+        "upvote": 16,
+        "downvote": 38,
+        "comment": 46,
+        "award": 4
+      }
     },
-    "items": [
-        {
-            "id": "de83fc78-d648-444e-b20d-853bf05e4f0e",
-            "title": "this is the post title, available only on reddit",
-            "text": "this is a social media post",
-            "author_name_hash": "60b46b7370f80735a06b7aa8c4eb6bd588440816b086d5ef7355cf202a118305",
-            "type": "post",
-            "created_at": "2023-12-06 17:02:11",
-            "enagements": {
-                "upvote": 34,
-                "downvote": 27
-            }
-        },
-        {
-            "id": "a4c08177-8db2-4507-acc1-1298220be98d",
-            "parent_id": "", // this is a top-level comment
-            "post_id": "de83fc78-d648-444e-b20d-853bf05e4f0e",
-            "text": "this is a comment, by the author of the post",
-            "author_name_hash": "60b46b7370f80735a06b7aa8c4eb6bd588440816b086d5ef7355cf202a118305",
-            "type": "comment",
-            "created_at": "2023-12-08 11:32:12",
-            "enagements": {
-                "upvote": 3,
-                "downvote": 5
-            }
-        },
-        {
-            "id": "06fb0b62-2501-40f1-a152-db019d03d2e6",
-            "parent_id": "a4c08177-8db2-4507-acc1-1298220be98d",
-            "post_id": "de83fc78-d648-444e-b20d-853bf05e4f0e",
-            "text": "this is a reply to the first comment",
-            "author_name_hash": "60b46b7370f80735a06b7aa8c4eb6bd588440816b086d5ef7355cf202a118305",
-            "type": "comment",
-            "created_at": "2023-12-08 11:32:12",
-            "enagements": {
-                "upvote": 3,
-                "downvote": 5
-            }
-        }
-    ]
+    {
+      "id": "1d4d65c1-32bc-486b-bb44-761f33820f12",
+      "post_id": "fde9c535-2d98-45db-b2d9-c3f8c4de0330",
+      "parent_id": null,
+      "title": null,
+      "text": "Incidunt temporibus at maiores ratione eveniet facere. Eligendi nulla ipsa. Temporibus ex magnam voluptate enim laborum quod.",
+      "author_name_hash": "e601eae141746a9677174503e03ee41298f8b1e89ba63565edf4ed0553fdd40a",
+      "type": "comment",
+      "created_at": "2024-04-09T19:29:38.071843Z",
+      "engagements": {
+        "upvote": 38,
+        "downvote": 2,
+        "comment": 9,
+        "award": 11
+      }
+    },
+    {
+      "id": "ceb75c43-a4f6-4426-a7af-5b178a6fc19a",
+      "post_id": "fde9c535-2d98-45db-b2d9-c3f8c4de0330",
+      "parent_id": "1d4d65c1-32bc-486b-bb44-761f33820f12",
+      "title": null,
+      "text": "Nemo suscipit consequuntur officia blanditiis repellendus dolor neque. Dolore reiciendis adipisci reprehenderit blanditiis ad iste hic.",
+      "author_name_hash": "911fb438baa1eb6bbb28b4af3419150fbc44409f5129c400ef4ab58c02102a6b",
+      "type": "comment",
+      "created_at": "2024-04-09T19:29:38.071940Z",
+      "engagements": {
+        "upvote": 18,
+        "downvote": 0,
+        "comment": 29,
+        "award": 36
+      }
+    }
+  ]
 }
 ```
+
+### Response
 
 Your ranker should return an ordered list of IDs. You can also remove items by removing an ID, or add items by inserting a new ID that you generate. For new posts (only posts insertion is supported), also provide the post URL.
 
 ```jsonc
 {
-    "ranked_ids": [
-        "de83fc78-d648-444e-b20d-853bf05e4f0e",
-        "571775f3-2564-4cf5-b01c-f4cb6bab461b"
-    ],
-    "new_items": [
-        {
-            "id": "571775f3-2564-4cf5-b01c-f4cb6bab461b",
-            "url": "https://reddit.com/r/PRCExample/comments/1f33ead/example_to_insert",
-        }
-    ]
+  "ranked_ids": [
+    "fde9c535-2d98-45db-b2d9-c3f8c4de0330",
+    "1d4d65c1-32bc-486b-bb44-761f33820f12",
+    "c9c0ea77-7501-4b34-b1a3-f56e41a14f44",
+    "10f32cf7-4566-41f9-b07b-6655f4f7fe46"
+  ],
+  "new_items": [
+    {
+      "id": "c9c0ea77-7501-4b34-b1a3-f56e41a14f44",
+      "url": "https://reddit.com/r/PRCExample/comments/1f33ead/example_to_insert"
+    },
+    {
+      "id": "10f32cf7-4566-41f9-b07b-6655f4f7fe46",
+      "url": "https://reddit.com/r/PRCExample/comments/1f33ead/another_example"
+    }
+  ]
 }
 ```
 
 You do not need to return the same number of content items as you received. However, keep in mind that making a significant change in the number of items could have a negative impact on the user experience.
+
+## Pydantic models
+
+We have a set of pydanitc models, which are the source of truth for the API format. Using them, you can encode, parse, and validate the request and response json. You can also use them natively in fastapi. The examples above were generated from these models.
+
+You can always find the most current version in [examples/models](https://github.com/HumanCompatibleAI/ranking-challenge/tree/main/examples/models)
 
 ## Request fields
 
@@ -152,7 +178,7 @@ At present, we expect content item insertion to only work for posts. If you need
 In general, our caller will log any non-success response code. Returning a correct code and error may help with debugging. Some codes you could consider returning:
 
 - `200`: Success. Everything worked and the response should be considered valid
-- `400`: Bad request. You validated or attempted to parse the input and it failed.a
+- `400`: Bad request. You validated or attempted to parse the input and it failed.
 - `413`: Request too long. You have a limit to the amount of data you can receive and it was exceeded.
 - `429`: Too many requests. There is a rate-limit (potentially upstream) that was exceeded.
 - `500`: Internal Server Error. Something failed in your application.
