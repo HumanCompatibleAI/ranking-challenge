@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Literal, Optional, Union
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, HttpUrl
 from pydantic.types import NonNegativeInt
 
 
@@ -69,6 +69,10 @@ class ContentItem(BaseModel):
 
     type: Literal["post", "comment"] = Field(
         description="Whether the content item is a `post` or `comment`. On Twitter, tweets will be identified as `comment` when they are replies displayed on the page for a single tweet."
+    )
+
+    embedded_urls: Optional[list[HttpUrl]] = Field(
+        description="A list of URLs that are embedded in the content item. This could be links to images, videos, or other content. They may or may not also appear in the text of the item."
     )
 
     created_at: datetime = Field(

@@ -73,6 +73,7 @@ def fake_item(platform="reddit", type="post", post_id=None, parent_id=None):
         author_name_hash=hashlib.sha256(fake.name().encode()).hexdigest(),
         type=type,
         created_at=time.time(),
+        embedded_urls=[fake.url() for _ in range(randint(0, 3))],
         engagements=engagements,
     )
 
