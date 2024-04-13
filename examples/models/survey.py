@@ -135,7 +135,6 @@ class SurveyResponses(BaseModel):
 
     
     # Information
-    
     # Cannot encode with boolean due to 'unsure' option. Alternative is nullable boolean?
      
     headline_1 : Optional[bool]

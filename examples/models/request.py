@@ -101,7 +101,7 @@ class RankingRequest(BaseModel):
     """A complete ranking request"""
 
     session: Session
-    survey = SurveyResponses
+    survey : SurveyResponses
     items: list[ContentItem]
     
     
