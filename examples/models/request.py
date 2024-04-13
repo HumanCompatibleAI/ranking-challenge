@@ -4,6 +4,8 @@ from typing import Literal, Optional, Union
 from pydantic import BaseModel, Field, HttpUrl
 from pydantic.types import NonNegativeInt
 
+from survey import EnumField, SurveyResponses
+
 
 class TwitterEngagements(BaseModel):
     """Engagement counts from Twitter"""
@@ -99,4 +101,10 @@ class RankingRequest(BaseModel):
     """A complete ranking request"""
 
     session: Session
+    survey = SurveyResponses
     items: list[ContentItem]
+    
+    
+
+    
+    
