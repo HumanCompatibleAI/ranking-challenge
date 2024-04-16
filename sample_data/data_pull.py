@@ -5,15 +5,22 @@ import pandas as pd
 from pathlib import Path
 import os
 import sys
+import inspect
 import hashlib
 from datetime import datetime
 import json
 import argparse
 
+parentdir = os.path.dirname(  # make it possible to import from ../ in a reliable way
+    os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+)
+sys.path.insert(0, parentdir)
+
+from examples.models.request import RankingRequest, FacebookEngagements, RedditEngagements, TwitterEngagements, ContentItem
+
 script_dir = os.path.dirname(__file__)
 
 platforms = ['facebook', 'reddit', 'twitter']
-
 
 
 def data_puller(platform, x, seed_no, username):
@@ -58,13 +65,14 @@ def data_puller(platform, x, seed_no, username):
 
     # Establish static part of JSON
     static_json = {
-    "session": {
-        "user_id": user_id,
-        "user_name_hash": hashed_user,
-        "platform": platform,
-        "current_time": current_time,
-    },
-    "items": []
+        "session": {
+            "user_id": user_id,
+            "user_name_hash": hashed_user,
+            "platform": platform,
+            "cohort": "AB",
+            "current_time": current_time,
+        },
+        "items": []
     }
 
     if platform.upper() == 'FACEBOOK':
@@ -79,46 +87,66 @@ def data_puller(platform, x, seed_no, username):
 
         for index, row in posts.iterrows():
             item = row.to_dict()
+            item = {k: v if v == v else "" for k, v in item.items()}  # replace NaN with ""
+
+            item["type"] = item["type"].lower()
+            item["embedded_urls"] = []
+
             # General structure for engagement metrics
-            engagements = {
-                'likes': item.pop('like', 0),
+            engagements = FacebookEngagements(**{
+                'like': item.pop('like', 0),
                 'love': item.pop('love', 0),
                 'haha': item.pop('haha', 0),
                 'wow': item.pop('wow', 0),
                 'sad': item.pop('sad', 0),
                 'angry': item.pop('angry', 0),
-                'comments': item.pop('comments', 0),
-                'shares': item.pop('shares', 0),
-            }
+                'comment': item.pop('comments', 0),
+                'share': item.pop('shares', 0),
+                'care': 0,
+            })
             item['engagements'] = engagements
 
             # General structure for posts
             item['engagements'] = engagements
             post_id = item.pop('all_post_ids')
             item['id'] = post_id
-            item.pop('post_id', None)
-            item.pop('parent_id', None)
-            final_items.append(item)
+            final_items.append(ContentItem(**item))
             # processed_post_ids.add(post_id)
 
-                # Include related comments directly after their respective post
+            # Include related comments directly after their respective post
             if post_id in comments_grouped_by_post_id.groups:
                 related_comments = comments_grouped_by_post_id.get_group(post_id)
                 for _, comment_row in related_comments.iterrows():
                     comment_item = comment_row.to_dict()
+                    comment_item = {k: v if v == v else "" for k, v in comment_item.items()}  # replace NaN with ""
+
+                    comment_item["type"] = comment_item["type"].lower()
+                    comment_item["embedded_urls"] = []
+                    comment_item["parent_id"] = ""  # one level of threading for now
+                    comment_item["engagements"] = FacebookEngagements(**{
+                        'like': comment_item.pop('like', 0),
+                        'love': comment_item.pop('love', 0),
+                        'haha': comment_item.pop('haha', 0),
+                        'wow': comment_item.pop('wow', 0),
+                        'sad': comment_item.pop('sad', 0),
+                        'angry': comment_item.pop('angry', 0),
+                        'comment': comment_item.pop('comments', 0),
+                        'share': comment_item.pop('shares', 0),
+                        'care': 0,
+                    })
                     comment_item['post_id'] = comment_item.pop('all_post_ids')  # Rename 'all_post_ids' to 'post_id'
-                    final_items.append(comment_item)
+                    final_items.append(ContentItem(**comment_item))
 
         static_json['items'] = final_items
 
 
     if platform.upper() == 'REDDIT':
         df = pd.read_csv(os.path.join(script_dir,'reddit_data/processed/filtered_reddit_data.csv'), low_memory=False)
-        
+
         # We will sample from our dataset and then split into posts and comments
         posts_df =  df[df['type'] == 'Post']
         sample = posts_df.sample(n=x, random_state=seed_no)
-        
+
         # Initialize the list to store final items
         final_items = []
 
@@ -126,10 +154,14 @@ def data_puller(platform, x, seed_no, username):
         for _, post_row in sample.iterrows(): # change made here, was posts_df before
             # General structure for posts
             post_item = post_row.to_dict()
-            post_item.pop('parent_id', None)
-            post_item.pop('post_id', None)
-            post_item.pop('text', None)
-            post_item['engagements'] = {'upvotes': post_item.pop('upvotes', 0), 'downvotes': post_item.pop('downvotes', 0)}
+            post_item = {k: v if v == v else "" for k, v in post_item.items()}  # replace NaN with ""
+            if post_item['upvotes'] < 0:
+                post_item['upvotes'] = 0
+            if post_item['downvotes'] < 0:
+                post_item['downvotes'] = 0
+            post_item["type"] = post_item["type"].lower()
+            post_item['engagements'] = RedditEngagements(**{'upvote': post_item.pop('upvotes', 0), 'downvote': post_item.pop('downvotes', 0), 'comment': 0, 'award': 0})
+            post_item['embedded_urls'] = []
             final_items.append(post_item)
 
             # Find and append related comments
@@ -137,8 +169,16 @@ def data_puller(platform, x, seed_no, username):
             related_comments = df[(df['type'] == 'Comment') & (df['post_id'] == post_item['id'])]
             for _, comment_row in related_comments.iterrows():
                 comment_item = comment_row.to_dict()
+                comment_item = {k: v if v == v else "" for k, v in comment_item.items()}  # replace NaN with ""
+                if comment_item['upvotes'] < 0:
+                    comment_item['upvotes'] = 0
+                if comment_item['downvotes'] < 0:
+                    comment_item['downvotes'] = 0
+
                 comment_item.pop('title', None)
-                comment_item['engagements'] = {'upvotes': comment_item.pop('upvotes', 0), 'downvotes': comment_item.pop('downvotes', 0)}
+                comment_item['engagements'] = RedditEngagements(**{'upvote': comment_item.pop('upvotes', 0), 'downvote': comment_item.pop('downvotes', 0), 'comment': 0, 'award': 0})
+                comment_item["type"] = comment_item["type"].lower()
+                comment_item['embedded_urls'] = []
                 final_items.append(comment_item)
 
         static_json['items'] = final_items
@@ -149,6 +189,9 @@ def data_puller(platform, x, seed_no, username):
         # We will sample from our dataset and establish an empty parent_id column
         sample = df.sample(n=x, random_state=seed_no).reset_index(drop=True)
         sample['parent_id'] = [None] * len(sample)
+        if 'followers_count' not in sample.columns:
+            # fake this if it's not available so that the code below for creating engagements works
+            sample['followers_count'] = [5] * len(sample)
 
         # We establish a blank dictionary to hold the thread info
         graph = {}
@@ -185,7 +228,7 @@ def data_puller(platform, x, seed_no, username):
 
         # Our structure for tweets. Without 'posts' as a concept, only one structure is needed
         transformed_data = []
-        
+
         # Randomisation of engagement metrics (current data is majority zero, this will change if we come across improved data)
         # Randomisation will combine a proportional amount of follower count with a random noise variable on top
         reply_seed = 1
@@ -193,7 +236,7 @@ def data_puller(platform, x, seed_no, username):
         like_seed = 3
         quote_seed = 4
         noise_std = 1
-        
+
         np.random.seed(reply_seed)
         sample['simulated_replies'] = round((sample['followers_count'] * 0.001) + np.random.normal(loc=0, scale=noise_std, size=len(sample)), 0).clip(lower=0).astype(int)
         np.random.seed(repost_seed)
@@ -203,36 +246,41 @@ def data_puller(platform, x, seed_no, username):
         np.random.seed(quote_seed)
         sample['simulated_quotes'] = round((sample['followers_count'] * 0.005) + np.random.normal(loc=0, scale=noise_std, size=len(sample)), 0).clip(lower=0).astype(int)
 
-        # Grab relevant fields     
+        # Grab relevant fields
         for _, row in sample.iterrows():
+            embedded_urls = []
+            if row.get("expanded_url", None):
+                embedded_urls.append(row["expanded_url"])
             transformed_row = {
                 "id": row['id'],
                 "parent_id": row.get('parent_id', ''),
                 "text": row['text'],
-                "expanded_url": row.get('expanded_url',None),
+                "embedded_urls": embedded_urls,
                 "author_name_hash": row['author_id'],
-                "type": 'tweet',
+                "type": 'post',
                 "created_at": row['created_at'].strftime('%Y-%m-%d %H:%M:%S') if pd.notnull(row['created_at']) else '',
-                "engagements": {
-                    'reply': row.get('simulated_replies', 0),
-                    'repost': row.get('simulated_reposts', 0),
+                "engagements": TwitterEngagements(**{
+                    'comment': row.get('simulated_replies', 0),
+                    'retweet': row.get('simulated_reposts', 0),
                     'like': row.get('simulated_likes', 0),
-                    'quote': row.get('simulated_quotes', 0)
-                },
-                "user_metrics": {
-                    "followers": row.get('followers_count', 0),
-                    "following": row.get('following_count', 0),
-                    "tweet_count": row.get('tweet_count', 0),
-                    "listed_count": row.get('listed_count', 0),
-                }
+                    'share': 0,
+                })
+                # these aren't in the current api spec, but it looks like we could add them
+                # "user_metrics": {
+                #     "followers": row.get('followers_count', 0),
+                #     "following": row.get('following_count', 0),
+                #     "tweet_count": row.get('tweet_count', 0),
+                #     "listed_count": row.get('listed_count', 0),
+                # }
             }
-            transformed_data.append(transformed_row)
+            transformed_data.append(ContentItem(**transformed_row))
 
         static_json["items"] = transformed_data
 
-    # done, output    
-    json.dump(static_json, sys.stdout, indent=4)
+    request = RankingRequest(**static_json)
 
+    # done, output
+    print(request.model_dump_json(indent=4))
 
 
 if __name__ == "__main__":
