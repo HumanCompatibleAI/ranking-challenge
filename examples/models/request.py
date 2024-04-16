@@ -4,7 +4,7 @@ from typing import Literal, Optional, Union
 from pydantic import BaseModel, Field, HttpUrl
 from pydantic.types import NonNegativeInt
 
-from models.survey import SurveyResponse
+from .survey import SurveyResponse
 
 
 class TwitterEngagements(BaseModel):
