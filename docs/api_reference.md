@@ -13,60 +13,87 @@ Your ranker should accept a list of social media posts and comments, each with a
 (this example is a single post with two threaded comments)
 
 ```jsonc
+Request:
 {
   "session": {
-    "user_id": "1cfe49e5-02b6-4e58-a376-4b254a62650e",
-    "user_name_hash": "0af8c7486e97a23b4631283970f55a3c51338cbf7a7748ca39449a895822be84",
+    "user_id": "74f2e773-5bcd-4936-8d21-dbd34d4f8b18",
+    "user_name_hash": "a7a80e8ea489379a64f8d188fceefa6c77550f1682ee2b76b09d5270a7378cc1",
+    "cohort": "AB",
     "platform": "reddit",
-    "current_time": "2024-04-09T19:29:38.072017Z"
+    "current_time": "2024-04-15T23:59:46.295928Z"
+  },
+  "survey": {
+    "party_id": "democrat",
+    "party_write_in": null,
+    "support": "strong",
+    "party_lean": "democrat",
+    "sex": "female",
+    "age": 3,
+    "education": 4,
+    "ideology": 5,
+    "income": 6,
+    "ethnicity": "native_american",
+    "ethnicity_write_in": null,
+    "socmed_use": 7,
+    "browser_perc": 0.8,
+    "mobile_perc": 0.2
   },
   "items": [
     {
-      "id": "fde9c535-2d98-45db-b2d9-c3f8c4de0330",
+      "id": "76d8710b-e1d2-40b6-8d99-084d4bc7f3ce",
       "post_id": null,
       "parent_id": null,
       "title": null,
-      "text": "Sed error repellat minima ex. Numquam recusandae unde perspiciatis quasi suscipit. Natus repellat voluptate nostrum vel.",
-      "author_name_hash": "2e7a2066f0d892ecfd656fa64c1081aa9c6778fb0d22217240a62377435c9ace",
+      "text": "Atque tempore unde.\nSint quia minima blanditiis. Rem veritatis soluta quidem excepturi quam suscipit. Sequi doloribus consequuntur error nulla tenetur.",
+      "author_name_hash": "d9f7b073fc3a7c142d154f4edcce9837ba3c35c855281942b08f19340b4439a8",
       "type": "post",
-      "created_at": "2024-04-09T19:29:38.071245Z",
+      "embedded_urls": [
+        "https://dominguez.com/",
+        "https://everett-gordon.biz/",
+        "https://www.smith-miles.com/"
+      ],
+      "created_at": "2024-04-15T23:59:46.291735Z",
       "engagements": {
-        "upvote": 16,
-        "downvote": 38,
-        "comment": 46,
-        "award": 4
+        "upvote": 28,
+        "downvote": 15,
+        "comment": 12,
+        "award": 16
       }
     },
     {
-      "id": "1d4d65c1-32bc-486b-bb44-761f33820f12",
-      "post_id": "fde9c535-2d98-45db-b2d9-c3f8c4de0330",
+      "id": "620c78e8-5e15-4f82-a008-63cccf4cfdc2",
+      "post_id": "76d8710b-e1d2-40b6-8d99-084d4bc7f3ce",
       "parent_id": null,
       "title": null,
-      "text": "Incidunt temporibus at maiores ratione eveniet facere. Eligendi nulla ipsa. Temporibus ex magnam voluptate enim laborum quod.",
-      "author_name_hash": "e601eae141746a9677174503e03ee41298f8b1e89ba63565edf4ed0553fdd40a",
+      "text": "Necessitatibus ullam ullam est consequuntur. Eligendi dolorem officiis eligendi harum.",
+      "author_name_hash": "da41ff70b25c5ea3ebb595e9dd595688a7c5204fd3b89c5cb9005633799e493e",
       "type": "comment",
-      "created_at": "2024-04-09T19:29:38.071843Z",
+      "embedded_urls": [
+        "https://www.fox.com/"
+      ],
+      "created_at": "2024-04-15T23:59:46.295685Z",
       "engagements": {
-        "upvote": 38,
-        "downvote": 2,
-        "comment": 9,
-        "award": 11
+        "upvote": 13,
+        "downvote": 50,
+        "comment": 50,
+        "award": 35
       }
     },
     {
-      "id": "ceb75c43-a4f6-4426-a7af-5b178a6fc19a",
-      "post_id": "fde9c535-2d98-45db-b2d9-c3f8c4de0330",
-      "parent_id": "1d4d65c1-32bc-486b-bb44-761f33820f12",
+      "id": "ae2ca8be-7faf-4d6e-95dd-2e5f1c27961e",
+      "post_id": "76d8710b-e1d2-40b6-8d99-084d4bc7f3ce",
+      "parent_id": "620c78e8-5e15-4f82-a008-63cccf4cfdc2",
       "title": null,
-      "text": "Nemo suscipit consequuntur officia blanditiis repellendus dolor neque. Dolore reiciendis adipisci reprehenderit blanditiis ad iste hic.",
-      "author_name_hash": "911fb438baa1eb6bbb28b4af3419150fbc44409f5129c400ef4ab58c02102a6b",
+      "text": "Repellat sit sed animi sunt. Sapiente quam temporibus itaque tenetur dolores excepturi. Harum ullam magnam dolores vel fuga aut.",
+      "author_name_hash": "c54177a4d5fc74be8efc20af12c3c069adb646e7db712a347f05f12b056e732c",
       "type": "comment",
-      "created_at": "2024-04-09T19:29:38.071940Z",
+      "embedded_urls": [],
+      "created_at": "2024-04-15T23:59:46.295851Z",
       "engagements": {
-        "upvote": 18,
-        "downvote": 0,
-        "comment": 29,
-        "award": 36
+        "upvote": 19,
+        "downvote": 31,
+        "comment": 32,
+        "award": 40
       }
     }
   ]
@@ -80,19 +107,20 @@ Your ranker should return an ordered list of IDs. You can also remove items by r
 ```jsonc
 {
   "ranked_ids": [
-    "fde9c535-2d98-45db-b2d9-c3f8c4de0330",
-    "1d4d65c1-32bc-486b-bb44-761f33820f12",
-    "c9c0ea77-7501-4b34-b1a3-f56e41a14f44",
-    "10f32cf7-4566-41f9-b07b-6655f4f7fe46"
+    "76d8710b-e1d2-40b6-8d99-084d4bc7f3ce",
+    "620c78e8-5e15-4f82-a008-63cccf4cfdc2",
+    "ae2ca8be-7faf-4d6e-95dd-2e5f1c27961e",
+    "5e5a9aca-ce2d-4026-8386-e5d023d770a4",
+    "d285ae38-463d-4065-9478-a41a86710e97"
   ],
   "new_items": [
     {
-      "id": "c9c0ea77-7501-4b34-b1a3-f56e41a14f44",
-      "url": "https://reddit.com/r/PRCExample/comments/1f33ead/example_to_insert"
+      "id": "5e5a9aca-ce2d-4026-8386-e5d023d770a4",
+      "url": "https://williams-weber.com/"
     },
     {
-      "id": "10f32cf7-4566-41f9-b07b-6655f4f7fe46",
-      "url": "https://reddit.com/r/PRCExample/comments/1f33ead/another_example"
+      "id": "d285ae38-463d-4065-9478-a41a86710e97",
+      "url": "https://grant-kent.org/"
     }
   ]
 }
@@ -112,8 +140,13 @@ You can always find the most current version in [examples/models](https://github
 
 - `user_id`: A unique ID for this study participant.
 - `user_name_hash`: A (salted) hash of the user's username. We'll do our best to make it match the `author_name_hash` on posts authored by the current user.
+- `cohort`: The cohort to which the user has been assigned. You can safely ignore this. It is used by the PRC request router.
 - `platform`: One of `reddit`, `twitter`, `facebook`
 - `current_time`: The current time according to the user's browser, in UTC, in `YYYY-MM-DD hh:mm:ss` format.
+
+### Survey fields
+
+Demographic information about the user from the PRC intake survey. More documentation on the format is available in `examples/models/survey.py`
 
 ### Content items
 

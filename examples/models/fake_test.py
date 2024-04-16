@@ -1,6 +1,6 @@
+import inspect
 import os
 import sys
-import inspect
 
 parentdir = os.path.dirname(  # make it possible to import from ../ in a reliable way
     os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))

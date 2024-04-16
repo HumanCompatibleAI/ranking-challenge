@@ -4,7 +4,7 @@ from typing import Literal, Optional, Union
 from pydantic import BaseModel, Field, HttpUrl
 from pydantic.types import NonNegativeInt
 
-from survey import EnumField, SurveyResponses
+from models.survey import SurveyResponse
 
 
 class TwitterEngagements(BaseModel):
@@ -48,17 +48,16 @@ class ContentItem(BaseModel):
 
     post_id: Optional[str] = Field(
         description="The ID of the post to which this comment belongs. Useful for linking comments to their post when comments are shown in a feed. Currently this UX only exists on Facebook.",
-        default=None
+        default=None,
     )
 
     parent_id: Optional[str] = Field(
         description="For threaded comments, this identifies the comment to which this one is a reply. Blank for top-level comments.",
-        default=None
+        default=None,
     )
 
     title: Optional[str] = Field(
-        description="The post title, only available on reddit posts.",
-        default=None
+        description="The post title, only available on reddit posts.", default=None
     )
 
     text: str = Field(
@@ -81,17 +80,26 @@ class ContentItem(BaseModel):
         description="The time that the item was created in UTC, in `YYYY-MM-DD hh:mm:ss` format, at the highest resolution available (which may be as low as the hour)."
     )
 
-    engagements: Union[TwitterEngagements, RedditEngagements, FacebookEngagements] = Field(description="Engagement counts for the content item.")
+    engagements: Union[TwitterEngagements, RedditEngagements, FacebookEngagements] = (
+        Field(description="Engagement counts for the content item.")
+    )
 
 
 class Session(BaseModel):
     """Data that is scoped to the user's browsing session (generally a single page view)"""
 
-    user_id: str = Field(description="A unique id for this study participant. Will remain fixed for the duration of the experiment.")
+    user_id: str = Field(
+        description="A unique id for this study participant. Will remain fixed for the duration of the experiment."
+    )
     user_name_hash: str = Field(
         description="A (salted) hash of the user's username. We'll do our best to make it match the `item.author_name_hash` on posts authored by the current user."
     )
-    platform: Literal['twitter', 'reddit', 'facebook'] = Field(description="The platform on which the user is viewing content.")
+    cohort: str = Field(
+        description="The cohort to which the user has been assigned. You can safely ignore this. It is used by the PRC request router."
+    )
+    platform: Literal["twitter", "reddit", "facebook"] = Field(
+        description="The platform on which the user is viewing content."
+    )
     current_time: datetime = Field(
         description="The current time according to the user's browser, in UTC, in `YYYY-MM-DD hh:mm:ss` format."
     )
@@ -100,11 +108,11 @@ class Session(BaseModel):
 class RankingRequest(BaseModel):
     """A complete ranking request"""
 
-    session: Session
-    survey : SurveyResponses
-    items: list[ContentItem]
-    
-    
-
-    
-    
+    session: Session = Field(
+        description="Data that is scoped to the user's browsing session"
+    )
+    survey: Optional[SurveyResponse] = Field(
+        description="Responses to PRC survey. Added by the request router.",
+        default=None,
+    )
+    items: list[ContentItem] = Field(description="The content items to be ranked.")
