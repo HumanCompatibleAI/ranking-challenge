@@ -26,7 +26,12 @@ analyzer = SentimentIntensityAnalyzer()
 @app.route("/rank", methods=["POST"])  # Allow POST requests for this endpoint
 def analyze_sentiment():
     post_data = request.json
-    RankingRequest(**post_data)  # ensure that the input data is valid as a side-effect
+
+    # Ensure that the input data is valid as a side-effect. This isn't a best-practice,
+    # but it demonstrates how you can use the models for validation even if you're not
+    # using them to process any data. But consider using FastAPI since it will do all
+    # of this automatically for you.
+    RankingRequest(**post_data)
 
     ranked_results = []
     for item in post_data.get("items"):
