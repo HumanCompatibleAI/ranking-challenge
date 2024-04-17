@@ -96,8 +96,8 @@ def test_rank_reddit(url):
                 r"https?://(?:[-\w.]|(?:%[\da-fA-F]{2}))+", row["text"]
             )
             engagements = RedditEngagements(
-                upvote=row["upvotes"],
-                downvote=row["downvotes"],
+                upvote=int(float(row["upvotes"])),
+                downvote=int(float(row["downvotes"])),
                 comment=0,
                 award=0,
             )
