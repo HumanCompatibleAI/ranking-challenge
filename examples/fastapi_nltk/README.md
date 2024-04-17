@@ -9,7 +9,7 @@ This example uses [pydantic](https://docs.pydantic.dev/) to validate the schema 
 ## Setting up your environment
 
 1. Create a virtual environment using your preferred method
-2. `pip install -r requirements.txt`
+2. `pip install -r requirements.txt` at the repo root
 
 ## Running tests
 

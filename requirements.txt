@@ -1,7 +1,10 @@
 fastapi>=0.110.0
-nltk
-pytest
-requests
+flask
+flask-cors
 httpx
+nltk
+openai
+pytest
+python-dotenv
+requests
 uvicorn[standard]
-
