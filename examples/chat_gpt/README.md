@@ -5,11 +5,11 @@ This is another simple example that uses the OpenAI API to rank items based on t
 ## Setting up your environment
 
 1. Create a virtual environment using your preferred method
-2. `pip install -r requirements.txt`
+2. `pip install -r requirements.txt` at the repo root
 
 ## Running tests
 
-Just run `pytest`. For some systems, depending on your environment architecture, you can also try `python -m pytest`. 
+Just run `pytest`. For some systems, depending on your environment architecture, you can also try `python -m pytest`.
 
 ## Executing your server outside of a unit test
 
