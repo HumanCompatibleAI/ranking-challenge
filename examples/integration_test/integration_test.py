@@ -22,6 +22,7 @@ from models.response import RankingResponse
 
 # Note: this magical url fixture is defined in conftest.py
 
+TIMEOUT = 30.0
 
 def test_rank_fake(url):
     # Send POST request to the API
@@ -29,7 +30,7 @@ def test_rank_fake(url):
         url,
         content=fake_request().model_dump_json(),
         headers={"content-type": "application/json"},
-        timeout=30.0,
+        timeout=TIMEOUT,
         follow_redirects=True,
     )
 
@@ -185,7 +186,7 @@ def check_response(url, platform, items):
         url,
         content=request.model_dump_json(),
         headers={"content-type": "application/json"},
-        timeout=30.0,
+        timeout=TIMEOUT,
         follow_redirects=True,
     )
     total_time = time.time() - start
@@ -195,7 +196,11 @@ def check_response(url, platform, items):
         response.status_code == 200
     ), f"Request failed with content: {response.content}"
 
-    result = RankingResponse.model_validate_json(response.content)
+    try:
+        result = RankingResponse.model_validate_json(response.content)
+    except Exception as e:
+        print(f"Raw response:\n{response.content}", file=sys.stderr)
+        raise e
 
     print(result, file=sys.stderr)
 

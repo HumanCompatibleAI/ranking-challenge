@@ -1,8 +1,19 @@
+import os
+import sys
+import inspect
+
+parentdir = os.path.dirname(  # make it possible to import from ../ in a reliable way
+    os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+)
+sys.path.insert(0, parentdir)
+
 import nltk
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
+from models.request import RankingRequest
+from models.response import RankingResponse
 from sample_data import NEW_POSTS
 
 nltk.download("vader_lexicon")
@@ -15,8 +26,9 @@ analyzer = SentimentIntensityAnalyzer()
 @app.route("/rank", methods=["POST"])  # Allow POST requests for this endpoint
 def analyze_sentiment():
     post_data = request.json
-    ranked_results = []
+    RankingRequest(**post_data)  # ensure that the input data is valid as a side-effect
 
+    ranked_results = []
     for item in post_data.get("items"):
         text = item.get("text")
         id = item.get("id")
@@ -47,6 +59,9 @@ def analyze_sentiment():
         ],
     }
 
+    RankingResponse(**result) # ensure that the response is valid as a side-effect
+
+    # let flask work with the dict though, since it seems to prefer that
     return jsonify(result)
 
 

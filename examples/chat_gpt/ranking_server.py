@@ -1,11 +1,20 @@
 import json
 import os
+import sys
+import inspect
+
+parentdir = os.path.dirname(  # make it possible to import from ../ in a reliable way
+    os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+)
+sys.path.insert(0, parentdir)
 
 from dotenv import load_dotenv
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from openai import OpenAI
 
+from models.request import RankingRequest
+from models.response import RankingResponse
 from sample_data import NEW_POSTS
 
 load_dotenv()  # if a .env file exists, load environment variables from it
@@ -58,6 +67,8 @@ def generate_rankings(items):
 @app.route("/rank", methods=["POST"])  # Allow POST requests for this endpoint
 def rank_items():
     post_data = request.json
+    RankingRequest(**post_data)  # ensure that the input data is valid as a side-effect
+
     items = post_data.get("items")
 
     ranked_ids = generate_rankings(items)
@@ -69,6 +80,8 @@ def rank_items():
         "ranked_ids": ranked_ids,
         "new_items": NEW_POSTS,
     }
+
+    RankingResponse(**result)  # ensure that the response is valid as a side-effect
 
     return jsonify(result)
 

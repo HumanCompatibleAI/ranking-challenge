@@ -4,6 +4,8 @@ CHATGPT_EXAMPLE = {
     "session": {
         "user_id": "193a9e01-8849-4e1f-a42a-a859fa7f2ad3",
         "user_name_hash": "6511c5688bbb87798128695a283411a26da532df06e6e931a53416e379ddda0e",
+        "platform": "reddit",
+        "cohort": "AB",
         "current_time": "2024-01-20 18:41:20",
     },
     "items": [
@@ -15,7 +17,8 @@ CHATGPT_EXAMPLE = {
             "type": "post",
             "platform": "reddit",
             "created_at": "2023-12-06 17:02:11",
-            "enagements": {"upvote": 34, "downvote": 27},
+            "embedded_urls": [],
+            "engagements": {"upvote": 34, "downvote": 27, "comment": 20, "award": 0},
         },
         {
             "id": "s5ad13266-8abk4-5219-kre5-2811022l7e43dv",
@@ -26,7 +29,8 @@ CHATGPT_EXAMPLE = {
             "type": "comment",
             "platform": "reddit",
             "created_at": "2023-12-08 11:32:12",
-            "enagements": {"upvote": 15, "downvote": 2},
+            "embedded_urls": [],
+            "engagements": {"upvote": 15, "downvote": 2, "comment": 22, "award": 2},
         },
         {
             "id": "a4c08177-8db2-4507-acc1-1298220be98d",
@@ -37,7 +41,8 @@ CHATGPT_EXAMPLE = {
             "type": "comment",
             "platform": "reddit",
             "created_at": "2023-12-08 11:35:00",
-            "enagements": {"upvote": 3, "downvote": 5},
+            "embedded_urls": [],
+            "engagements": {"upvote": 3, "downvote": 5, "comment": 10, "award": 0},
         },
     ],
 }
