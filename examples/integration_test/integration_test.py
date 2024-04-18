@@ -44,7 +44,7 @@ def test_rank_fake(url):
 
 
 def test_rank_facebook(url):
-    with open("test_data/facebook.csv") as f:
+    with open("test_data/facebook.csv", encoding="utf-8") as f:
         items = []
         reader = csv.DictReader(f)
         for row in reader:
@@ -89,7 +89,7 @@ def test_rank_facebook(url):
 
 
 def test_rank_reddit(url):
-    with open("test_data/reddit.csv") as f:
+    with open("test_data/reddit.csv", encoding="utf-8") as f:
         items = []
         reader = csv.DictReader(f)
         for row in reader:
@@ -109,6 +109,7 @@ def test_rank_reddit(url):
                     post_id=row["post_id"],
                     parent_id=row["parent_id"],
                     text=row["text"],
+                    title=row["title"],
                     author_name_hash=row["author_name_hash"],
                     type=row["type"].lower(),
                     created_at=row["created_at"],
