@@ -14,6 +14,7 @@ from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from models.request import RankingRequest
 from models.response import RankingResponse
 from fastapi_nltk.sample_data import NEW_POSTS
+from fastapi.middleware.cors import CORSMiddleware
 
 nltk.download("vader_lexicon")
 
@@ -25,6 +26,13 @@ app = FastAPI(
     version="0.1.0",
 )
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=False,
+    allow_methods=["HEAD", "OPTIONS", "GET", "POST"],
+    allow_headers=["*"],
+)
 
 @app.post("/rank")
 def rank(ranking_request: RankingRequest) -> RankingResponse:
