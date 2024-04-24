@@ -45,13 +45,35 @@ BASIC_EXAMPLE = {
 }
 
 # some new posts that can be added to the response
-NEW_POSTS = [
-    {
-        "id": "571775f3-2564-4cf5-b01c-f4cb6bab461b",
-        "url": "https://reddit.com/r/PRCExample/comments/1f33ead/example_to_insert",
-    },
-    {
-        "id": "1fcbb164-f81f-4532-b068-2561941d0f63",
-        "url": "https://reddit.com/r/PRCExample/comments/ef56a23/another_example_to_insert",
-    },
-]
+NEW_POSTS = {
+    "facebook": [
+        {
+            "id": "571775f3-2564-4cf5-b01c-f4cb6bab461b",
+            "url": "https://www.facebook.com/photo/?fbid=10160163058503437&set=a.10156555775028437",
+        },
+        {
+            "id": "1fcbb164-f81f-4532-b068-2561941d0f63",
+            "url": "https://www.facebook.com/photo/?fbid=10160163060778437&set=a.10156555775028437",
+        },
+    ],
+    "reddit": [
+        {
+            "id": "571775f3-2564-4cf5-b01c-f4cb6bab461b",
+            "url": "https://www.reddit.com/r/bestOfReddit/comments/hb55wg/rick_astley_gets_rick_rolled/",
+        },
+        {
+            "id": "1fcbb164-f81f-4532-b068-2561941d0f63",
+            "url": "https://www.reddit.com/r/maru/comments/13co2hm/liquid_maru_with_level_10_of_meltability/",
+        },
+    ],
+    "twitter": [
+        {
+            "id": "571775f3-2564-4cf5-b01c-f4cb6bab461b",
+            "url": "https://twitter.com/Horse_ebooks/status/218439593240956928",
+        },
+        {
+            "id": "1fcbb164-f81f-4532-b068-2561941d0f63",
+            "url": "https://twitter.com/elonmusk/status/1519480761749016577",
+        },
+    ],
+}
