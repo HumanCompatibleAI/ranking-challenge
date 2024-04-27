@@ -8,7 +8,41 @@ import json
 from datetime import datetime
 import random
 from random import choice, randint
+from typing import Literal, Callable
 
+import sys, os
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s [%(levelname)s] %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
+logger = logging.getLogger(__name__)
+
+from normalize_posts import process_facebook, process_reddit, process_twitter, NORMALIZED_DATA_FILE_FN
+
+FB_DATA_FILE = 'facebook_data/processed/filtered_comment_post.csv'
+REDDIT_DATA_FILE = 'reddit_data/processed/filtered_reddit_data.csv'
+TWITTER_DATA_FILE = 'twitter_data/processed/filtered_jan_2023.json'
+
+
+platform_filtered_data = {
+    'facebook': FB_DATA_FILE,
+    'reddit': REDDIT_DATA_FILE,
+    'twitter': TWITTER_DATA_FILE,
+}
+
+platform_data_gen: dict[Literal['facebook', 'reddit', 'twitter'], Callable] = {
+    'facebook': process_facebook,
+    'reddit': process_reddit,
+    'twitter': process_twitter,
+}
+
+def normalize_data(platform, data_file):
+    return platform_data_gen[platform](data_file=data_file)
 
 # Hashing function to anonymise certain data points
 
@@ -85,7 +119,7 @@ reddit_data['text'] = reddit_data['text'].combine_first(reddit_data['selftext'])
 
 # Lastly, we select relevant columns and then export to a csv within the 'Processed' folder
 filtered_reddit = reddit_data[['id', 'title','parent_id', 'post_id', 'text', 'author_name_hash', 'type', 'created_at', 'upvotes', 'downvotes']]
-filtered_reddit.to_csv(os.path.join(script_dir,'reddit_data/processed/filtered_reddit_data.csv'), index=False)
+filtered_reddit.to_csv(os.path.join(script_dir, REDDIT_DATA_FILE), index=False)
 
 # FACEBOOK PREPROCESSING
 
@@ -151,7 +185,7 @@ for col in hash_col:
 
 # Lastly, we export our data out
 filtered_facebook = merged[['id','parent_id','all_post_ids','text','author_name_hash','type','created_at','like', 'love', 'haha', 'wow', 'sad', 'angry', 'comments','shares']]
-# filtered_facebook.to_csv(os.path.join(script_dir,'facebook_data/rrocfbsed/filtered_comment_post.csv'), index=False)
+filtered_facebook.to_csv(os.path.join(script_dir, FB_DATA_FILE), index=False)
 
 
 # TWITTER PREPROCESSING
@@ -201,6 +235,17 @@ for file_name in files:
                         })
                     jsons.append(data_part)
 
-with open(os.path.join(script_dir,'twitter_data/processed/filtered_jan_2023.json'), 'w', encoding='utf-8') as output_file:
+logger.info(f"Starting preprocessing")
+
+with open(os.path.join(script_dir, TWITTER_DATA_FILE), 'w', encoding='utf-8') as output_file:
     json.dump(jsons, output_file, indent=4)
 
+for platform, data_file in platform_filtered_data.items():
+    filename = NORMALIZED_DATA_FILE_FN(platform)
+    logger.info(f"Writing {filename}")
+    items = normalize_data(platform, data_file)
+    with open(filename, 'w') as f:
+        for item in items:
+            f.write(item.model_dump_json() + '\n')
+
+logger.info(f"Finished preprocessing")
