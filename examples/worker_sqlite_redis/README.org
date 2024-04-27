@@ -1,0 +1,92 @@
+#+title: Worker for processing post history
+
+This example illustrates using ad hoc and scheduled jobs to interact with the
+posts database.
+
+* Infrastructure
+
+** Posts database
+
+The posts database is an SQLite file. It can be generated via running
+preprocessing followed by an ETL script:
+
+#+begin_src shell
+cd $PROJECT_ROOT/sample_data
+python preprocessing.py
+python seed_post_db.py
+#+end_src
+
+** Job queue
+
+We use Celery for running async and scheduled jobs. A Redis instance is used
+both as a broker and result persistence backend. As per standard Celery
+practices, we define the tasks in a file ~tasks.py~, and use the ~@app.task~
+decorator to register them.
+
+As per best practices, we avoid using complex data structures as arguments to
+tasks, as this may require having to deal with serialization issues.
+
+Ad hoc tasks are enqueued using the ~.delay()~ method.
+In addition, we provide an example that sets up a scheduled task via a hook.
+Consult [[https://docs.celeryq.dev/en/stable/userguide/periodic-tasks.html][Celery documentation]] for more details.
+
+We illustrate two ways of returning results from tasks:
+- using the ~AsyncResult~ object and its blocking ~.get()~ method
+- explicitly storing the result in the Redis
+
+** Redis
+
+A Redis instance is used not only as part of Celery deployment, but also as a
+general-purpose data store for persisting and consuming results of async
+processing. Because of memory constraints, it is discouraged to store
+large result sets in Redis.
+
+* Data models
+
+The posts database has the following schema:
+
+#+begin_src sql
+CREATE TABLE posts (
+  id TEXT PRIMARY KEY,
+  session_timestamp TIMESTAMP,
+  session_user_id TEXT,
+  platform TEXT,
+  type TEXT,
+  author_name_hash TEXT,
+  created_at TIMESTAMP,
+  post_blob TEXT
+)
+#+end_src
+
+The ~post_blob~ field contains a JSON representation of the ~ContentItem~
+pydantic model. The other fields are metadata derived from either the
+~ContentItem~ or ~Session~ models.
+
+* Setting up your environment
+
+To run this example, you need to have the following installed:
+- celery
+- redis-py
+- pytest
+- pandas
+- nltk
+
+You will need to use a virtual environment using your preferred tool.
+We provide ~environment.txt~ for conda users which can be used to install all dependencies.
+
+You will also need docker compose to run Redis and Celery.
+
+* Running tests
+
+We provide a makefile to run tests. You can run the tests using ~make test~.
+
+This will spin up a Redis container, run the tests, and tear down the container.
+Running this command is a good way to ensure that your environment is set up correctly.
+
+Be aware that due to the way pytest interacts with Celery, you need to ensure
+that no other Celery workers are running when you run the tests.
+
+* Running examples
+
+1. Launch Celery and Redis using ~make run~ or ~docker compose up --build~.
+2. Run the sample tasks via ~python worker.py~.

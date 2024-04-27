@@ -1,0 +1,5 @@
+celery[pytest]
+pytest
+redis
+pandas
+nltk
