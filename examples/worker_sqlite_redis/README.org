@@ -13,7 +13,7 @@ preprocessing followed by an ETL script:
 #+begin_src shell
 cd $PROJECT_ROOT/sample_data
 python preprocessing.py
-python seed_post_db.py --no_user_pool
+python seed_post_db.py --no-user-pool
 #+end_src
 
 This will bulk-populate the database with posts from the sample data, using a
@@ -90,7 +90,8 @@ The posts database has the following schema:
 
 #+begin_src sql
 CREATE TABLE posts (
-  id TEXT PRIMARY KEY,
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  post_id TEXT,
   session_timestamp TIMESTAMP,
   session_user_id TEXT,
   platform TEXT,
@@ -100,6 +101,8 @@ CREATE TABLE posts (
   post_blob TEXT
 )
 #+end_src
+
+We index on ~created_at~, ~post_id~, and ~session_user_id~.
 
 The ~post_blob~ field contains a JSON representation of the ~ContentItem~
 pydantic model. The other fields are metadata derived from either the
@@ -128,6 +131,21 @@ Running this command is a good way to ensure that your environment is set up cor
 
 Be aware that due to the way pytest interacts with Celery, you need to ensure
 that no other Celery workers are running when you run the tests.
+
+In addition, the tests use the raw data timestamps in SQL queries, thus they
+will fail unless ~--no-user-pool~ flag is used when seeding the database. A
+self-contained test setup (from the current directory) is therefore something like this:
+
+#+begin_src bash
+export PROJECT_ROOT=$(git rev-parse --show-toplevel)
+export TEST_POSTS_DB=sample_posts_test.db
+export POSTS_DB_PATH=${PROJECT_ROOT}/sample_data/${TEST_POSTS_DB}
+cd ${PROJECT_ROOT}/sample_data
+python seed_post_db.py --no-user-pool --dbname=${TEST_POSTS_DB}
+cd ${PROJECT_ROOT}/examples/worker_sqlite_redis
+make test
+rm ${POSTS_DB_PATH}
+#+end_src
 
 * Running examples
 

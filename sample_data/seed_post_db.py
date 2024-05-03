@@ -22,6 +22,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from data_pull import bulk_feed_generator, count_lines_by_platform
 from user_pool import FeedParams
+from normalize_posts import NORMALIZED_DATA_FILE_FN
 
 from examples.models.request import ContentItem, Session
 
@@ -42,7 +43,8 @@ def drop_table_posts(con: sqlite3.Connection):
 def create_db(con: sqlite3.Connection):
     sql_create_table = """
 CREATE TABLE posts (
-  id TEXT PRIMARY KEY,
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  post_id TEXT,
   session_timestamp TIMESTAMP,
   session_user_id TEXT,
   platform TEXT,
@@ -51,17 +53,21 @@ CREATE TABLE posts (
   created_at TIMESTAMP,
   post_blob TEXT
 )"""
-    sql_create_index = """
-CREATE INDEX idx_created_at ON posts(created_at)"""
+    sql_create_indexes = """
+CREATE INDEX idx_created_at ON posts(created_at);
+CREATE INDEX idx_post_id ON posts(post_id);
+CREATE INDEX idx_session_user_id ON posts(session_user_id);
+    """
     cur = con.cursor()
     cur.execute(sql_create_table)
-    cur.execute(sql_create_index)
+    cur.executescript(sql_create_indexes)
     con.commit()
 
 
 def as_db_row(metadata: Session, post: ContentItem):
     return {
-        'id': post.id,
+        'id': None,
+        'post_id': post.id,
         'session_timestamp': metadata.current_time.strftime('%Y-%m-%d %H:%M:%S'),
         'session_user_id': metadata.user_id,
         'platform': metadata.platform,
@@ -77,6 +83,7 @@ def insert_rows(con: sqlite3.Connection, dbrows: list[dict]):
     cur.executemany("""
 INSERT OR REPLACE INTO posts VALUES(
     :id,
+    :post_id,
     :session_timestamp,
     :session_user_id,
     :platform,
@@ -129,11 +136,20 @@ if __name__ == '__main__':
     parser.add_argument('--platform-distribution', type=parse_platform_setting, default='auto')
     parser.add_argument('-r', '--randomseed', type=int, help='random seed', nargs='?', default=None)
     parser.add_argument('--no-user-pool', action='store_true', help='Disable user pool.')
+    parser.add_argument('--dbname', type=str, help='Database file name')
     table_controls = parser.add_mutually_exclusive_group()
     table_controls.add_argument('--drop-table', action='store_true', help='Drop the table before seeding.')
     table_controls.add_argument('--upsert', action='store_true', help='Upsert into the table.')
 
     args = parser.parse_args()
+
+    for platform in platforms:
+        if not os.path.exists(NORMALIZED_DATA_FILE_FN(platform)):
+            logger.error(f'Normalized data file for {platform} not found. Please run preprocessing.py first.')
+            sys.exit(1)
+
+    if args.dbname:
+        DBNAME = args.dbname.removesuffix('.db') + '.db'
 
     feed_params = FeedParams(
         n_users=args.n_users,
