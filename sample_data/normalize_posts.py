@@ -1,20 +1,11 @@
-# Importing of relevant packages
 import numpy as np
 import random
 import pandas as pd
-from pathlib import Path
 import os
 import sys
 import inspect
-import hashlib
-from datetime import datetime
-import json
-import argparse
-import sqlite3
-from itertools import chain
-from dataclasses import dataclass
-from typing import Literal, Callable
 import logging
+from tqdm import tqdm
 
 logging.basicConfig(
     level=logging.INFO,
@@ -60,7 +51,7 @@ def process_facebook(data_file=FB_DATA_FILE, num_samples=-1, seed=0) -> list[Con
     # Instantiate empty list and set
     final_items = []
 
-    for _, row in posts.iterrows():
+    for _, row in tqdm(posts.iterrows(), "Processing Facebook posts", total=posts.shape[0]):
         item = row.to_dict()
         item = {k: v if v == v else "" for k, v in item.items()}  # replace NaN with ""
 
@@ -187,7 +178,7 @@ def process_twitter(data_file=TWITTER_DATA_FILE, num_samples=-1, seed=0) -> list
     df['simulated_quotes'] = round((df['followers_count'] * 0.005) + np.random.normal(loc=0, scale=noise_std, size=len(df)), 0).clip(lower=0).astype(int)
 
     # Grab relevant fields
-    for _, row in df.iterrows():
+    for _, row in tqdm(df.iterrows(), "Processing Twitter posts", total=df.shape[0]):
         embedded_urls = []
         if row.get("expanded_url", None):
             embedded_urls.append(row["expanded_url"])
@@ -236,8 +227,12 @@ def process_reddit(data_file=REDDIT_DATA_FILE, num_samples=-1, seed=0) -> list[C
     # Initialize the list to store final items
     final_items = []
 
+    # index comments by post_id for faster lookups
+    comments_df = df[df['type'] == 'Comment']
+    comments_df = comments_df.set_index('post_id', drop=False)
+
     # Iterate through each post in the posts DataFrame
-    for _, post_row in posts_df.iterrows(): # change made here, was posts_df before
+    for _, post_row in tqdm(posts_df.iterrows(), "Processing Reddit posts", total=posts_df.shape[0]):
         # General structure for posts
         post_item = post_row.to_dict()
         post_item = {k: v if v == v else "" for k, v in post_item.items()}  # replace NaN with ""
@@ -251,8 +246,7 @@ def process_reddit(data_file=REDDIT_DATA_FILE, num_samples=-1, seed=0) -> list[C
         final_items.append(ContentItem(**post_item))
 
         # Find and append related comments
-        # related_comments = comments_df[comments_df['post_id'] == post_item['id']]
-        related_comments = df[(df['type'] == 'Comment') & (df['post_id'] == post_item['id'])]
+        related_comments = comments_df[comments_df['post_id'] == post_item['id']]
         for _, comment_row in related_comments.iterrows():
             comment_item = comment_row.to_dict()
             comment_item = {k: v if v == v else "" for k, v in comment_item.items()}  # replace NaN with ""

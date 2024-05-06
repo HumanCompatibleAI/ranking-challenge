@@ -117,7 +117,7 @@ for item in reddit_data['created_utc']:
 reddit_data.rename(columns={'ups':'upvotes', 'created_utc':'created_at', 'downs':'downvotes', 'body':'text', 'author': 'author_name_hash'}, inplace=True)
 reddit_data['text'] = reddit_data['text'].combine_first(reddit_data['selftext'])
 
-# Lastly, we select relevant columns and then export to a csv within the 'Processed' folder
+# Lastly, we select relevant columns and then export to a csv within the 'processed' folder
 filtered_reddit = reddit_data[['id', 'title','parent_id', 'post_id', 'text', 'author_name_hash', 'type', 'created_at', 'upvotes', 'downvotes']]
 filtered_reddit.to_csv(os.path.join(script_dir, REDDIT_DATA_FILE), index=False)
 
