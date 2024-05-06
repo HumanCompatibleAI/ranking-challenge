@@ -6,7 +6,9 @@ import argparse
 import hashlib
 import random
 import string
-from datetime import datetime
+from datetime import datetime, timedelta
+from itertools import islice, cycle
+from typing import Optional, Iterable
 
 logging.basicConfig(
     level=logging.INFO,
@@ -23,50 +25,118 @@ sys.path.insert(0, parentdir)
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from normalize_posts import NORMALIZED_DATA_FILE_FN
+from user_pool import FeedParams, UserPool, User
 
 from examples.models.request import RankingRequest, ContentItem, Session
 
 platforms = ['facebook', 'reddit', 'twitter']
 
 def make_random_user_session(platform, username=None, seed_no=None) -> Session:
-    random.seed(seed_no)
-    if username is None:
-        username = ''.join(
-            random.choices(string.ascii_lowercase, k=8) +
-            random.choices(string.digits, k=3)
+    return User.generate_random(platform, username, seed_no).get_session(platform, datetime.now())
+
+def count_lines_by_platform():
+    line_counts = {}
+    for platform in platforms:
+        with open(NORMALIZED_DATA_FILE_FN(platform), 'r') as f:
+            line_counts[platform] = sum(1 for _ in f)
+    return line_counts
+
+def batched(iterable, n):
+    # batched('ABCDEFG', 3) → ABC DEF G
+    if n < 1:
+        raise ValueError('n must be at least one')
+    it = iter(iterable)
+    while batch := list(islice(it, n)):
+        yield batch
+
+
+class UserFeedBuilder:
+
+    def __init__(self, user: User, feed_params: FeedParams, feed_end_jitter_hours=12, seed=None):
+        random.seed(seed)
+        self.user = user
+        self.feed_params = feed_params
+        now = datetime.now()
+        self.is_inactive = (user.activity_level == 0 or feed_params.baseline_sessions_per_day == 0)
+        self.dt_days = 0
+        feed_end = now - timedelta(hours=feed_end_jitter_hours * random.random())
+        self.last_session_timestamp = feed_end
+
+    def make_request(self, platform: str, items_batch: list[ContentItem]) -> RankingRequest:
+        if self.is_inactive:
+            raise ValueError("Inactive user")
+        session_interval = 1 / self.user.activity_level / self.feed_params.baseline_sessions_per_day
+        self.last_session_timestamp -= timedelta(days=session_interval)
+        item_timestamp = self.last_session_timestamp - timedelta(days=session_interval)
+        dt = session_interval / len(items_batch)
+        for item in items_batch:
+            item.created_at = item_timestamp
+            item_timestamp += timedelta(days=dt)
+        return RankingRequest(
+            session=self.user.get_session(platform, self.last_session_timestamp),
+            items=items_batch
         )
-    hashed_user = hashlib.sha256(username.encode()).hexdigest()
-    # let's make user id deterministic from username
-    salt = b"9vB8nz93vD5T7Khw"
-    user_id = hashlib.sha256(username.encode() + salt).hexdigest()
-    return Session(
-        user_id=user_id,
-        user_name_hash=hashed_user,
-        cohort="XX",
-        platform=platform,
-        current_time=datetime.now(),
-    )
 
 
-def bulk_feed_generator() -> list[RankingRequest]:
+def _make_feed(platform, users, items, feed_params, seed=None) -> list[RankingRequest]:
+    feed = []
+    feed_builders = filter(lambda x: not x.is_inactive,
+                           [UserFeedBuilder(user, feed_params) for user in users])
+    # we assume that the items are ordered chronlolgically; since we are building
+    # the feed in reverse chronological order, we need to reverse the items
+    max_activity = max(feed_params.activity_distribution.keys())
+    ibatch = batched(reversed(items), feed_params.items_per_session)
+    round_robin_users = cycle(feed_builders)
+    random.seed(seed)
+    try:
+        while True:
+            builder = next(round_robin_users)
+            relative_activity = builder.user.activity_level / max_activity
+            if random.random() > relative_activity:
+                continue
+            feed.append(builder.make_request(platform, next(ibatch)))
+    except StopIteration:
+        return sorted(feed, key=lambda x: x.session.current_time)
+
+
+def bulk_feed_generator(feed_params: Optional[FeedParams] = None, seed=None) -> list[RankingRequest]:
     '''
     The purpose of this function is to generate a bulk feed for all platforms.
 
-    With the completion of https://www.pivotaltracker.com/story/show/187494488
-    it will utilize the user pool functionality to imitate feeds for multiple users.
+    We use the UserPool class to generate a pool of users and their respective sessions
+    based on feed parameters (sessions per day, items per session, etc).
 
-    Currently, we generate a single 'superfeed' that nominally represents a feed for a single user
-    and comprises of a mix of posts and comments from all platforms over all time.
+    In this flow, we fake the timestamps of the sessions to simulate a set of
+    sessions that are spread out over a period of time and yield the expected number
+    of items in a way that uses up the available content, with the last session
+    taking place at the current time.
+
+    When `feed_params` is omitted, we generate a single 'superfeed' that
+    nominally represents a feed for a single user and comprises of a mix of
+    posts and comments from all platforms over all time.
     '''
     feed_list = []
+    if feed_params is None:
+        # generate "superfeed" for a single dummy user
+        for platform in platforms:
+            session = make_random_user_session(platform, 'test_user')
+            with open(NORMALIZED_DATA_FILE_FN(platform), 'r') as f:
+                feed = [ContentItem.model_validate_json(line) for line in f]
+                feed_list.append(RankingRequest(
+                    session=session,
+                    items=feed
+                ))
+        return feed_list
+
+    # generate feed for a user pool
+    user_pool = UserPool(feed_params, seed=seed)
+    platform_users = user_pool.by_platform()
     for platform in platforms:
-        session = make_random_user_session(platform, 'test_user')
+        users = platform_users[platform]
         with open(NORMALIZED_DATA_FILE_FN(platform), 'r') as f:
-            feed = [ContentItem.model_validate_json(line) for line in f]
-            feed_list.append(RankingRequest(
-                session=session,
-                items=feed
-            ))
+            items = [ContentItem.model_validate_json(line) for line in f]
+            feed_list.extend(_make_feed(platform, users, items, feed_params, seed=seed))
+
     return feed_list
 
 

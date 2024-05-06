@@ -13,8 +13,51 @@ preprocessing followed by an ETL script:
 #+begin_src shell
 cd $PROJECT_ROOT/sample_data
 python preprocessing.py
-python seed_post_db.py
+python seed_post_db.py --no_user_pool
 #+end_src
+
+This will bulk-populate the database with posts from the sample data, using a
+single dummy user and leaving timestamps unmodified.
+
+If the table ~posts~ already exists, you will need to supply either the
+~--drop-table~ or ~--upsert~ flags to either drop the table or upsert the data.
+
+It is also possible to simulate a user pool which emulates many aspects of the
+expected ranking requests from a cohort of users. The following options are used
+to customize this process:
+
+- ~n-users (int)~: The number of users to generate (default 500).
+- ~baseline-sessions-per-day (int)~: Default number of sessions per user per day (default 1)
+- ~items-per-session (int)~: Number of items (posts) per session (default 10).
+- ~activity-distribution (string-valued dict, e.g.: '0.2:20,1:65,5:15')~:
+      A dictionary mapping relative activity level values to the relative proportion
+      of users with that activity level. This distribution will be normalized, so
+      the numbers may be floats representing probabilities or unnormalized relative
+      numbers, etc.  The keys are the activity levels, which indicate the number of
+      sessions per day relative to the baseline option above. For instance, the
+      value of 5 with the ~baseline-sessions-per-day~ of 1 means that these are
+      active users which on average will have 5 sessions per day,  (default: '1:1',
+      i.e. all users will have the same baseline activity level 1)
+- ~platform-distribution (string-valued dict, e.g.: 'facebook:11,reddit:7.4,twitter:1.25')~:
+      Relative number of users for each platform. When omitted, the seed script
+      will allocate the number of users proportional to the number of sample posts
+      in the seed data. This is done so that the sample feeds for different platform
+      represent roughly the same time interval, even with data imbalances.
+
+The sample feeds exhibit the following artificial constraints:
+- We employ a simplifying assumption that a user belongs to one platform only,
+  which allows us to easily specify the distribution and sample from it.
+- A sample post will occur once in a feed. In reality, posts may be duplicated
+  across multiple users' feeds and/or be shown in multiple sessions for a given user.
+- When different activity levels are specified, the number of users may deviate
+  from ~n-users~ somewhat due to rejection sampling.
+- Likewise, the earliest feed time for any given platform will vary somewhat due
+  to sampling variance.
+
+It is important to note that when creating the simulated feeds, synthetic
+timestamps are generated for the sessions and posts. They maintain chronological
+order of the feed and are computed such that the newest timestamps are
+(approximately) current time.
 
 ** Job queue
 
