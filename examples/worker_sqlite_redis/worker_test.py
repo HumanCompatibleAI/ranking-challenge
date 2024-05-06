@@ -1,3 +1,6 @@
+# IMPORTANT: these tests assume the test database has been seeded
+#            with raw sample data WITHOUT the user pool (which modifies timestamps)
+#            i.e. with `python seed_post_db.py --no-user-pool`
 import pytest
 import os
 import sqlite3
