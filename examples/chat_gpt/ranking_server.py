@@ -1,20 +1,12 @@
 import json
 import os
-import sys
-import inspect
-
-parentdir = os.path.dirname(  # make it possible to import from ../ in a reliable way
-    os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-)
-sys.path.insert(0, parentdir)
-
 from dotenv import load_dotenv
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from openai import OpenAI
 
-from models.request import RankingRequest
-from models.response import RankingResponse
+from ranking_challenge.request import RankingRequest
+from ranking_challenge.response import RankingResponse
 from sample_data import NEW_POSTS
 
 load_dotenv()  # if a .env file exists, load environment variables from it
