@@ -11,9 +11,9 @@ from helpers import extract_named_entities
 from typing import Any
 
 REDIS_DB = f"{os.getenv('REDIS_CONNECTION_STRING', 'redis://localhost:6379')}/0"
-POSTS_DB = os.getenv('POSTS_DB_PATH', '../../sample_data/sample_posts.db')
+POSTS_DB = os.getenv("POSTS_DB_PATH", "../../sample_data/sample_posts.db")
 
-app = Celery('tasks', backend=REDIS_DB, broker=REDIS_DB)
+app = Celery("tasks", backend=REDIS_DB, broker=REDIS_DB)
 
 
 @app.task
@@ -69,10 +69,10 @@ SELECT platform, post_blob->>'$.text' as text FROM posts WHERE created_at BETWEE
     con = sqlite3.connect(POSTS_DB)
     try:
         df = pd.read_sql_query(query, con)
-        df['contains_match'] = df['text'].apply(lambda x: match in x.lower())
-        counts = df[df['contains_match']].groupby('platform').size()
+        df["contains_match"] = df["text"].apply(lambda x: match in x.lower())
+        counts = df[df["contains_match"]].groupby("platform").size()
         summary_statistics = counts.to_dict()
-        summary_statistics['total_rows'] = len(df)
+        summary_statistics["total_rows"] = len(df)
         return summary_statistics
     finally:
         con.close()
@@ -106,16 +106,19 @@ SELECT post_blob FROM posts WHERE created_at BETWEEN '{from_}' AND '{to}';"""
     try:
         cur = con.cursor()
         cur.execute(query)
-        post_bodies = [json.loads(x[0]).get('text', '') for x in cur.fetchall()]
+        post_bodies = [json.loads(x[0]).get("text", "") for x in cur.fetchall()]
         for post_body in post_bodies:
             ne_counter.update(set(extract_named_entities(post_body)))
         r = redis.Redis.from_url(REDIS_DB)
-        r.set(result_key, json.dumps(
-            {
-                'top_named_entities': ne_counter.most_common(k),
-                'timestamp': datetime.utcnow().isoformat()
-
-            }))
+        r.set(
+            result_key,
+            json.dumps(
+                {
+                    "top_named_entities": ne_counter.most_common(k),
+                    "timestamp": datetime.utcnow().isoformat(),
+                }
+            ),
+        )
         return True
     finally:
         con.close()
@@ -127,5 +130,9 @@ def setup_periodic_tasks(sender, **kwargs):
 
     This illustrates running the `count_top_named_entities` task every 5 minutes.
     """
-    result_key = 'my_worker:scheduled:top_named_entities'
-    sender.add_periodic_task(300, count_top_named_entities.s(10, '2017-05-31', '2017-06-01', result_key), name='run every 5 min')
+    result_key = "my_worker:scheduled:top_named_entities"
+    sender.add_periodic_task(
+        300,
+        count_top_named_entities.s(10, "2017-05-31", "2017-06-01", result_key),
+        name="run every 5 min",
+    )

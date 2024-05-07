@@ -8,3 +8,4 @@ pytest
 python-dotenv
 requests
 uvicorn[standard]
+ranking-challenge

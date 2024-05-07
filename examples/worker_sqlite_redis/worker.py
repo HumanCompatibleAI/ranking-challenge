@@ -8,8 +8,14 @@
 # In cases where we set the results in Redis explicitly, we can use the redis-py library to retrieve the results
 # from the specified key.
 
-from tasks import query_posts_db, substring_matches_by_platform, count_top_named_entities, REDIS_DB
+from tasks import (
+    query_posts_db,
+    substring_matches_by_platform,
+    count_top_named_entities,
+    REDIS_DB,
+)
 import redis
+
 
 def get_timerange_posts():
     """Get posts from a specific time range."""
@@ -20,27 +26,30 @@ SELECT platform, post_blob FROM posts WHERE created_at BETWEEN '2017-05-31' AND 
     result = query_posts_db.delay(sql)
     print(result.get()[-5:])
 
+
 def count_trump_posts():
     """Count the number of posts containing the word 'trump' in a specific time range."""
 
-    result = substring_matches_by_platform.delay('trump', '2017-05-31', '2017-06-01')
+    result = substring_matches_by_platform.delay("trump", "2017-05-31", "2017-06-01")
     print(result.get())
+
 
 def top_named_entities():
     """Return top 10 named entities and store in a spcific key in Redis."""
 
-    result_key = 'my_worker:top_named_entities'
-    result = count_top_named_entities.delay(10, '2017-05-31', '2017-06-01', result_key)
+    result_key = "my_worker:top_named_entities"
+    result = count_top_named_entities.delay(10, "2017-05-31", "2017-06-01", result_key)
     success = result.get(timeout=10)  # customize timeout or omit it as needed
     if not success:
-        print('Task failed or timeout reached')
+        print("Task failed or timeout reached")
         return
     r = redis.Redis.from_url(REDIS_DB)
     top_entities = r.get(result_key)
     r.delete(result_key)
-    print(top_entities.decode('utf-8'))       #type:ignore
+    print(top_entities.decode("utf-8"))  # type:ignore
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     get_timerange_posts()
     count_trump_posts()
     top_named_entities()
