@@ -3,8 +3,8 @@ import sys
 sys.path.append(".")  # allows for importing from the current directory
 
 import pytest
-
 import ranking_server
+
 import sample_data
 
 

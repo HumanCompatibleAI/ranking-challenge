@@ -1,19 +1,15 @@
 # IMPORTANT: these tests assume the test database has been seeded
 #            with raw sample data WITHOUT the user pool (which modifies timestamps)
 #            i.e. with `python seed_post_db.py --no-user-pool`
-import pytest
+import json
 import os
 import sqlite3
-import redis
-import json
 from datetime import datetime
 
-from tasks import (
-    query_posts_db,
-    substring_matches_by_platform,
-    count_top_named_entities,
-)
-from tasks import POSTS_DB, REDIS_DB
+import pytest
+import redis
+from tasks import (POSTS_DB, REDIS_DB, count_top_named_entities,
+                   query_posts_db, substring_matches_by_platform)
 
 
 @pytest.fixture(scope="session", autouse=True)
