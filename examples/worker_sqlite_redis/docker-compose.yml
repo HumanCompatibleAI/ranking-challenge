@@ -17,3 +17,17 @@ services:
       REDIS_CONNECTION_STRING: redis://redis:6379
       POSTS_DB_PATH: /data/sample_posts.db
     command: celery -A tasks worker -B --loglevel=info
+
+  ranker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/ranker
+    depends_on:
+      - redis
+    environment:
+      REDIS_CONNECTION_STRING: redis://redis:6379
+    command: uvicorn ranking_server:app --host 0.0.0.0 --port 4000
+    ports:
+      - "4000:4000"

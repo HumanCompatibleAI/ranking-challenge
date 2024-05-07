@@ -3,3 +3,5 @@ pytest
 redis
 pandas
 nltk
+fastapi>=0.110.0
+uvicorn[standard]
