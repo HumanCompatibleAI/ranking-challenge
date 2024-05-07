@@ -2,7 +2,6 @@ import json
 import pytest
 
 from fastapi.testclient import TestClient
-import fakeredis
 
 import ranking_server
 import test_data
@@ -19,7 +18,7 @@ def client(app):
     return TestClient(app)
 
 
-def test_rank(client, redis_client):
+def test_rank(client):
     # Send POST request to the API
     response = client.post("/rank", json=test_data.BASIC_EXAMPLE)
 

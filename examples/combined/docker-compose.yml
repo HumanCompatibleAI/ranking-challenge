@@ -6,10 +6,10 @@ services:
 
   celery-worker:
     build:
-      context: .
+      context: sandbox_worker
       dockerfile: Dockerfile
     volumes:
-      - .:/app
+      - ./sandbox_worker:/app
       - ../../sample_data:/data
     depends_on:
       - redis
@@ -20,10 +20,10 @@ services:
 
   ranker:
     build:
-      context: .
+      context: ranking_server
       dockerfile: Dockerfile
     volumes:
-      - .:/ranker
+      - ./ranking_server:/app
     depends_on:
       - redis
     environment:
