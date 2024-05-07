@@ -111,6 +111,7 @@ def fake_new_item():
         "url": fake.url(),
     }
 
+
 # if run from command line
 def main():
     request = fake_request(n_posts=1, n_comments=2)
@@ -121,6 +122,7 @@ def main():
     response = fake_response([item.id for item in request.items], 2)
     print("\nResponse:")
     print(response.model_dump_json(indent=2))
+
 
 if __name__ == "__main__":
     main()

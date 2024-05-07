@@ -9,3 +9,6 @@ python-dotenv
 requests
 uvicorn[standard]
 ranking-challenge
+black
+isort
+autoflake

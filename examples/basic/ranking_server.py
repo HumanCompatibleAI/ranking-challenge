@@ -6,9 +6,9 @@ import nltk
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
-
 from ranking_challenge.request import RankingRequest
 from ranking_challenge.response import RankingResponse
+
 from sample_data import NEW_POSTS
 
 nltk.download("vader_lexicon")

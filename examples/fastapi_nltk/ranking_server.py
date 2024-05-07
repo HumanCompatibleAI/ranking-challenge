@@ -1,11 +1,10 @@
 import random
 
-from fastapi import FastAPI
-from fastapi_nltk.sample_data import NEW_POSTS
-from fastapi.middleware.cors import CORSMiddleware
 import nltk
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi_nltk.sample_data import NEW_POSTS
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
-
 from ranking_challenge.request import RankingRequest
 from ranking_challenge.response import RankingResponse
 
