@@ -28,6 +28,6 @@ services:
       - redis
     environment:
       REDIS_CONNECTION_STRING: redis://redis:6379
-    command: uvicorn ranking_server:app --host 0.0.0.0 --port 4000
+    command: uvicorn ranking_server:app --host 0.0.0.0 --port 8000
     ports:
-      - "4000:4000"
+      - "8000:8000"

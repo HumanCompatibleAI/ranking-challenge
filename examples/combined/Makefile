@@ -18,5 +18,8 @@ run:
 
 test:
 	$(DOCKER_COMPOSE) up -d redis
-	pytest worker_test.py
+	pytest .
 	$(DOCKER_COMPOSE) down
+
+ci:
+	./ci.sh

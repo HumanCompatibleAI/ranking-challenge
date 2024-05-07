@@ -1,28 +1,21 @@
-import os
-import sys
-import inspect
 import random
-
-parentdir = os.path.dirname(  # make it possible to import from ../ in a reliable way
-    os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-)
-sys.path.insert(0, parentdir)
 
 from fastapi import FastAPI
 import nltk
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
-from models.request import RankingRequest
-from models.response import RankingResponse
-from fastapi_nltk.sample_data import NEW_POSTS
 from fastapi.middleware.cors import CORSMiddleware
+from ranking_challenge.request import RankingRequest
+from ranking_challenge.response import RankingResponse
+
+from test_data import NEW_POSTS
 
 nltk.download("vader_lexicon")
 
 analyzer = SentimentIntensityAnalyzer()
 
 app = FastAPI(
-    title="Prosocial Ranking Challenge nltk example",
+    title="Prosocial Ranking Challenge combined example",
     description="Ranks input by sentiment using nltk's VADER sentiment analysis.",
     version="0.1.0",
 )

@@ -148,7 +148,7 @@ make test
 rm ${POSTS_DB_PATH}
 #+end_src
 
-(this is available as a shell script you can run in ~ci.sh~)
+(this is available as a shell script you can run in ~ci.sh~ or ~make ci~)
 
 * Running examples
 

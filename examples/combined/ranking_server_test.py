@@ -1,19 +1,11 @@
 import json
-import os
-import sys
-import inspect
-
-parentdir = os.path.dirname(  # make it possible to import from ../ in a reliable way
-    os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-)
-sys.path.insert(0, parentdir)
-
 import pytest
 
 from fastapi.testclient import TestClient
+import fakeredis
 
-from fastapi_nltk import ranking_server
-from fastapi_nltk import sample_data
+import ranking_server
+import test_data
 
 
 @pytest.fixture
@@ -27,9 +19,9 @@ def client(app):
     return TestClient(app)
 
 
-def test_rank(client):
+def test_rank(client, redis_client):
     # Send POST request to the API
-    response = client.post("/rank", json=sample_data.BASIC_EXAMPLE)
+    response = client.post("/rank", json=test_data.BASIC_EXAMPLE)
 
     # Check if the request was successful (status code 200)
     if response.status_code != 200:
