@@ -6,7 +6,7 @@ Your ranker should be implemented as a service that accepts an HTTP POST request
 
 ## Request/response format
 
-Your ranker should accept a list of social media posts and comments, each with a corresponding ID, in JSON format:
+Your ranker should accept a list of social media posts and comments, each with a corresponding ID, in JSON format.
 
 ### Request
 
@@ -132,7 +132,9 @@ You do not need to return the same number of content items as you received. Howe
 
 We have a set of pydanitc models, which are the source of truth for the API format. Using them, you can encode, parse, and validate the request and response json. You can also use them natively in fastapi. The examples above were generated from these models.
 
-You can always find the most current version in [examples/models](https://github.com/HumanCompatibleAI/ranking-challenge/tree/main/examples/models)
+You can always find the most current version in [examples/models](https://github.com/HumanCompatibleAI/ranking-challenge/tree/main/module/src/ranking_challenge)
+
+To use them, just `pip install ranking-challenge`, and use them to generate and validate your request/response json: [PyPI: ranking-challenge](https://pypi.org/project/ranking-challenge/).
 
 ## Request fields
 

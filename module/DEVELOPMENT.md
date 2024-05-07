@@ -14,4 +14,4 @@
 1. Upload to TestPyPi: `twine upload -r testpypi dist/*`
 
 A nice doc on how to do this:
-https://realpython.com/pypi-publish-python-package/
+<https://realpython.com/pypi-publish-python-package/>
