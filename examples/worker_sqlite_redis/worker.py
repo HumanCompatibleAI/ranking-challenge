@@ -8,13 +8,9 @@
 # In cases where we set the results in Redis explicitly, we can use the redis-py library to retrieve the results
 # from the specified key.
 
-from tasks import (
-    query_posts_db,
-    substring_matches_by_platform,
-    count_top_named_entities,
-    REDIS_DB,
-)
 import redis
+from tasks import (REDIS_DB, count_top_named_entities, query_posts_db,
+                   substring_matches_by_platform)
 
 
 def get_timerange_posts():

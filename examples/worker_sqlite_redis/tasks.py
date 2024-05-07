@@ -1,14 +1,14 @@
+import json
 import os
 import sqlite3
-import json
+from collections import Counter
 from datetime import datetime
+from typing import Any
+
 import pandas as pd
 import redis
-from collections import Counter
 from celery import Celery
 from helpers import extract_named_entities
-
-from typing import Any
 
 REDIS_DB = f"{os.getenv('REDIS_CONNECTION_STRING', 'redis://localhost:6379')}/0"
 POSTS_DB = os.getenv("POSTS_DB_PATH", "../../sample_data/sample_posts.db")

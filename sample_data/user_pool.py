@@ -1,15 +1,16 @@
-from dataclasses import dataclass, field
+import hashlib
 import random
 import string
-import hashlib
+from dataclasses import dataclass, field
+
 import numpy as np
-from typing import Optional, Literal
 
 SALT = b"9vB8nz93vD5T7Khw"
 
 DEFAULT_PLATFORMS = ["facebook", "reddit", "twitter"]
 
-from examples.models.request import Session
+from ranking_challenge.request import Session
+
 
 @dataclass
 class User:
@@ -28,9 +29,9 @@ class User:
     def generate_random(cls, platform, username=None, seed=None):
         random.seed(seed)
         if username is None:
-            username = ''.join(
-                random.choices(string.ascii_lowercase, k=8) +
-                random.choices(string.digits, k=3)
+            username = "".join(
+                random.choices(string.ascii_lowercase, k=8)
+                + random.choices(string.digits, k=3)
             )
         hashed_user = hashlib.sha256(username.encode()).hexdigest()
         # let's make user id deterministic from username
@@ -41,19 +42,22 @@ class User:
             user_name_hash=hashed_user,
             cohort="XX",
             activity_level=1,
-            platforms=[platform]
+            platforms=[platform],
         )
 
     def get_session(self, platform, current_time):
         if platform not in self.platforms:
-            raise ValueError(f"User {self.username} is not registered on platform {platform}")
+            raise ValueError(
+                f"User {self.username} is not registered on platform {platform}"
+            )
         return Session(
             user_id=self.user_id,
             user_name_hash=self.user_name_hash,
             cohort=self.cohort,
             platform=platform,
-            current_time=current_time
+            current_time=current_time,
         )
+
 
 @dataclass
 class FeedParams:
@@ -76,11 +80,14 @@ class FeedParams:
             one platform only, which allows us to easily specify the distribution
             and sample from it.
     """
+
     n_users: int
     baseline_sessions_per_day: int
     items_per_session: int
     activity_distribution: dict = field(default_factory=lambda: {1: 1})
-    platform_distribution: dict = field(default_factory=lambda: {platform: 1 for platform in DEFAULT_PLATFORMS})
+    platform_distribution: dict = field(
+        default_factory=lambda: {platform: 1 for platform in DEFAULT_PLATFORMS}
+    )
 
 
 class UserPool:
@@ -95,8 +102,12 @@ class UserPool:
             seed (int|None): A seed for the random number generator.
         """
         self.n = feed_params.n_users
-        self.activity_distribution = self._normalize_distribution(feed_params.activity_distribution)
-        self.platform_distribution = self._normalize_distribution(feed_params.platform_distribution)
+        self.activity_distribution = self._normalize_distribution(
+            feed_params.activity_distribution
+        )
+        self.platform_distribution = self._normalize_distribution(
+            feed_params.platform_distribution
+        )
         self.users = self._generate(seed=seed)
 
     def by_platform(self) -> dict[str, list[User]]:

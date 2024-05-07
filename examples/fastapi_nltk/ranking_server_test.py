@@ -4,11 +4,8 @@ import sys
 sys.path.append(".")  # allows for importing from the current directory
 
 import pytest
-
 from fastapi.testclient import TestClient
-
-from fastapi_nltk import ranking_server
-from fastapi_nltk import sample_data
+from fastapi_nltk import ranking_server, sample_data
 
 
 @pytest.fixture

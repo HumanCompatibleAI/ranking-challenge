@@ -16,14 +16,9 @@ sys.path.insert(0, parentdir)
 
 import httpx
 from ranking_challenge.fake import fake_request
-from ranking_challenge.request import (
-    ContentItem,
-    FacebookEngagements,
-    RankingRequest,
-    RedditEngagements,
-    Session,
-    TwitterEngagements,
-)
+from ranking_challenge.request import (ContentItem, FacebookEngagements,
+                                       RankingRequest, RedditEngagements,
+                                       Session, TwitterEngagements)
 from ranking_challenge.response import RankingResponse
 
 # Note: this magical url fixture is defined in conftest.py
@@ -86,7 +81,7 @@ def test_rank_facebook(url):
                     embedded_urls=embedded_urls,
                     engagements=engagements,
                 )
-            except Exception as e:
+            except Exception:
                 # skip invalid lines
                 continue
 
@@ -123,7 +118,7 @@ def test_rank_reddit(url):
                     embedded_urls=embedded_urls,
                     engagements=engagements,
                 )
-            except Exception as e:
+            except Exception:
                 # skip invalid lines
                 continue
 
@@ -168,7 +163,7 @@ def test_rank_twitter(url):
                     embedded_urls=embedded_urls,
                     engagements=engagements,
                 )
-            except Exception as e:
+            except Exception:
                 # skip invalid lines
                 continue
 
