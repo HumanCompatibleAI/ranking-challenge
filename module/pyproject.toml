@@ -1,0 +1,40 @@
+# pyproject.toml
+
+[build-system]
+requires = ["setuptools>=61.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ranking_challenge"
+version = "1.0.3"
+description = "The Prosocial Ranking Challenge"
+readme = "README.md"
+authors = [{ name = "Ian Baker", email = "ian@sonic.net" }]
+license = { file = "LICENSE" }
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Framework :: Pydantic :: 2",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+]
+keywords = ["ranking", "social media", "challenge"]
+dependencies = [
+    "pydantic >= 2.6.0",
+    "faker",
+]
+requires-python = ">=3.9"
+
+[project.optional-dependencies]
+dev = ["black", "isort", "pip-tools", "pytest"]
+
+[project.urls]
+Homepage = "https://humancompatible.ai/news/2024/01/18/the-prosocial-ranking-challenge-60000-in-prizes-for-better-social-media-algorithms/"
+Repository = "https://github.com/humancompatibleai/ranking-challenge"
+Blog = "https://rankingchallenge.substack.com/"
+
+[project.scripts]
+rcfaker = "ranking_challenge.fake:main"

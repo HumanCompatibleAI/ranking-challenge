@@ -9,8 +9,8 @@ import pytest
 from openai.types.chat import ChatCompletionMessage
 from openai.types.chat.chat_completion import ChatCompletion, Choice
 
-import ranking_server
-import sample_data
+from chat_gpt import ranking_server
+from chat_gpt import sample_data
 
 
 @pytest.fixture

@@ -1,19 +1,14 @@
-import os
 import sys
-import inspect
 
-parentdir = os.path.dirname(  # make it possible to import from ../ in a reliable way
-    os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-)
-sys.path.insert(0, parentdir)
+sys.path.append(".")  # allows for importing from the current directory
 
 import nltk
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
-from models.request import RankingRequest
-from models.response import RankingResponse
+from ranking_challenge.request import RankingRequest
+from ranking_challenge.response import RankingResponse
 from sample_data import NEW_POSTS
 
 nltk.download("vader_lexicon")
@@ -64,7 +59,7 @@ def analyze_sentiment():
         ],
     }
 
-    RankingResponse(**result) # ensure that the response is valid as a side-effect
+    RankingResponse(**result)  # ensure that the response is valid as a side-effect
 
     # let flask work with the dict though, since it seems to prefer that
     return jsonify(result)
