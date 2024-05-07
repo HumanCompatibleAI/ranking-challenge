@@ -8,4 +8,4 @@ You can get them with a:
 pip install ranking-challenge
 ```
 
-The code is located at in [module/src/ranking-challenge](/module/src/ranking_challenge)
+The code is located at in [/module](/module)
