@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ranking_challenge"
-version = "1.0.2"
+version = "1.0.3"
 description = "The Prosocial Ranking Challenge"
 readme = "README.md"
 authors = [{ name = "Ian Baker", email = "ian@sonic.net" }]
@@ -37,4 +37,4 @@ Repository = "https://github.com/humancompatibleai/ranking-challenge"
 Blog = "https://rankingchallenge.substack.com/"
 
 [project.scripts]
-rcfaker = "fake.__main__:main"
+rcfaker = "ranking_challenge.fake:main"
