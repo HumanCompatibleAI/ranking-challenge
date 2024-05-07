@@ -21,14 +21,16 @@ required json format
 ## To Use
 
 ### In short
-```
+
+```bash
 python preprocess.py
 python data_pull.py -p reddit -n 50
 ```
-will get you json for a batch of 50 reddit posts, to stdout. 
 
+will get you json for a batch of 50 reddit posts, to stdout.
 
 ### Longer
+
 Clone the repository and run the `preprocessing.py` file. You should only have to do this once. This
 should take our data sources, clean them and then create the
 processed files which you will create a sample feed from
@@ -103,8 +105,7 @@ Tweets from Jan 1st 2023
 
 Sourced from
 
-  https://archive.org/download/archiveteam-twitter-stream-2023-01
-
+  <https://archive.org/download/archiveteam-twitter-stream-2023-01>
 
 ### Reddit
 
@@ -123,7 +124,7 @@ Sourced from
 
 Sourced From:
 
-  https://academictorrents.com/details/9c263fc85366c1ef8f5bb9da0203f4c8c8db75f4
+  <https://academictorrents.com/details/9c263fc85366c1ef8f5bb9da0203f4c8c8db75f4>
 
 ### Facebook
 
@@ -145,4 +146,4 @@ Sourced From:
 
 Sourced from
 
-  https://github.com/jbencina/facebook-news/blob/master/README.md
+  <https://github.com/jbencina/facebook-news/blob/master/README.md>
