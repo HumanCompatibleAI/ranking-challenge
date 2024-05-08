@@ -5,6 +5,21 @@ posts database.
 
 * Infrastructure
 
+** Ranking server
+
+The ranking server is a FastAPI application that serves the ranking requests. This
+one is very similar to the FastAPI NLTK example, but simpler. It reads some valies
+from Redis (common named entities from the posts database), which are then used to
+compute a simple post ranking, showing entries that do not contain any of those words
+first.
+
+To run just the ranking server outside of Docker:
+
+#+begin_src shell
+cd ranking_server
+uvicorn ranking_server:app --reload
+#+end_src
+
 ** Posts database
 
 The posts database is an SQLite file. It can be generated via running
@@ -84,6 +99,15 @@ general-purpose data store for persisting and consuming results of async
 processing. Because of memory constraints, it is discouraged to store
 large result sets in Redis.
 
+Redis is the primary way that your offline tasks will communicate with the components
+in the serving path.
+
+If your Celery jobs need to store large intermediate results, you may want to consider
+changing the backend so as to not overload the Redis instance. For example, you could
+use the SQLAlchemy backend to store results in a local database file. You can assume
+that you will have a single worker host, so the local filesystem is a fine place for
+data that is not needed outside the worker.
+
 * Data models
 
 The posts database has the following schema:
@@ -118,7 +142,10 @@ To run this example, you need to have the following installed:
 - nltk
 
 You will need to use a virtual environment using your preferred tool.
-We provide ~environment.txt~ for conda users which can be used to install all dependencies.
+We provide ~environment.yml~ for conda users which can be used to install all dependencies.
+To use it: ~conda env create -f environment.yml~
+
+To re-export dependencies, use ~conda env export > environment.yml~.
 
 You will also need docker compose to run Redis and Celery.
 
@@ -152,5 +179,5 @@ rm ${POSTS_DB_PATH}
 
 * Running examples
 
-1. Launch Celery and Redis using ~make run~ or ~docker compose up --build~.
+1. Launch Celery, Redis, and FastAPI using ~make run~ or ~docker compose up --build~.
 2. Run the sample tasks via ~python worker.py~.

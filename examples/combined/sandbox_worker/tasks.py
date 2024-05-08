@@ -11,7 +11,7 @@ from celery import Celery
 from helpers import extract_named_entities
 
 REDIS_DB = f"{os.getenv('REDIS_CONNECTION_STRING', 'redis://localhost:6379')}/0"
-POSTS_DB = os.getenv("POSTS_DB_PATH", "../../sample_data/sample_posts.db")
+POSTS_DB = os.getenv("POSTS_DB_PATH", "../../../sample_data/sample_posts.db")
 
 app = Celery("tasks", backend=REDIS_DB, broker=REDIS_DB)
 
