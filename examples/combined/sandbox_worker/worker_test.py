@@ -4,7 +4,7 @@
 import json
 import os
 import sqlite3
-from datetime import datetime
+from datetime import datetime, UTC
 
 import pytest
 import redis
@@ -60,7 +60,7 @@ def test_count_top_named_entities(celery_app, celery_worker):
     assert "top_named_entities" in top_entities.keys()
     assert "timestamp" in top_entities.keys()
     result_time = datetime.fromisoformat(top_entities["timestamp"])
-    dt = datetime.utcnow() - result_time
+    dt = datetime.now(UTC) - result_time
     assert (
         dt.total_seconds() < 10
     ), f"Result timesteamp {result_time} appears to be stale"

@@ -10,7 +10,7 @@ BASIC_EXAMPLE = {
     },
     "items": [
         {
-            "id": "de83fc78-d648-444e-b20d-853bf05e4f0e",
+            "id": "should-rank-high",
             "title": "this is the post title, available only on reddit",
             "text": "this is the worst thing I have ever seen!",
             "author_name_hash": "60b46b7370f80735a06b7aa8c4eb6bd588440816b086d5ef7355cf202a118305",
@@ -20,10 +20,10 @@ BASIC_EXAMPLE = {
             "engagements": {"upvote": 34, "downvote": 27, "comment": 20, "award": 0},
         },
         {
-            "id": "s5ad13266-8abk4-5219-kre5-2811022l7e43dv",
+            "id": "should-rank-low",
             "post_id": "de83fc78-d648-444e-b20d-853bf05e4f0e",
             "parent_id": "",
-            "text": "this is amazing!",
+            "text": "this is amazing! foo!",
             "author_name_hash": "60b46b7370f80735a06b7aa8c4eb6bd588440816b086d5ef7355cf202a118305",
             "embedded_urls": [],
             "type": "comment",
@@ -31,7 +31,7 @@ BASIC_EXAMPLE = {
             "engagements": {"upvote": 15, "downvote": 2, "comment": 22, "award": 2},
         },
         {
-            "id": "a4c08177-8db2-4507-acc1-1298220be98d",
+            "id": "should-rank-high-2",
             "post_id": "de83fc78-d648-444e-b20d-853bf05e4f0e",
             "parent_id": "s5ad13266-8abk4-5219-kre5-2811022l7e43dv",
             "text": "this thing is ok.",

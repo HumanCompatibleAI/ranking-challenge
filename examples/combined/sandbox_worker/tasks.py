@@ -2,7 +2,7 @@ import json
 import os
 import sqlite3
 from collections import Counter
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import Any
 
 import pandas as pd
@@ -115,7 +115,7 @@ SELECT post_blob FROM posts WHERE created_at BETWEEN '{from_}' AND '{to}';"""
             json.dumps(
                 {
                     "top_named_entities": ne_counter.most_common(k),
-                    "timestamp": datetime.utcnow().isoformat(),
+                    "timestamp": datetime.now(UTC).isoformat(),
                 }
             ),
         )

@@ -1,16 +1,20 @@
+from datetime import datetime, UTC
 import json
-import pytest
+from unittest.mock import patch
 
+import fakeredis
 from fastapi.testclient import TestClient
+import pytest
 
 import ranking_server
 import test_data
 
 
 @pytest.fixture
-def app():
-    app = ranking_server.app
-    yield app
+def app(redis_client):
+    with patch("ranking_server.redis_client", return_value=redis_client):
+        app = ranking_server.app
+        yield app
 
 
 @pytest.fixture
@@ -18,7 +22,27 @@ def client(app):
     return TestClient(app)
 
 
-def test_rank(client):
+@pytest.fixture
+def redis_client(request):
+    redis_client = fakeredis.FakeRedis()
+    return redis_client
+
+
+def test_rank(client, redis_client):
+    # put named entities in redis
+    result_key = "my_worker:scheduled:top_named_entities"
+
+    fake_named_entities = ['foo', 'bar', 'baz']
+    redis_client.set(
+        result_key,
+        json.dumps(
+            {
+                "top_named_entities": fake_named_entities,
+                "timestamp": datetime.now(UTC).isoformat(),
+            }
+        ),
+    )
+
     # Send POST request to the API
     response = client.post("/rank", json=test_data.BASIC_EXAMPLE)
 
@@ -31,11 +55,8 @@ def test_rank(client):
     result = response.json()
 
     # Check if the response contains the expected ids, in the expected order
-    assert result["ranked_ids"][1:4] == [
-        "s5ad13266-8abk4-5219-kre5-2811022l7e43dv",
-        "a4c08177-8db2-4507-acc1-1298220be98d",
-        "de83fc78-d648-444e-b20d-853bf05e4f0e",
+    assert result["ranked_ids"] == [
+        "should-rank-high",
+        "should-rank-high-2",
+        "should-rank-low",
     ]
-
-    # check for inserted posts
-    assert len(result["new_items"]) == 1
