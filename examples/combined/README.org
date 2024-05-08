@@ -1,14 +1,24 @@
-#+title: Worker for processing post history
+#+title: Background processes
 
-This example illustrates using ad hoc and scheduled jobs to interact with the
-posts database.
+This example illustrates setting up and deploying persistence components as well
+as various background processes (scrapers, workers, and scorers), and using
+their output in the ranker's serving path to deliver the final results to the
+user.
+
+Specifically, we show the following components:
+- posts database (SQLite) with users' historical feeds
+- a job queue (Celery) that can be used to create ad hoc and scheduled jobs that
+  perform background processing/analytics on this database
+- Redis instance to store these processing results for use by the ranking server
+  and/or other stateful algorithms
+- the ranking server itself
 
 * Infrastructure
 
 ** Ranking server
 
 The ranking server is a FastAPI application that serves the ranking requests. This
-one is very similar to the FastAPI NLTK example, but simpler. It reads some valies
+one is very similar to the FastAPI NLTK example, but simpler. It reads some values
 from Redis (common named entities from the posts database), which are then used to
 compute a simple post ranking, showing entries that do not contain any of those words
 first.
