@@ -1,9 +1,34 @@
-#+title: Worker for processing post history
+#+title: Background processes
 
-This example illustrates using ad hoc and scheduled jobs to interact with the
-posts database.
+This example illustrates setting up and deploying persistence components as well
+as various background processes (scrapers, workers, and scorers), and using
+their output in the ranker's serving path to deliver the final results to the
+user.
+
+Specifically, we show the following components:
+- posts database (SQLite) with users' historical feeds
+- a job queue (Celery) that can be used to create ad hoc and scheduled jobs that
+  perform background processing/analytics on this database
+- Redis instance to store these processing results for use by the ranking server
+  and/or other stateful algorithms
+- the ranking server itself
 
 * Infrastructure
+
+** Ranking server
+
+The ranking server is a FastAPI application that serves the ranking requests. This
+one is very similar to the FastAPI NLTK example, but simpler. It reads some values
+from Redis (common named entities from the posts database), which are then used to
+compute a simple post ranking, showing entries that do not contain any of those words
+first.
+
+To run just the ranking server outside of Docker:
+
+#+begin_src shell
+cd ranking_server
+uvicorn ranking_server:app --reload
+#+end_src
 
 ** Posts database
 
@@ -84,6 +109,15 @@ general-purpose data store for persisting and consuming results of async
 processing. Because of memory constraints, it is discouraged to store
 large result sets in Redis.
 
+Redis is the primary way that your offline tasks will communicate with the components
+in the serving path.
+
+If your Celery jobs need to store large intermediate results, you may want to consider
+changing the backend so as to not overload the Redis instance. For example, you could
+use the SQLAlchemy backend to store results in a local database file. You can assume
+that you will have a single worker host, so the local filesystem is a fine place for
+data that is not needed outside the worker.
+
 * Data models
 
 The posts database has the following schema:
@@ -118,7 +152,10 @@ To run this example, you need to have the following installed:
 - nltk
 
 You will need to use a virtual environment using your preferred tool.
-We provide ~environment.txt~ for conda users which can be used to install all dependencies.
+We provide ~environment.yml~ for conda users which can be used to install all dependencies.
+To use it: ~conda env create -f environment.yml~
+
+To re-export dependencies, use ~conda env export > environment.yml~.
 
 You will also need docker compose to run Redis and Celery.
 
@@ -142,12 +179,15 @@ export TEST_POSTS_DB=sample_posts_test.db
 export POSTS_DB_PATH=${PROJECT_ROOT}/sample_data/${TEST_POSTS_DB}
 cd ${PROJECT_ROOT}/sample_data
 python seed_post_db.py --no-user-pool --dbname=${TEST_POSTS_DB}
-cd ${PROJECT_ROOT}/examples/worker_sqlite_redis
+python -m nltk.downloader maxent_ne_chunker words punkt averaged_perceptron_tagger
+cd ${PROJECT_ROOT}/examples/combined
 make test
 rm ${POSTS_DB_PATH}
 #+end_src
 
+(this is available as a shell script you can run in ~ci.sh~ or ~make ci~)
+
 * Running examples
 
-1. Launch Celery and Redis using ~make run~ or ~docker compose up --build~.
+1. Launch Celery, Redis, and FastAPI using ~make run~ or ~docker compose up --build~.
 2. Run the sample tasks via ~python worker.py~.

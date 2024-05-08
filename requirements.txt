@@ -12,3 +12,4 @@ ranking-challenge
 black
 isort
 autoflake
+fakeredis
