@@ -1,0 +1,90 @@
+#+title: Scraper worker
+
+This example illustrates using a scraper to collect and persist social media
+posts.
+
+* Infrastructure
+
+** Scraping process
+
+For this example, we will collect tweets using the Twitter search API. With the
+recent Twitter API restrictions, it is impossible to make these calls using the
+free API tier. Therefore, to make this example work you have to provide
+logged-in credentials for a Twitter account. More specifically, once logged in
+you need to extract the Twitter cookie by using the browser developer tools. One
+way to do this is in the /Network/ tab of Chrome dev tools; upon the completion
+of a browser request to a Twitter timeline, look for a request to an
+authenticated API endpoint, for example, ~api/1.1/users/recommendations.json~,
+and copy the cookie from the /Headers/ section (or right-click on the request,
+select "copy as cURL", and get the cookie from the cURL command).
+
+It is important to note that this flow is for the demo only and is brittle. *Do
+not use it in production.*
+
+Once Twitter credentials are available, they need to be exported as environment
+variables:
+
+#+begin_src shell
+export TWITTER_SESSION_COOKIE='my-cookie'
+export TWITTER_USERNAME=myusername
+export TWITTER_EMAIL=myemail@domain.com
+#+end_src
+
+The scraping jobs are scheduled using Celery Beat scheduler, and therefore need
+to be written as Celery tasks. Importantly, because the scraper can receive no
+data from the rest of the infrastructure, these tasks cannot be controlled once
+they are deployed; they need to be written in a "set it and forget it" fashion.
+
+** Ingestion process
+
+In order to communicate the results of the scraping process to the ranker, the
+ingestion process will be running inside the sandboxed environment, and
+configured to receive data from the scraper via HTTP ~POST~ requests. It is
+recommended to provide an API for receiving data, as well as errors and,
+optionally, metrics.
+
+* Data models
+
+The exact schemas of scraped data are up to you and may depend on the nature of
+the data you are aiming to collect and/or specifics of the scraper
+implementation. For our example, we create the following tables in SQLite for
+the scraping results and errors:
+
+#+begin_src sql
+CREATE TABLE scraper_data (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  post_id TEXT NOT NULL UNIQUE,
+  source_id TEXT,
+  task_id TEXT,
+  post_blob TEXT NOT NULL
+)
+
+CREATE TABLE scraper_errors (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  source_id TEXT,
+  task_id TEXT,
+  message TEXT
+)
+#+end_src
+
+* Setting up your environment
+
+This example is fully dockerized, so no dependencies beyond Docker are needed to
+run it. For local testing and development, however, you may need to install
+Celery and [[https://github.com/vladkens/twscrape.git][twscrape]].
+
+The SQLite database for scraping results will be at ~$PROJECT_ROOT/sample_data/scraper_results.db~
+
+Please note that even though here the scraper and ingestion containers are
+running "side by side" in this example, in an actual deployment they will be
+firewalled and e.g.  the scraper process will have no access to the Redis
+instance inside the sandboxed environment (but it may have its own small Redis
+instance to serve as a Celery broker)
+
+* Running examples
+
+1. Set up the Twitter credentials as described above.
+2. Run ~docker compose up --build~.
+3. Examine the log output and/or the SQLite database.
