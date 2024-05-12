@@ -6,11 +6,9 @@ sys.path.append(".")  # allows for importing from the current directory
 from unittest.mock import patch
 
 import pytest
+from chat_gpt import ranking_server, sample_data
 from openai.types.chat import ChatCompletionMessage
 from openai.types.chat.chat_completion import ChatCompletion, Choice
-
-import ranking_server
-import sample_data
 
 
 @pytest.fixture

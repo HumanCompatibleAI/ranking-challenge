@@ -1,7 +1,13 @@
+import sys
+
+sys.path.append(".")  # allows for importing from the current directory
+
 import nltk
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
+from ranking_challenge.request import RankingRequest
+from ranking_challenge.response import RankingResponse
 
 from sample_data import NEW_POSTS
 
@@ -15,8 +21,14 @@ analyzer = SentimentIntensityAnalyzer()
 @app.route("/rank", methods=["POST"])  # Allow POST requests for this endpoint
 def analyze_sentiment():
     post_data = request.json
-    ranked_results = []
 
+    # Ensure that the input data is valid as a side-effect. This isn't a best-practice,
+    # but it demonstrates how you can use the models for validation even if you're not
+    # using them to process any data. But consider using FastAPI since it will do all
+    # of this automatically for you.
+    RankingRequest(**post_data)
+
+    ranked_results = []
     for item in post_data.get("items"):
         text = item.get("text")
         id = item.get("id")
@@ -47,6 +59,9 @@ def analyze_sentiment():
         ],
     }
 
+    RankingResponse(**result)  # ensure that the response is valid as a side-effect
+
+    # let flask work with the dict though, since it seems to prefer that
     return jsonify(result)
 
 

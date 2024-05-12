@@ -1,0 +1,33 @@
+services:
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+
+  celery-worker:
+    build:
+      context: sandbox_worker
+      dockerfile: Dockerfile
+    volumes:
+      - ./sandbox_worker:/app
+      - ../../sample_data:/data
+    depends_on:
+      - redis
+    environment:
+      REDIS_CONNECTION_STRING: redis://redis:6379
+      POSTS_DB_PATH: /data/sample_posts.db
+    command: celery -A tasks worker -B --loglevel=info
+
+  ranker:
+    build:
+      context: ranking_server
+      dockerfile: Dockerfile
+    volumes:
+      - ./ranking_server:/app
+    depends_on:
+      - redis
+    environment:
+      REDIS_CONNECTION_STRING: redis://redis:6379
+    command: uvicorn ranking_server:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8000:8000"

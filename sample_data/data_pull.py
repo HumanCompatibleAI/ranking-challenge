@@ -1,246 +1,201 @@
-# Importing of relevant packages
-import numpy as np
-import random
-import pandas as pd
-from pathlib import Path
-import os
-import sys
-import hashlib
-from datetime import datetime
-import json
 import argparse
+import inspect
+import logging
+import os
+import random
+import sys
+from datetime import datetime, timedelta
+from itertools import cycle, islice
+from typing import Optional
 
-script_dir = os.path.dirname(__file__)
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
+logger = logging.getLogger(__name__)
 
-platforms = ['facebook', 'reddit', 'twitter']
+
+parentdir = os.path.dirname(  # make it possible to import from ../ in a reliable way
+    os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+)
+sys.path.insert(0, parentdir)
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+from normalize_posts import NORMALIZED_DATA_FILE_FN
+from ranking_challenge.request import ContentItem, RankingRequest, Session
+from user_pool import FeedParams, User, UserPool
+
+platforms = ["facebook", "reddit", "twitter"]
 
 
+def make_random_user_session(platform, username=None, seed_no=None) -> Session:
+    return User.generate_random(platform, username, seed_no).get_session(
+        platform, datetime.now()
+    )
 
-def data_puller(platform, x, seed_no, username):
-    '''
-    This function seeks to convert our sample data into the appropriate JSON format.
-    It will download this file to "os.path.dirname(__file__)" under the name 'final_{platform}_data.json'
+
+def count_lines_by_platform():
+    line_counts = {}
+    for platform in platforms:
+        with open(NORMALIZED_DATA_FILE_FN(platform), "r") as f:
+            line_counts[platform] = sum(1 for _ in f)
+    return line_counts
+
+
+def batched(iterable, n):
+    # batched('ABCDEFG', 3) → ABC DEF G
+    if n < 1:
+        raise ValueError("n must be at least one")
+    it = iter(iterable)
+    while batch := list(islice(it, n)):
+        yield batch
+
+
+class UserFeedBuilder:
+
+    def __init__(
+        self, user: User, feed_params: FeedParams, feed_end_jitter_hours=12, seed=None
+    ):
+        random.seed(seed)
+        self.user = user
+        self.feed_params = feed_params
+        now = datetime.now()
+        self.is_inactive = (
+            user.activity_level == 0 or feed_params.baseline_sessions_per_day == 0
+        )
+        self.dt_days = 0
+        feed_end = now - timedelta(hours=feed_end_jitter_hours * random.random())
+        self.last_session_timestamp = feed_end
+
+    def make_request(
+        self, platform: str, items_batch: list[ContentItem]
+    ) -> RankingRequest:
+        if self.is_inactive:
+            raise ValueError("Inactive user")
+        session_interval = (
+            1 / self.user.activity_level / self.feed_params.baseline_sessions_per_day
+        )
+        self.last_session_timestamp -= timedelta(days=session_interval)
+        item_timestamp = self.last_session_timestamp - timedelta(days=session_interval)
+        dt = session_interval / len(items_batch)
+        for item in items_batch:
+            item.created_at = item_timestamp
+            item_timestamp += timedelta(days=dt)
+        return RankingRequest(
+            session=self.user.get_session(platform, self.last_session_timestamp),
+            items=items_batch,
+        )
+
+
+def _make_feed(platform, users, items, feed_params, seed=None) -> list[RankingRequest]:
+    feed = []
+    feed_builders = filter(
+        lambda x: not x.is_inactive,
+        [UserFeedBuilder(user, feed_params) for user in users],
+    )
+    # we assume that the items are ordered chronlolgically; since we are building
+    # the feed in reverse chronological order, we need to reverse the items
+    max_activity = max(feed_params.activity_distribution.keys())
+    ibatch = batched(reversed(items), feed_params.items_per_session)
+    round_robin_users = cycle(feed_builders)
+    random.seed(seed)
+    try:
+        while True:
+            builder = next(round_robin_users)
+            relative_activity = builder.user.activity_level / max_activity
+            if random.random() > relative_activity:
+                continue
+            feed.append(builder.make_request(platform, next(ibatch)))
+    except StopIteration:
+        return sorted(feed, key=lambda x: x.session.current_time)
+
+
+def bulk_feed_generator(
+    feed_params: Optional[FeedParams] = None, seed=None
+) -> list[RankingRequest]:
+    """
+    The purpose of this function is to generate a bulk feed for all platforms.
+
+    We use the UserPool class to generate a pool of users and their respective sessions
+    based on feed parameters (sessions per day, items per session, etc).
+
+    In this flow, we fake the timestamps of the sessions to simulate a set of
+    sessions that are spread out over a period of time and yield the expected number
+    of items in a way that uses up the available content, with the last session
+    taking place at the current time.
+
+    When `feed_params` is omitted, we generate a single 'superfeed' that
+    nominally represents a feed for a single user and comprises of a mix of
+    posts and comments from all platforms over all time.
+    """
+    feed_list = []
+    if feed_params is None:
+        # generate "superfeed" for a single dummy user
+        for platform in platforms:
+            session = make_random_user_session(platform, "test_user")
+            with open(NORMALIZED_DATA_FILE_FN(platform), "r") as f:
+                feed = [ContentItem.model_validate_json(line) for line in f]
+                feed_list.append(RankingRequest(session=session, items=feed))
+        return feed_list
+
+    # generate feed for a user pool
+    user_pool = UserPool(feed_params, seed=seed)
+    platform_users = user_pool.by_platform()
+    for platform in platforms:
+        users = platform_users[platform]
+        with open(NORMALIZED_DATA_FILE_FN(platform), "r") as f:
+            items = [ContentItem.model_validate_json(line) for line in f]
+            feed_list.extend(_make_feed(platform, users, items, feed_params, seed=seed))
+
+    return feed_list
+
+
+def random_user_feed_generator(platform, x, seed_no, username):
+    """
+    This function seeks to convert our sample data into the appropriate JSON format
+    that imitates a user's feed for the given platform.
 
     Args:
     Platform -> String : ['Facebook', 'Reddit', 'Twitter']
     x -> Int
     seed_no -> Int
     username -> String
-
-    For Facebook data:
-    The function will order comments to appear after the post they are related to.
-    If not related to a post it will append the comment at the end of the chain
-
-    For Reddit data:
-    Our comments have already been randomly assigned in preprocessing.
-    Our function simply orders comments to appear after their assigned post.
-
-    For Twitter data:
-    We randomly sample a subset of our twitter data and then randomly assign parents to create threads.
-    We also include a random chance to break a thread so that we can create a stream of posts
-
-    '''
+    """
     if platform.upper() not in (name.upper() for name in platforms):
         print("Not an applicable platform. Try again")
+        return
 
-    np.random.seed(seed_no)
+    random.seed(seed_no)
+    session = make_random_user_session(platform, username, seed_no)
 
-    # We must create a hashed user_id and hashed_username
-    hasher = hashlib.sha256()
-    hasher.update(os.urandom(16))
-    user_id = hasher.hexdigest()
-
-    hasher = hashlib.sha256()
-    hasher.update(username.encode())
-    hashed_user = hasher.hexdigest()
-
-    current_time = str(datetime.now()) # JSON does not accept datetime obj
-
-    # Establish static part of JSON
-    static_json = {
-    "session": {
-        "user_id": user_id,
-        "user_name_hash": hashed_user,
-        "platform": platform,
-        "current_time": current_time,
-    },
-    "items": []
-    }
-
-    if platform.upper() == 'FACEBOOK':
-        df = pd.read_csv(os.path.join(script_dir, 'facebook_data/processed/filtered_comment_post.csv'))
-
-        # We randomly sample x values and then group our comments by 'all_post_ids'
-        posts = df[df['type'] == 'Post'].sample(n=x, random_state=seed_no)
-        comments_grouped_by_post_id = df[df['type'] == 'Comment'].groupby('all_post_ids')
-
-        # Instantiate empty list and set
-        final_items = []
-
-        for index, row in posts.iterrows():
-            item = row.to_dict()
-            # General structure for engagement metrics
-            engagements = {
-                'likes': item.pop('like', 0),
-                'love': item.pop('love', 0),
-                'haha': item.pop('haha', 0),
-                'wow': item.pop('wow', 0),
-                'sad': item.pop('sad', 0),
-                'angry': item.pop('angry', 0),
-                'comments': item.pop('comments', 0),
-                'shares': item.pop('shares', 0),
-            }
-            item['engagements'] = engagements
-
-            # General structure for posts
-            item['engagements'] = engagements
-            post_id = item.pop('all_post_ids')
-            item['id'] = post_id
-            item.pop('post_id', None)
-            item.pop('parent_id', None)
-            final_items.append(item)
-            # processed_post_ids.add(post_id)
-
-                # Include related comments directly after their respective post
-            if post_id in comments_grouped_by_post_id.groups:
-                related_comments = comments_grouped_by_post_id.get_group(post_id)
-                for _, comment_row in related_comments.iterrows():
-                    comment_item = comment_row.to_dict()
-                    comment_item['post_id'] = comment_item.pop('all_post_ids')  # Rename 'all_post_ids' to 'post_id'
-                    final_items.append(comment_item)
-
-        static_json['items'] = final_items
-
-
-    if platform.upper() == 'REDDIT':
-        df = pd.read_csv(os.path.join(script_dir,'reddit_data/processed/filtered_reddit_data.csv'), low_memory=False)
-        
-        # We will sample from our dataset and then split into posts and comments
-        posts_df =  df[df['type'] == 'Post']
-        sample = posts_df.sample(n=x, random_state=seed_no)
-        
-        # Initialize the list to store final items
-        final_items = []
-
-        # Iterate through each post in the posts DataFrame
-        for _, post_row in sample.iterrows(): # change made here, was posts_df before
-            # General structure for posts
-            post_item = post_row.to_dict()
-            post_item.pop('parent_id', None)
-            post_item.pop('post_id', None)
-            post_item.pop('text', None)
-            post_item['engagements'] = {'upvotes': post_item.pop('upvotes', 0), 'downvotes': post_item.pop('downvotes', 0)}
-            final_items.append(post_item)
-
-            # Find and append related comments
-            # related_comments = comments_df[comments_df['post_id'] == post_item['id']]
-            related_comments = df[(df['type'] == 'Comment') & (df['post_id'] == post_item['id'])]
-            for _, comment_row in related_comments.iterrows():
-                comment_item = comment_row.to_dict()
-                comment_item.pop('title', None)
-                comment_item['engagements'] = {'upvotes': comment_item.pop('upvotes', 0), 'downvotes': comment_item.pop('downvotes', 0)}
-                final_items.append(comment_item)
-
-        static_json['items'] = final_items
-
-    if platform.upper() == 'TWITTER':
-        df = pd.read_json(os.path.join(script_dir,'twitter_data/processed/filtered_jan_2023.json'))
-
-        # We will sample from our dataset and establish an empty parent_id column
-        sample = df.sample(n=x, random_state=seed_no).reset_index(drop=True)
-        sample['parent_id'] = [None] * len(sample)
-
-        # We establish a blank dictionary to hold the thread info
-        graph = {}
-        def check_for_cycle(graph, start, visited=None, stack=None):
-            if visited is None: visited = set()
-            if stack is None: stack = set()
-            visited.add(start); stack.add(start)
-            for neighbour in graph.get(start, []):
-                if neighbour not in visited:
-                    if check_for_cycle(graph, neighbour, visited, stack): return True
-                elif neighbour in stack: return True
-            stack.remove(start)
-            return False
-
-        # We define this function to assign parents and to randomly break threads and create new ones
-        def assign_parents(sample):
-            ids = sample['id'].tolist()
-            for idx, post_id in enumerate(ids):
-                if random.random() > 0.7:  # 30% chance to start a new thread; adjust as needed
-                    continue
-                possible_parents = ids[:idx]
-                while possible_parents:
-                    parent_id = random.choice(possible_parents)
-                    if parent_id in graph: graph[parent_id].append(post_id)
-                    else: graph[parent_id] = [post_id]
-                    if check_for_cycle(graph, parent_id):
-                        graph[parent_id].remove(post_id)
-                        possible_parents.remove(parent_id)
-                    else:
-                        sample.loc[sample['id'] == post_id, 'parent_id'] = parent_id
-                        break
-
-        assign_parents(sample)
-
-        # Our structure for tweets. Without 'posts' as a concept, only one structure is needed
-        transformed_data = []
-        
-        # Randomisation of engagement metrics (current data is majority zero, this will change if we come across improved data)
-        # Randomisation will combine a proportional amount of follower count with a random noise variable on top
-        reply_seed = 1
-        repost_seed = 2
-        like_seed = 3
-        quote_seed = 4
-        noise_std = 1
-        
-        np.random.seed(reply_seed)
-        sample['simulated_replies'] = round((sample['followers_count'] * 0.001) + np.random.normal(loc=0, scale=noise_std, size=len(sample)), 0).clip(lower=0).astype(int)
-        np.random.seed(repost_seed)
-        sample['simulated_reposts'] = round((sample['followers_count'] * 0.005) + np.random.normal(loc=0, scale=noise_std, size=len(sample)), 0).clip(lower=0).astype(int)
-        np.random.seed(like_seed)
-        sample['simulated_likes'] = round((sample['followers_count'] * 0.01) + np.random.normal(loc=0, scale=noise_std, size=len(sample)), 0).clip(lower=0).astype(int)
-        np.random.seed(quote_seed)
-        sample['simulated_quotes'] = round((sample['followers_count'] * 0.005) + np.random.normal(loc=0, scale=noise_std, size=len(sample)), 0).clip(lower=0).astype(int)
-
-        # Grab relevant fields     
-        for _, row in sample.iterrows():
-            transformed_row = {
-                "id": row['id'],
-                "parent_id": row.get('parent_id', ''),
-                "text": row['text'],
-                "expanded_url": row.get('expanded_url',None),
-                "author_name_hash": row['author_id'],
-                "type": 'tweet',
-                "created_at": row['created_at'].strftime('%Y-%m-%d %H:%M:%S') if pd.notnull(row['created_at']) else '',
-                "engagements": {
-                    'reply': row.get('simulated_replies', 0),
-                    'repost': row.get('simulated_reposts', 0),
-                    'like': row.get('simulated_likes', 0),
-                    'quote': row.get('simulated_quotes', 0)
-                },
-                "user_metrics": {
-                    "followers": row.get('followers_count', 0),
-                    "following": row.get('following_count', 0),
-                    "tweet_count": row.get('tweet_count', 0),
-                    "listed_count": row.get('listed_count', 0),
-                }
-            }
-            transformed_data.append(transformed_row)
-
-        static_json["items"] = transformed_data
-
-    # done, output    
-    json.dump(static_json, sys.stdout, indent=4)
-
+    with open(NORMALIZED_DATA_FILE_FN(platform), "r") as f:
+        feed_sample = random.sample(
+            [ContentItem.model_validate_json(line) for line in f], x
+        )
+        request = RankingRequest(session=session, items=feed_sample)
+        print(request.model_dump_json(indent=4))
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Sample data from platforms')
-    parser.add_argument('-p', '--platform', type=str, help='Platform to pull data from')
-    parser.add_argument('-n', '--numposts', type=int, help='number of posts to generate', nargs='?', const=100, default=100)
-    parser.add_argument('-r', '--randomseed', type=int, help='random seed', nargs='?', const=1, default=1)
-    parser.add_argument('-u', '--username', type=str, help='username', nargs='?', const="username", default="username")
+    parser = argparse.ArgumentParser(description="Sample data from platforms")
+    parser.add_argument("-p", "--platform", type=str, help="Platform to pull data from")
+    parser.add_argument(
+        "-n",
+        "--numposts",
+        type=int,
+        help="number of posts to generate",
+        nargs="?",
+        default=100,
+    )
+    parser.add_argument(
+        "-r", "--randomseed", type=int, help="random seed", nargs="?", default=None
+    )
+    parser.add_argument(
+        "-u", "--username", type=str, help="username", nargs="?", default=None
+    )
     args = parser.parse_args()
 
-    data_puller(args.platform, args.numposts, args.randomseed, args.username)
+    random_user_feed_generator(
+        args.platform, args.numposts, args.randomseed, args.username
+    )

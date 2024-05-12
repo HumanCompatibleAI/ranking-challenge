@@ -6,79 +6,135 @@ Your ranker should be implemented as a service that accepts an HTTP POST request
 
 ## Request/response format
 
-_NOTE: This is provisional, and will almost certainly change._
+Your ranker should accept a list of social media posts and comments, each with a corresponding ID, in JSON format.
 
-Your ranker should accept a list of social media posts and comments, each with a corresponding ID, in JSON format:
+### Request
+
+(this example is a single post with two threaded comments)
 
 ```jsonc
+Request:
 {
-    "session": {
-        "user_id": "193a9e01-8849-4e1f-a42a-a859fa7f2ad3",
-        "user_name_hash": "6511c5688bbb87798128695a283411a26da532df06e6e931a53416e379ddda0e",
-        "platform": "reddit",
-        "current_time": "2024-01-20 18:41:20",
+  "session": {
+    "user_id": "74f2e773-5bcd-4936-8d21-dbd34d4f8b18",
+    "user_name_hash": "a7a80e8ea489379a64f8d188fceefa6c77550f1682ee2b76b09d5270a7378cc1",
+    "cohort": "AB",
+    "platform": "reddit",
+    "current_time": "2024-04-15T23:59:46.295928Z"
+  },
+  "survey": {
+    "party_id": "democrat",
+    "party_write_in": null,
+    "support": "strong",
+    "party_lean": "democrat",
+    "sex": "female",
+    "age": 3,
+    "education": 4,
+    "ideology": 5,
+    "income": 6,
+    "ethnicity": "native_american",
+    "ethnicity_write_in": null,
+    "socmed_use": 7,
+    "browser_perc": 0.8,
+    "mobile_perc": 0.2
+  },
+  "items": [
+    {
+      "id": "76d8710b-e1d2-40b6-8d99-084d4bc7f3ce",
+      "post_id": null,
+      "parent_id": null,
+      "title": null,
+      "text": "Atque tempore unde.\nSint quia minima blanditiis. Rem veritatis soluta quidem excepturi quam suscipit. Sequi doloribus consequuntur error nulla tenetur.",
+      "author_name_hash": "d9f7b073fc3a7c142d154f4edcce9837ba3c35c855281942b08f19340b4439a8",
+      "type": "post",
+      "embedded_urls": [
+        "https://dominguez.com/",
+        "https://everett-gordon.biz/",
+        "https://www.smith-miles.com/"
+      ],
+      "created_at": "2024-04-15T23:59:46.291735Z",
+      "engagements": {
+        "upvote": 28,
+        "downvote": 15,
+        "comment": 12,
+        "award": 16
+      }
     },
-    "items": [
-        {
-            "id": "de83fc78-d648-444e-b20d-853bf05e4f0e",
-            "title": "this is the post title, available only on reddit",
-            "text": "this is a social media post",
-            "author_name_hash": "60b46b7370f80735a06b7aa8c4eb6bd588440816b086d5ef7355cf202a118305",
-            "type": "post",
-            "created_at": "2023-12-06 17:02:11",
-            "enagements": {
-                "upvote": 34,
-                "downvote": 27
-            }
-        },
-        {
-            "id": "a4c08177-8db2-4507-acc1-1298220be98d",
-            "parent_id": "", // this is a top-level comment
-            "post_id": "de83fc78-d648-444e-b20d-853bf05e4f0e",
-            "text": "this is a comment, by the author of the post",
-            "author_name_hash": "60b46b7370f80735a06b7aa8c4eb6bd588440816b086d5ef7355cf202a118305",
-            "type": "comment",
-            "created_at": "2023-12-08 11:32:12",
-            "enagements": {
-                "upvote": 3,
-                "downvote": 5
-            }
-        },
-        {
-            "id": "06fb0b62-2501-40f1-a152-db019d03d2e6",
-            "parent_id": "a4c08177-8db2-4507-acc1-1298220be98d",
-            "post_id": "de83fc78-d648-444e-b20d-853bf05e4f0e",
-            "text": "this is a reply to the first comment",
-            "author_name_hash": "60b46b7370f80735a06b7aa8c4eb6bd588440816b086d5ef7355cf202a118305",
-            "type": "comment",
-            "created_at": "2023-12-08 11:32:12",
-            "enagements": {
-                "upvote": 3,
-                "downvote": 5
-            }
-        }
-    ]
+    {
+      "id": "620c78e8-5e15-4f82-a008-63cccf4cfdc2",
+      "post_id": "76d8710b-e1d2-40b6-8d99-084d4bc7f3ce",
+      "parent_id": null,
+      "title": null,
+      "text": "Necessitatibus ullam ullam est consequuntur. Eligendi dolorem officiis eligendi harum.",
+      "author_name_hash": "da41ff70b25c5ea3ebb595e9dd595688a7c5204fd3b89c5cb9005633799e493e",
+      "type": "comment",
+      "embedded_urls": [
+        "https://www.fox.com/"
+      ],
+      "created_at": "2024-04-15T23:59:46.295685Z",
+      "engagements": {
+        "upvote": 13,
+        "downvote": 50,
+        "comment": 50,
+        "award": 35
+      }
+    },
+    {
+      "id": "ae2ca8be-7faf-4d6e-95dd-2e5f1c27961e",
+      "post_id": "76d8710b-e1d2-40b6-8d99-084d4bc7f3ce",
+      "parent_id": "620c78e8-5e15-4f82-a008-63cccf4cfdc2",
+      "title": null,
+      "text": "Repellat sit sed animi sunt. Sapiente quam temporibus itaque tenetur dolores excepturi. Harum ullam magnam dolores vel fuga aut.",
+      "author_name_hash": "c54177a4d5fc74be8efc20af12c3c069adb646e7db712a347f05f12b056e732c",
+      "type": "comment",
+      "embedded_urls": [],
+      "created_at": "2024-04-15T23:59:46.295851Z",
+      "engagements": {
+        "upvote": 19,
+        "downvote": 31,
+        "comment": 32,
+        "award": 40
+      }
+    }
+  ]
 }
 ```
+
+### Response
 
 Your ranker should return an ordered list of IDs. You can also remove items by removing an ID, or add items by inserting a new ID that you generate. For new posts (only posts insertion is supported), also provide the post URL.
 
 ```jsonc
 {
-    "ranked_ids": [
-        "de83fc78-d648-444e-b20d-853bf05e4f0e",
-        "571775f3-2564-4cf5-b01c-f4cb6bab461b"
-    ],
-    "new_items": [
-        {
-            "id": "571775f3-2564-4cf5-b01c-f4cb6bab461b",
-            "url": "https://reddit.com/r/PRCExample/comments/1f33ead/example_to_insert",
-        }
-    ]
+  "ranked_ids": [
+    "76d8710b-e1d2-40b6-8d99-084d4bc7f3ce",
+    "620c78e8-5e15-4f82-a008-63cccf4cfdc2",
+    "ae2ca8be-7faf-4d6e-95dd-2e5f1c27961e",
+    "5e5a9aca-ce2d-4026-8386-e5d023d770a4",
+    "d285ae38-463d-4065-9478-a41a86710e97"
+  ],
+  "new_items": [
+    {
+      "id": "5e5a9aca-ce2d-4026-8386-e5d023d770a4",
+      "url": "https://williams-weber.com/"
+    },
+    {
+      "id": "d285ae38-463d-4065-9478-a41a86710e97",
+      "url": "https://grant-kent.org/"
+    }
+  ]
 }
 ```
 
 You do not need to return the same number of content items as you received. However, keep in mind that making a significant change in the number of items could have a negative impact on the user experience.
+
+## Pydantic models
+
+We have a set of pydanitc models, which are the source of truth for the API format. Using them, you can encode, parse, and validate the request and response json. You can also use them natively in fastapi. The examples above were generated from these models.
+
+You can always find the most current version in [examples/models](https://github.com/HumanCompatibleAI/ranking-challenge/tree/main/module)
+
+To use them, just `pip install ranking-challenge`, and use them to generate and validate your request/response json: [PyPI: ranking-challenge](https://pypi.org/project/ranking-challenge/).
 
 ## Request fields
 
@@ -86,8 +142,13 @@ You do not need to return the same number of content items as you received. Howe
 
 - `user_id`: A unique ID for this study participant.
 - `user_name_hash`: A (salted) hash of the user's username. We'll do our best to make it match the `author_name_hash` on posts authored by the current user.
+- `cohort`: The cohort to which the user has been assigned. You can safely ignore this. It is used by the PRC request router.
 - `platform`: One of `reddit`, `twitter`, `facebook`
 - `current_time`: The current time according to the user's browser, in UTC, in `YYYY-MM-DD hh:mm:ss` format.
+
+### Survey fields
+
+Demographic information about the user from the PRC intake survey. More documentation on the format is available in `examples/models/survey.py`
 
 ### Content items
 

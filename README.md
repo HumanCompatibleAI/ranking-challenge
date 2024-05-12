@@ -1,6 +1,6 @@
 # Prosocial Ranking Challenge
 
-<p align="center">
+<p align="center"><!-- markdownlint-disable MD033 -->
 
 ![Prosocial Ranking Challenge](/docs/img/prc-logo.png?raw=true)
 

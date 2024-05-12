@@ -1,0 +1,193 @@
+#+title: Background processes
+
+This example illustrates setting up and deploying persistence components as well
+as various background processes (scrapers, workers, and scorers), and using
+their output in the ranker's serving path to deliver the final results to the
+user.
+
+Specifically, we show the following components:
+- posts database (SQLite) with users' historical feeds
+- a job queue (Celery) that can be used to create ad hoc and scheduled jobs that
+  perform background processing/analytics on this database
+- Redis instance to store these processing results for use by the ranking server
+  and/or other stateful algorithms
+- the ranking server itself
+
+* Infrastructure
+
+** Ranking server
+
+The ranking server is a FastAPI application that serves the ranking requests. This
+one is very similar to the FastAPI NLTK example, but simpler. It reads some values
+from Redis (common named entities from the posts database), which are then used to
+compute a simple post ranking, showing entries that do not contain any of those words
+first.
+
+To run just the ranking server outside of Docker:
+
+#+begin_src shell
+cd ranking_server
+uvicorn ranking_server:app --reload
+#+end_src
+
+** Posts database
+
+The posts database is an SQLite file. It can be generated via running
+preprocessing followed by an ETL script:
+
+#+begin_src shell
+cd $PROJECT_ROOT/sample_data
+python preprocessing.py
+python seed_post_db.py --no-user-pool
+#+end_src
+
+This will bulk-populate the database with posts from the sample data, using a
+single dummy user and leaving timestamps unmodified.
+
+If the table ~posts~ already exists, you will need to supply either the
+~--drop-table~ or ~--upsert~ flags to either drop the table or upsert the data.
+
+It is also possible to simulate a user pool which emulates many aspects of the
+expected ranking requests from a cohort of users. The following options are used
+to customize this process:
+
+- ~n-users (int)~: The number of users to generate (default 500).
+- ~baseline-sessions-per-day (int)~: Default number of sessions per user per day (default 1)
+- ~items-per-session (int)~: Number of items (posts) per session (default 10).
+- ~activity-distribution (string-valued dict, e.g.: '0.2:20,1:65,5:15')~:
+      A dictionary mapping relative activity level values to the relative proportion
+      of users with that activity level. This distribution will be normalized, so
+      the numbers may be floats representing probabilities or unnormalized relative
+      numbers, etc.  The keys are the activity levels, which indicate the number of
+      sessions per day relative to the baseline option above. For instance, the
+      value of 5 with the ~baseline-sessions-per-day~ of 1 means that these are
+      active users which on average will have 5 sessions per day,  (default: '1:1',
+      i.e. all users will have the same baseline activity level 1)
+- ~platform-distribution (string-valued dict, e.g.: 'facebook:11,reddit:7.4,twitter:1.25')~:
+      Relative number of users for each platform. When omitted, the seed script
+      will allocate the number of users proportional to the number of sample posts
+      in the seed data. This is done so that the sample feeds for different platform
+      represent roughly the same time interval, even with data imbalances.
+
+The sample feeds exhibit the following artificial constraints:
+- We employ a simplifying assumption that a user belongs to one platform only,
+  which allows us to easily specify the distribution and sample from it.
+- A sample post will occur once in a feed. In reality, posts may be duplicated
+  across multiple users' feeds and/or be shown in multiple sessions for a given user.
+- When different activity levels are specified, the number of users may deviate
+  from ~n-users~ somewhat due to rejection sampling.
+- Likewise, the earliest feed time for any given platform will vary somewhat due
+  to sampling variance.
+
+It is important to note that when creating the simulated feeds, synthetic
+timestamps are generated for the sessions and posts. They maintain chronological
+order of the feed and are computed such that the newest timestamps are
+(approximately) current time.
+
+** Job queue
+
+We use Celery for running async and scheduled jobs. A Redis instance is used
+both as a broker and result persistence backend. As per standard Celery
+practices, we define the tasks in a file ~tasks.py~, and use the ~@app.task~
+decorator to register them.
+
+As per best practices, we avoid using complex data structures as arguments to
+tasks, as this may require having to deal with serialization issues.
+
+Ad hoc tasks are enqueued using the ~.delay()~ method.
+In addition, we provide an example that sets up a scheduled task via a hook.
+Consult [[https://docs.celeryq.dev/en/stable/userguide/periodic-tasks.html][Celery documentation]] for more details.
+
+We illustrate two ways of returning results from tasks:
+- using the ~AsyncResult~ object and its blocking ~.get()~ method
+- explicitly storing the result in the Redis
+
+** Redis
+
+A Redis instance is used not only as part of Celery deployment, but also as a
+general-purpose data store for persisting and consuming results of async
+processing. Because of memory constraints, it is discouraged to store
+large result sets in Redis.
+
+Redis is the primary way that your offline tasks will communicate with the components
+in the serving path.
+
+If your Celery jobs need to store large intermediate results, you may want to consider
+changing the backend so as to not overload the Redis instance. For example, you could
+use the SQLAlchemy backend to store results in a local database file. You can assume
+that you will have a single worker host, so the local filesystem is a fine place for
+data that is not needed outside the worker.
+
+* Data models
+
+The posts database has the following schema:
+
+#+begin_src sql
+CREATE TABLE posts (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  post_id TEXT,
+  session_timestamp TIMESTAMP,
+  session_user_id TEXT,
+  platform TEXT,
+  type TEXT,
+  author_name_hash TEXT,
+  created_at TIMESTAMP,
+  post_blob TEXT
+)
+#+end_src
+
+We index on ~created_at~, ~post_id~, and ~session_user_id~.
+
+The ~post_blob~ field contains a JSON representation of the ~ContentItem~
+pydantic model. The other fields are metadata derived from either the
+~ContentItem~ or ~Session~ models.
+
+* Setting up your environment
+
+To run this example, you need to have the following installed:
+- celery
+- redis-py
+- pytest
+- pandas
+- nltk
+
+You will need to use a virtual environment using your preferred tool.
+We provide ~environment.yml~ for conda users which can be used to install all dependencies.
+To use it: ~conda env create -f environment.yml~
+
+To re-export dependencies, use ~conda env export > environment.yml~.
+
+You will also need docker compose to run Redis and Celery.
+
+* Running tests
+
+We provide a makefile to run tests. You can run the tests using ~make test~.
+
+This will spin up a Redis container, run the tests, and tear down the container.
+Running this command is a good way to ensure that your environment is set up correctly.
+
+Be aware that due to the way pytest interacts with Celery, you need to ensure
+that no other Celery workers are running when you run the tests.
+
+In addition, the tests use the raw data timestamps in SQL queries, thus they
+will fail unless ~--no-user-pool~ flag is used when seeding the database. A
+self-contained test setup (from the current directory) is therefore something like this:
+
+#+begin_src bash
+export PROJECT_ROOT=$(git rev-parse --show-toplevel)
+export TEST_POSTS_DB=sample_posts_test.db
+export POSTS_DB_PATH=${PROJECT_ROOT}/sample_data/${TEST_POSTS_DB}
+cd ${PROJECT_ROOT}/sample_data
+python seed_post_db.py --no-user-pool --dbname=${TEST_POSTS_DB}
+python -m nltk.downloader maxent_ne_chunker words punkt averaged_perceptron_tagger
+cd ${PROJECT_ROOT}/examples/combined
+make test
+rm ${POSTS_DB_PATH}
+#+end_src
+
+(this is available as a shell script you can run in ~ci.sh~ or ~make ci~)
+
+* Running examples
+
+1. Launch Celery, Redis, and FastAPI using ~make run~ or ~docker compose up --build~.
+2. Run the sample tasks via ~python worker.py~.

@@ -1,0 +1,15 @@
+fastapi>=0.110.0
+flask
+flask-cors
+httpx
+nltk
+openai
+pytest
+python-dotenv
+requests
+uvicorn[standard]
+ranking-challenge
+black
+isort
+autoflake
+fakeredis

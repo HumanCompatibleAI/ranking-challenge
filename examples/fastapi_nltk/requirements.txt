@@ -1,7 +1,0 @@
-fastapi>=0.110.0
-nltk
-pytest
-requests
-httpx
-uvicorn[standard]
-

@@ -5,6 +5,8 @@ from dotenv import load_dotenv
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from openai import OpenAI
+from ranking_challenge.request import RankingRequest
+from ranking_challenge.response import RankingResponse
 
 from sample_data import NEW_POSTS
 
@@ -58,6 +60,13 @@ def generate_rankings(items):
 @app.route("/rank", methods=["POST"])  # Allow POST requests for this endpoint
 def rank_items():
     post_data = request.json
+
+    # Ensure that the input data is valid as a side-effect. This isn't a best-practice,
+    # but it demonstrates how you can use the models for validation even if you're not
+    # using them to process any data. But consider using FastAPI since it will do all
+    # of this automatically for you.
+    RankingRequest(**post_data)
+
     items = post_data.get("items")
 
     ranked_ids = generate_rankings(items)
@@ -69,6 +78,8 @@ def rank_items():
         "ranked_ids": ranked_ids,
         "new_items": NEW_POSTS,
     }
+
+    RankingResponse(**result)  # ensure that the response is valid as a side-effect
 
     return jsonify(result)
 

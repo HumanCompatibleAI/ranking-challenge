@@ -121,6 +121,7 @@ celerybeat.pid
 
 # Environments
 .env
+.envrc
 .venv
 env/
 venv/
@@ -172,3 +173,10 @@ cython_debug/
 Network Trash Folder
 Temporary Items
 .apdisk
+
+# processed sample data
+sample_posts.db
+normalized_posts_facebook.json
+normalized_posts_reddit.json
+normalized_posts_twitter.json
+

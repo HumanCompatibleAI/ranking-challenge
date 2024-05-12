@@ -5,7 +5,7 @@ This is a toy example that ranks a set of content items based on their sentiment
 ## Setting up your environment
 
 1. Create a virtual environment using your preferred method
-2. `pip install -r requirements.txt`
+2. `pip install -r requirements.txt` at the repo root
 
 ## Running tests
 
