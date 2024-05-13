@@ -87,7 +87,9 @@ class ContentItem(BaseModel):
 
 class Session(BaseModel):
     """Data that is scoped to the user's browsing session (generally a single page view)"""
-
+    session_id: str = Field(
+        description="A unique ID for this page view, updated on navigation events. Use this to determine if two requests came from the same page."
+    )
     user_id: str = Field(
         description="A unique id for this study participant. Will remain fixed for the duration of the experiment."
     )
@@ -99,6 +101,9 @@ class Session(BaseModel):
     )
     platform: Literal["twitter", "reddit", "facebook"] = Field(
         description="The platform on which the user is viewing content."
+    )
+    url: HttpUrl = Field(
+        description="The URL of the page that the user is viewing, minus the query string portion. This can help you to determine which part of the application the user is in."
     )
     current_time: datetime = Field(
         description="The current time according to the user's browser, in UTC, in `YYYY-MM-DD hh:mm:ss` format."
