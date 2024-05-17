@@ -38,7 +38,7 @@ def make_random_user_session(platform, username=None, seed_no=None) -> Session:
 def count_lines_by_platform():
     line_counts = {}
     for platform in platforms:
-        with open(NORMALIZED_DATA_FILE_FN(platform), "r") as f:
+        with open(NORMALIZED_DATA_FILE_FN(platform), "r", encoding="utf-8") as f:
             line_counts[platform] = sum(1 for _ in f)
     return line_counts
 
@@ -134,7 +134,7 @@ def bulk_feed_generator(
         # generate "superfeed" for a single dummy user
         for platform in platforms:
             session = make_random_user_session(platform, "test_user")
-            with open(NORMALIZED_DATA_FILE_FN(platform), "r") as f:
+            with open(NORMALIZED_DATA_FILE_FN(platform), "r", encoding="utf-8") as f:
                 feed = [ContentItem.model_validate_json(line) for line in f]
                 feed_list.append(RankingRequest(session=session, items=feed))
         return feed_list
@@ -144,7 +144,7 @@ def bulk_feed_generator(
     platform_users = user_pool.by_platform()
     for platform in platforms:
         users = platform_users[platform]
-        with open(NORMALIZED_DATA_FILE_FN(platform), "r") as f:
+        with open(NORMALIZED_DATA_FILE_FN(platform), "r", encoding="utf-8") as f:
             items = [ContentItem.model_validate_json(line) for line in f]
             feed_list.extend(_make_feed(platform, users, items, feed_params, seed=seed))
 
@@ -169,7 +169,7 @@ def random_user_feed_generator(platform, x, seed_no, username):
     random.seed(seed_no)
     session = make_random_user_session(platform, username, seed_no)
 
-    with open(NORMALIZED_DATA_FILE_FN(platform), "r") as f:
+    with open(NORMALIZED_DATA_FILE_FN(platform), "r", encoding="utf-8") as f:
         feed_sample = random.sample(
             [ContentItem.model_validate_json(line) for line in f], x
         )

@@ -12,6 +12,12 @@ from ranking_challenge.response import RankingResponse
 from ranking_challenge.survey import SurveyResponse
 
 
+URI_PATHS = {
+    "reddit": ["", "r/aww", "r/politics", "r/programming", "r/technology"],
+    "twitter": ["", "jack", "TiredActor", "horse_ebooks"],
+    "facebook": ["", "photo", "groups"],
+}
+
 def fake_request(n_posts=1, n_comments=0, platform="reddit"):
     posts = [fake_item(platform=platform, type="post") for _ in range(n_posts)]
     comments = []
@@ -31,6 +37,8 @@ def fake_request(n_posts=1, n_comments=0, platform="reddit"):
     return RankingRequest(
         session=Session(
             user_id=str(uuid4()),
+            session_id=str(uuid4()),
+            url=f"https://{platform}.com/{fake.random_element(URI_PATHS[platform])}",
             user_name_hash=hashlib.sha256(fake.name().encode()).hexdigest(),
             cohort="AB",
             platform=platform,

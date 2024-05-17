@@ -50,7 +50,12 @@ class User:
             raise ValueError(
                 f"User {self.username} is not registered on platform {platform}"
             )
+        session_id = "".join(random.choices(string.ascii_lowercase, k=32))
+        url_slug = "".join(random.choices(string.ascii_lowercase, k=8))
+        url = f"https://{platform}.com/{url_slug}"
         return Session(
+            session_id=session_id,
+            url=url,
             user_id=self.user_id,
             user_name_hash=self.user_name_hash,
             cohort=self.cohort,
