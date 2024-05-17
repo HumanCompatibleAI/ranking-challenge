@@ -317,7 +317,7 @@ for platform, data_file in platform_filtered_data.items():
     filename = NORMALIZED_DATA_FILE_FN(platform)
     logger.info(f"Writing {filename}")
     items = normalize_data(platform, data_file)
-    with open(filename, "w", encoding="cp1252 ") as f:
+    with open(filename, "w", encoding="utf-8") as f:
         for item in items:
             f.write(item.model_dump_json() + "\n")
 
