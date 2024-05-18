@@ -21,7 +21,7 @@ parentdir = os.path.dirname(  # make it possible to import from ../ in a reliabl
 )
 sys.path.insert(0, parentdir)
 
-from module.src.ranking_challenge.request import (ContentItem, FacebookEngagements,
+from ranking_challenge.request import (ContentItem, FacebookEngagements,
                                        RankingRequest, RedditEngagements,
                                        Session, TwitterEngagements)
 

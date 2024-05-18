@@ -23,7 +23,7 @@ sys.path.insert(0, parentdir)
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from normalize_posts import NORMALIZED_DATA_FILE_FN
-from module.src.ranking_challenge.request import ContentItem, RankingRequest, Session
+from ranking_challenge.request import ContentItem, RankingRequest, Session
 from user_pool import FeedParams, User, UserPool
 
 platforms = ["facebook", "reddit", "twitter"]
