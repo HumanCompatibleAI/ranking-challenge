@@ -28,6 +28,36 @@ services:
       - redis
     environment:
       REDIS_CONNECTION_STRING: redis://redis:6379
-    command: uvicorn ranking_server:app --host 0.0.0.0 --port 8000
+    command: uvicorn ranking_server:app --host 0.0.0.0 --port 8001
     ports:
-      - "8000:8000"
+      - "8001:8001"
+
+  redis-scorer-queue:
+    image: redis
+    ports:
+      - "6380:6380"
+    command: ["redis-server", "--port", "6380"]
+
+  celery-scorer-worker0:
+    build:
+      context: scorer_worker
+      dockerfile: Dockerfile.scorer_worker
+    volumes:
+      - ./scorer_worker:/app
+    depends_on:
+      - redis
+    environment:
+      REDIS_CONNECTION_STRING: redis://redis-scorer-queue:6380
+    command: celery -A tasks worker --loglevel=info
+
+  celery-scorer-worker1:
+    build:
+      context: scorer_worker
+      dockerfile: Dockerfile.scorer_worker
+    volumes:
+      - ./scorer_worker:/app
+    depends_on:
+      - redis
+    environment:
+      REDIS_CONNECTION_STRING: redis://redis-scorer-queue:6380
+    command: celery -A tasks worker --loglevel=info

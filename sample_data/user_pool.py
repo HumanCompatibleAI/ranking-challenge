@@ -9,7 +9,7 @@ SALT = b"9vB8nz93vD5T7Khw"
 
 DEFAULT_PLATFORMS = ["facebook", "reddit", "twitter"]
 
-from ranking_challenge.request import Session
+from module.src.ranking_challenge.request import Session
 
 
 @dataclass

@@ -22,7 +22,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from data_pull import bulk_feed_generator, count_lines_by_platform
 from normalize_posts import NORMALIZED_DATA_FILE_FN
-from ranking_challenge.request import ContentItem, Session
+from module.src.ranking_challenge.request import ContentItem, Session
 from user_pool import FeedParams
 
 platforms = ["facebook", "reddit", "twitter"]
