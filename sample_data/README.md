@@ -23,7 +23,7 @@ required json format
 ### In short
 
 ```bash
-python preprocess.py
+python preprocessing.py
 python data_pull.py -p reddit -n 50
 ```
 

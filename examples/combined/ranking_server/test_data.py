@@ -2,10 +2,12 @@
 
 BASIC_EXAMPLE = {
     "session": {
+        "session_id": "719f30a1-03bb-4d41-a654-138da5c43547",
         "user_id": "193a9e01-8849-4e1f-a42a-a859fa7f2ad3",
         "user_name_hash": "6511c5688bbb87798128695a283411a26da532df06e6e931a53416e379ddda0e",
         "platform": "reddit",
         "cohort": "AB",
+        "url": "https://reddit.com/r/PRCExample/1f4deg/example_to_insert",
         "current_time": "2024-01-20 18:41:20",
     },
     "items": [

@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ranking_challenge"
-version = "1.0.3"
+version = "2.0.0"
 description = "The Prosocial Ranking Challenge"
 readme = "README.md"
 authors = [{ name = "Ian Baker", email = "ian@sonic.net" }]

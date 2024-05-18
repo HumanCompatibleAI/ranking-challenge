@@ -16,11 +16,13 @@ Your ranker should accept a list of social media posts and comments, each with a
 Request:
 {
   "session": {
-    "user_id": "74f2e773-5bcd-4936-8d21-dbd34d4f8b18",
-    "user_name_hash": "a7a80e8ea489379a64f8d188fceefa6c77550f1682ee2b76b09d5270a7378cc1",
+    "session_id": "fd5d9298-4ca8-4d73-969a-e8da20ff321b",
+    "user_id": "41d01393-090a-4fcb-942b-28d87a7a06f3",
+    "user_name_hash": "62a7c41518817a23706dfd600f29b1329eee18c69b014ae34265d7cf0ed183f1",
     "cohort": "AB",
     "platform": "reddit",
-    "current_time": "2024-04-15T23:59:46.295928Z"
+    "url": "https://reddit.com/r/technology",
+    "current_time": "2024-05-13T21:08:32.211000Z"
   },
   "survey": {
     "party_id": "democrat",
@@ -40,60 +42,60 @@ Request:
   },
   "items": [
     {
-      "id": "76d8710b-e1d2-40b6-8d99-084d4bc7f3ce",
+      "id": "368ba07d-a25f-49b1-a9dc-c1e909defe38",
       "post_id": null,
       "parent_id": null,
       "title": null,
-      "text": "Atque tempore unde.\nSint quia minima blanditiis. Rem veritatis soluta quidem excepturi quam suscipit. Sequi doloribus consequuntur error nulla tenetur.",
-      "author_name_hash": "d9f7b073fc3a7c142d154f4edcce9837ba3c35c855281942b08f19340b4439a8",
+      "text": "Perspiciatis itaque ea praesentium assumenda recusandae doloremque. Esse cupiditate praesentium praesentium minima. Quam odio vitae consequatur occaecati modi.",
+      "author_name_hash": "0d231f75b907c4106f2d4d72437b55f9527babb045ac07ca791871c902d556f4",
       "type": "post",
-      "embedded_urls": [
-        "https://dominguez.com/",
-        "https://everett-gordon.biz/",
-        "https://www.smith-miles.com/"
-      ],
-      "created_at": "2024-04-15T23:59:46.291735Z",
+      "embedded_urls": [],
+      "created_at": "2024-05-13T21:08:32.210288Z",
       "engagements": {
-        "upvote": 28,
-        "downvote": 15,
+        "upvote": 4,
+        "downvote": 6,
         "comment": 12,
-        "award": 16
+        "award": 4
       }
     },
     {
-      "id": "620c78e8-5e15-4f82-a008-63cccf4cfdc2",
-      "post_id": "76d8710b-e1d2-40b6-8d99-084d4bc7f3ce",
+      "id": "8421a4c8-f21b-482f-a8f4-ff1489365470",
+      "post_id": "368ba07d-a25f-49b1-a9dc-c1e909defe38",
       "parent_id": null,
       "title": null,
-      "text": "Necessitatibus ullam ullam est consequuntur. Eligendi dolorem officiis eligendi harum.",
-      "author_name_hash": "da41ff70b25c5ea3ebb595e9dd595688a7c5204fd3b89c5cb9005633799e493e",
+      "text": "Itaque suscipit fuga consectetur sint totam reiciendis. Praesentium corrupti quasi aperiam molestias similique.",
+      "author_name_hash": "778f795ac95b76ce554a685d937bf25082ec51c88bc15c68f7089c38fea40eda",
       "type": "comment",
       "embedded_urls": [
-        "https://www.fox.com/"
+        "https://rodriguez-davis.info/"
       ],
-      "created_at": "2024-04-15T23:59:46.295685Z",
+      "created_at": "2024-05-13T21:08:32.210409Z",
       "engagements": {
-        "upvote": 13,
-        "downvote": 50,
-        "comment": 50,
-        "award": 35
+        "upvote": 27,
+        "downvote": 19,
+        "comment": 21,
+        "award": 29
       }
     },
     {
-      "id": "ae2ca8be-7faf-4d6e-95dd-2e5f1c27961e",
-      "post_id": "76d8710b-e1d2-40b6-8d99-084d4bc7f3ce",
-      "parent_id": "620c78e8-5e15-4f82-a008-63cccf4cfdc2",
+      "id": "10b94628-b443-4b0a-ba9f-2efaafd19bff",
+      "post_id": "368ba07d-a25f-49b1-a9dc-c1e909defe38",
+      "parent_id": "8421a4c8-f21b-482f-a8f4-ff1489365470",
       "title": null,
-      "text": "Repellat sit sed animi sunt. Sapiente quam temporibus itaque tenetur dolores excepturi. Harum ullam magnam dolores vel fuga aut.",
-      "author_name_hash": "c54177a4d5fc74be8efc20af12c3c069adb646e7db712a347f05f12b056e732c",
+      "text": "Odio rerum quos nostrum ut sapiente possimus. Expedita fuga dolores quas maiores. Quos repellat deserunt corrupti assumenda amet debitis.",
+      "author_name_hash": "c97ea217787cd8d9fc8166c662075382b2ec0e2bc93bb2c82bf68f0b6527f05e",
       "type": "comment",
-      "embedded_urls": [],
-      "created_at": "2024-04-15T23:59:46.295851Z",
+      "embedded_urls": [
+        "https://www.johnson.com/",
+        "http://www.mckinney-johnson.com/",
+        "https://www.flowers.net/"
+      ],
+      "created_at": "2024-05-13T21:08:32.210636Z",
       "engagements": {
-        "upvote": 19,
-        "downvote": 31,
-        "comment": 32,
-        "award": 40
+        "upvote": 34,
+        "downvote": 27,
+        "comment": 5,
+        "award": 16
       }
     }
   ]
@@ -107,20 +109,20 @@ Your ranker should return an ordered list of IDs. You can also remove items by r
 ```jsonc
 {
   "ranked_ids": [
-    "76d8710b-e1d2-40b6-8d99-084d4bc7f3ce",
-    "620c78e8-5e15-4f82-a008-63cccf4cfdc2",
-    "ae2ca8be-7faf-4d6e-95dd-2e5f1c27961e",
-    "5e5a9aca-ce2d-4026-8386-e5d023d770a4",
-    "d285ae38-463d-4065-9478-a41a86710e97"
+    "368ba07d-a25f-49b1-a9dc-c1e909defe38",
+    "8421a4c8-f21b-482f-a8f4-ff1489365470",
+    "10b94628-b443-4b0a-ba9f-2efaafd19bff",
+    "abe08409-3421-4aba-8e5f-648f4276dbf0",
+    "3950fd29-45d2-4cb3-8cd0-47869ca98eb3"
   ],
   "new_items": [
     {
-      "id": "5e5a9aca-ce2d-4026-8386-e5d023d770a4",
-      "url": "https://williams-weber.com/"
+      "id": "abe08409-3421-4aba-8e5f-648f4276dbf0",
+      "url": "https://smith.com/"
     },
     {
-      "id": "d285ae38-463d-4065-9478-a41a86710e97",
-      "url": "https://grant-kent.org/"
+      "id": "3950fd29-45d2-4cb3-8cd0-47869ca98eb3",
+      "url": "https://www.martinez.com/"
     }
   ]
 }
@@ -142,8 +144,10 @@ To use them, just `pip install ranking-challenge`, and use them to generate and 
 
 - `user_id`: A unique ID for this study participant.
 - `user_name_hash`: A (salted) hash of the user's username. We'll do our best to make it match the `author_name_hash` on posts authored by the current user.
+- `session_id`: A unique ID for this page view, updated on navigation events. Use this to determine if two requests came from the same page.
 - `cohort`: The cohort to which the user has been assigned. You can safely ignore this. It is used by the PRC request router.
 - `platform`: One of `reddit`, `twitter`, `facebook`
+- `url`: The URL of the page that the user is viewing, minus the query string portion. This can help you to determine which part of the application the user is in.
 - `current_time`: The current time according to the user's browser, in UTC, in `YYYY-MM-DD hh:mm:ss` format.
 
 ### Survey fields
