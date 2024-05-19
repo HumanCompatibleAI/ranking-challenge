@@ -17,12 +17,13 @@ Consult the `scorer_advanced.py` example for a more sophisticated approach.
 
 import logging
 import time
-from typing import Any, Callable
+from typing import Any
 
 from celery import group
 from celery.utils import uuid
 from celery.exceptions import TimeoutError
 
+from scorer_worker.celery_app import app as celery_app
 
 logging.basicConfig(
     level=logging.INFO,
@@ -37,9 +38,7 @@ logger = logging.getLogger(__name__)
 DEADLINE_SECONDS = 1
 
 
-def compute_scores(
-    runner: Callable[..., Any], input: list[dict[str, Any]]
-) -> list[dict[str, Any]]:
+def compute_scores(task_name: str, input: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Task dispatcher/manager.
 
     Args:
@@ -52,7 +51,9 @@ def compute_scores(
 
     tasks = []
     for item in input:
-        tasks.append(runner.s(**item).set(task_id=uuid()))
+        tasks.append(
+            celery_app.signature(task_name, kwargs=item, options={"task_id": uuid()})
+        )
 
     logger.info(f"Sending the task group")
     async_result = group(tasks).apply_async()

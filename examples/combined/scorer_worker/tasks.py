@@ -35,12 +35,10 @@ Models:
 """
 
 import logging
-import os
 import random
 import time
 from typing import Any
 
-from celery import Celery
 from nltk.sentiment import SentimentIntensityAnalyzer
 from pydantic import BaseModel, Field
 
@@ -51,13 +49,10 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-
-REDIS_DB = f"{os.getenv('REDIS_CONNECTION_STRING', 'redis://localhost:6380')}/0"
+from scorer_worker.celery_app import app
 
 KILL_DEADLINE_SECONDS = 5
 TIME_LIMIT_SECONDS = 4
-
-app = Celery("tasks", backend=REDIS_DB, broker=REDIS_DB)
 
 
 class SentimentScoreInput(BaseModel):

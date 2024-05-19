@@ -23,12 +23,14 @@ services:
       context: ranking_server
       dockerfile: Dockerfile
     volumes:
-      - ./ranking_server:/app
+      - .:/app
     depends_on:
       - redis
     environment:
       REDIS_CONNECTION_STRING: redis://redis:6379
-    command: uvicorn ranking_server:app --host 0.0.0.0 --port 8001
+      SCORER_QUEUE_BROKER: redis://redis-scorer-queue:6380
+      SCORER_QUEUE_BACKEND: redis://redis-scorer-queue:6380
+    command: uvicorn ranking_server.ranking_server:app --host 0.0.0.0 --port 8001 --log-config ranking_server/logging_config.yaml
     ports:
       - "8001:8001"
 
@@ -42,22 +44,20 @@ services:
     build:
       context: scorer_worker
       dockerfile: Dockerfile.scorer_worker
-    volumes:
-      - ./scorer_worker:/app
     depends_on:
-      - redis
+      - redis-scorer-queue
     environment:
-      REDIS_CONNECTION_STRING: redis://redis-scorer-queue:6380
-    command: celery -A tasks worker --loglevel=info
+      SCORER_QUEUE_BROKER: redis://redis-scorer-queue:6380
+      SCORER_QUEUE_BACKEND: redis://redis-scorer-queue:6380
+    command: celery -A scorer_worker.celery_app worker --loglevel=info
 
   celery-scorer-worker1:
     build:
       context: scorer_worker
       dockerfile: Dockerfile.scorer_worker
-    volumes:
-      - ./scorer_worker:/app
     depends_on:
-      - redis
+      - redis-scorer-queue
     environment:
-      REDIS_CONNECTION_STRING: redis://redis-scorer-queue:6380
-    command: celery -A tasks worker --loglevel=info
+      SCORER_QUEUE_BROKER: redis://redis-scorer-queue:6380
+      SCORER_QUEUE_BACKEND: redis://redis-scorer-queue:6380
+    command: celery -A scorer_worker.celery_app worker --loglevel=info

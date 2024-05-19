@@ -28,7 +28,7 @@ from typing import Any, NamedTuple
 from celery import group
 from celery.utils import uuid
 
-from tasks import random_scorer, sentiment_scorer
+from scorer_worker.celery_app import app as celery_app
 
 logging.basicConfig(
     level=logging.INFO,
@@ -48,15 +48,15 @@ class ScorerType(Enum):
 
     Attributes:
         name (str): The name of the task.
-        runner (Callable): The function that implements the task logic.
+        runner (str): The registered celery task runner function.
 
     This functionality may also be rolled into a more heavyweight class,
     possibly in the `tasks.py` module, that can tie together the task label,
     input/output models, and runner function.
     """
 
-    SENTIMENT = (auto(), sentiment_scorer)
-    RANDOM = (auto(), random_scorer)
+    SENTIMENT = (auto(), "scorer_worker.tasks.sentiment_scorer")
+    RANDOM = (auto(), "scorer_worker.tasks.random_scorer")
 
     def __init__(self, id, runner):
         self.id = id
@@ -166,7 +166,11 @@ def compute_scores(input: list[ScoringInput]) -> list[ScoringOutput]:
         item_id = item.data["item_id"]
         task_id = uuid()
         task_params[task_id] = TaskParams(scorer_type=scorer_type, item_id=item_id)
-        tasks.append(scorer_type.runner.s(**item.data).set(task_id=task_id))
+        tasks.append(
+            celery_app.signature(
+                scorer_type.runner, kwargs=item.data, options={"task_id": task_id}
+            )
+        )
 
     logger.info(f"Sending the task group")
     t_sent = time.time() - t_start

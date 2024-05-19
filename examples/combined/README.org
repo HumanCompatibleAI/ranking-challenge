@@ -133,6 +133,19 @@ function documentation.
 Advanced example in particular makes an attempt to address the above-mentioned
 complexities.
 
+Note that we keep the Celery application definition and celery task definitions
+in separate modules, and enqueue the registered tasks using string-valued names.
+This allows us to simplify deployment by avoiding importing the task
+dependencies in the server.
+
+To ensure that the scoring examples works as expected on your system, we provide
+tests:
+
+#+begin_src shell
+cd scorer_worker
+make test
+#+end_src
+
 ** Redis
 
 A Redis instance is used not only as part of Celery deployment, but also as a

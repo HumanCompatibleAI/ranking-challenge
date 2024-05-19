@@ -6,6 +6,5 @@ COPY requirements.txt .
 
 RUN pip install --no-cache-dir -r requirements.txt
 RUN python -m nltk.downloader vader_lexicon movie_reviews punkt
-# RUN python -m nltk.downloader all
 
-COPY . .
+COPY . scorer_worker/
