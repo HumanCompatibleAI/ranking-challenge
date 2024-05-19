@@ -11,6 +11,7 @@ Specifically, we show the following components:
   perform background processing/analytics on this database
 - Redis instance to store these processing results for use by the ranking server
   and/or other stateful algorithms
+- scoring infrastructure (another Celery job queue)
 - the ranking server itself
 
 * Infrastructure
@@ -101,6 +102,49 @@ Consult [[https://docs.celeryq.dev/en/stable/userguide/periodic-tasks.html][Cele
 We illustrate two ways of returning results from tasks:
 - using the ~AsyncResult~ object and its blocking ~.get()~ method
 - explicitly storing the result in the Redis
+
+** Parallel scorers
+
+We assume that post-level parallelism can be used when performing certain types
+of scoring. In order to take advantage of that, we provide a separate Celery job queue.
+
+This scoring is expected to be performed in the serving path, so both the
+individual scoring tasks as well as queue management need to be optimized for
+low latency. As such, we expect the queue worker capacity and worker types
+(e.g. CPU vs GPU) to be provisioned in accordance with anticipated load.
+
+The implementer's job is to provide both the worker tasks (~tasks.py~) and the
+driver code suitable for performing the scoring. Depending on the scoring
+algorithm(s), there are multiple considerations that may be addressed, such as:
+
+ - running a heterogeneous workload, e.g. with multiple task types
+ - gracefully handling failures, e.g. enabling partial results
+ - fine-grained control over task execution time limits
+ - tuning and profiling
+
+Given the flexibility of Celery and Python, there are multiple valid ways to
+achieve the above goals. We provide two examples to illustrate possible ways
+to set up the job queue, and briefly discuss alternatives in the module and
+function documentation.
+
+ - ~scorer_worker/scorer_basic.py~
+ - ~scorer_worker/scorer_advanced.py~
+
+Advanced example in particular makes an attempt to address the above-mentioned
+complexities.
+
+Note that we keep the Celery application definition and celery task definitions
+in separate modules, and enqueue the registered tasks using string-valued names.
+This allows us to simplify deployment by avoiding importing the task
+dependencies in the server.
+
+To ensure that the scoring examples works as expected on your system, we provide
+tests:
+
+#+begin_src shell
+cd scorer_worker
+make test
+#+end_src
 
 ** Redis
 

@@ -1,5 +1,8 @@
 import json
 import os
+import sys
+from concurrent.futures.thread import ThreadPoolExecutor
+import logging
 
 from fastapi import FastAPI
 import redis
@@ -8,7 +11,17 @@ from fastapi.middleware.cors import CORSMiddleware
 from ranking_challenge.request import RankingRequest
 from ranking_challenge.response import RankingResponse
 
-from test_data import NEW_POSTS
+from scorer_worker.scorer_basic import compute_scores as compute_scores_basic
+
+from .test_data import NEW_POSTS
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s.%(msecs)03d [%(levelname)s] %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S,%f",
+)
+logger = logging.getLogger(__name__)
+logger.info("Starting up")
 
 REDIS_DB = f"{os.getenv('REDIS_CONNECTION_STRING', 'redis://localhost:6379')}/0"
 
@@ -29,11 +42,14 @@ app.add_middleware(
 )
 
 memoized_redis_client = None
+
+
 def redis_client():
     global memoized_redis_client
     if memoized_redis_client is None:
         memoized_redis_client = redis.Redis.from_url(REDIS_DB)
     return memoized_redis_client
+
 
 # Straw-man fake hypothesis for why this ranker example is worthwhile:
 # Paying too much attention to popular things or people makes a user sad.
@@ -42,6 +58,7 @@ def redis_client():
 # will be less sad.
 @app.post("/rank")
 def rank(ranking_request: RankingRequest) -> RankingResponse:
+    logger.info(f"Received ranking request")
     ranked_results = []
     # get the named entities from redis
     result_key = "my_worker:scheduled:top_named_entities"
@@ -51,9 +68,7 @@ def rank(ranking_request: RankingRequest) -> RankingResponse:
 
     for item in ranking_request.items:
         score = -1 if any(ne in item.text for ne in top_entities) else 1
-        ranked_results.append(
-            {"id": item.id, "score": score}
-        )
+        ranked_results.append({"id": item.id, "score": score})
 
     ranked_results.sort(key=lambda x: x["score"], reverse=True)
     ranked_ids = [content["id"] for content in ranked_results]
@@ -61,5 +76,19 @@ def rank(ranking_request: RankingRequest) -> RankingResponse:
     result = {
         "ranked_ids": ranked_ids,
     }
+    with ThreadPoolExecutor() as executor:
+        data = [{"item_id": x.id, "text": x.text} for x in ranking_request.items]
+        future = executor.submit(
+            compute_scores_basic, "scorer_worker.tasks.sentiment_scorer", data
+        )
+        try:
+            # logger.info("Submitting score computation task")
+            scoring_result = future.result(timeout=0.5)
+        except TimeoutError:
+            logger.error("Timed out waiting for score results")
+        except Exception as e:
+            logger.error(f"Error computing scores: {e}")
+        else:
+            logger.info(f"Computed scores: {scoring_result}")
 
     return result
