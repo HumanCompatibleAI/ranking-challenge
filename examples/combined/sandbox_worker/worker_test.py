@@ -2,22 +2,17 @@
 #            with raw sample data WITHOUT the user pool (which modifies timestamps)
 #            i.e. with `python seed_post_db.py --no-user-pool`
 import json
-import os
-import sqlite3
+import psycopg2
 from datetime import datetime, UTC
 
 import pytest
 import redis
-from tasks import (POSTS_DB, REDIS_DB, count_top_named_entities,
-                   query_posts_db, substring_matches_by_platform)
-
-
-@pytest.fixture(scope="session", autouse=True)
-def assert_posts_db_exists():
-    if not os.path.exists(POSTS_DB):
-        pytest.exit(
-            f"Posts db file does not exist (POSTS_DB={POSTS_DB}). Ensure you've seeded the database and that its path is correct."
-        )
+from tasks import (
+    REDIS_DB,
+    count_top_named_entities,
+    query_posts_db,
+    substring_matches_by_platform,
+)
 
 
 def test_query_posts_db(celery_app, celery_worker):
@@ -33,7 +28,7 @@ def test_query_posts_db_invalid_sql(celery_app, celery_worker):
     sql = """
 SELECT foo FROM bar;
 """
-    with pytest.raises(sqlite3.OperationalError):
+    with pytest.raises(psycopg2.errors.UndefinedTable):
         result = query_posts_db.delay(sql)
         result.get()
 

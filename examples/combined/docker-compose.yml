@@ -1,4 +1,26 @@
 services:
+
+  database:
+    image: postgres:15.7-alpine
+    ports:
+      - "5435:5432"
+    # command: -c 'log_statement=all'  # uncomment to debug
+    environment:
+      POSTGRES_DB: "postgres"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+      POSTGRES_HOST_AUTH_METHOD: "trust"
+      PGPORT: "5432"
+    # We want persistence for our database
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 1s
+      timeout: 14s
+      retries: 15
+      start_period: 2m
+
   redis:
     image: redis
     ports:
@@ -15,7 +37,7 @@ services:
       - redis
     environment:
       REDIS_CONNECTION_STRING: redis://redis:6379
-      POSTS_DB_PATH: /data/sample_posts.db
+      DB_URI: postgres://postgres:postgres@database:5432/postgres?sslmode=disable
     command: celery -A tasks worker -B --loglevel=info
 
   ranker:
@@ -61,3 +83,7 @@ services:
       SCORER_QUEUE_BROKER: redis://redis-scorer-queue:6380
       SCORER_QUEUE_BACKEND: redis://redis-scorer-queue:6380
     command: celery -A scorer_worker.celery_app worker --loglevel=info
+
+volumes:
+  postgres_data:
+    driver: local

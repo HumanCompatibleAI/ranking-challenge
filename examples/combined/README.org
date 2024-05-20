@@ -33,10 +33,13 @@ uvicorn ranking_server:app --reload
 
 ** Posts database
 
-The posts database is an SQLite file. It can be generated via running
-preprocessing followed by an ETL script:
+The posts database is stored in SQLite and mirrored in Postgres to better
+emulate the production deployment. In its most basic form, it can be generated
+via running preprocessing followed by an ETL script:
 
 #+begin_src shell
+export DB_URI=postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable
+# ^ use the connection string appropriate for your postgres instance
 cd $PROJECT_ROOT/sample_data
 python preprocessing.py
 python seed_post_db.py --no-user-pool
@@ -84,6 +87,18 @@ It is important to note that when creating the simulated feeds, synthetic
 timestamps are generated for the sessions and posts. They maintain chronological
 order of the feed and are computed such that the newest timestamps are
 (approximately) current time.
+
+Note that in order to get the posts database into Postgres for use by the other
+examples, it is necessary to have a Postgres instance running and provide its
+URI in the ~DB_URI~ environment variable. The easiest way to do this is to use
+the Docker container provided with the combined infrastructure example.
+
+Finally, it is possible to perform the ETL from the SQLite file into Postgres.
+Just run the script as follows:
+
+#+begin_src shell
+python seed_post_db.py --dbname=sample_posts.db --seed-postgres
+#+end_src
 
 ** Job queue
 
