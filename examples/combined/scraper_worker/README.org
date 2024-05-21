@@ -51,22 +51,22 @@ implementation. For our example, we create the following tables in SQLite for
 the scraping results and errors:
 
 #+begin_src sql
-CREATE TABLE scraper_data (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+CREATE TABLE IF NOT EXISTS scraper_data (
+  id SERIAL PRIMARY KEY,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   post_id TEXT NOT NULL UNIQUE,
   source_id TEXT,
   task_id TEXT,
-  post_blob TEXT NOT NULL
-)
+  post_blob JSONB
+);
 
-CREATE TABLE scraper_errors (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+CREATE TABLE IF NOT EXISTS scraper_errors (
+  id SERIAL PRIMARY KEY,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   source_id TEXT,
   task_id TEXT,
   message TEXT
-)
+);
 #+end_src
 
 * Setting up your environment
@@ -75,7 +75,8 @@ This example is fully dockerized, so no dependencies beyond Docker are needed to
 run it. For local testing and development, however, you may need to install
 Celery and [[https://github.com/vladkens/twscrape.git][twscrape]].
 
-The SQLite database for scraping results will be at ~$PROJECT_ROOT/sample_data/scraper_results.db~
+Scraper code requires ~SCRAPER_DB_URI~ to be set. A typical value might be
+: postgres://postgres:postgres@database:5432/scraper?sslmode=disable
 
 Please note that even though here the scraper and ingestion containers are
 running "side by side" in this example, in an actual deployment they will be
@@ -87,4 +88,4 @@ instance to serve as a Celery broker)
 
 1. Set up the Twitter credentials as described above.
 2. Run ~docker compose up --build~.
-3. Examine the log output and/or the SQLite database.
+3. Examine the log output and/or the Postgres database.

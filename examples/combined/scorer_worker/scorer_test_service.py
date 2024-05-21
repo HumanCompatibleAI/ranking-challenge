@@ -16,8 +16,8 @@ Add the following to docker-compose in order to use it:
     depends_on:
       - redis
     environment:
-      SCORER_QUEUE_BROKER: redis://redis-scorer-queue:6380
-      SCORER_QUEUE_BACKEND: redis://redis-scorer-queue:6380
+      CELERY_BROKER: redis://redis-scorer-queue:6380
+      CELERY_BACKEND: redis://redis-scorer-queue:6380
     command: uvicorn scorer_test_service:app --host 0.0.0.0 --port 8002
     ports:
       - "8002:8002"

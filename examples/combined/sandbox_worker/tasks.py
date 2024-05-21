@@ -9,13 +9,17 @@ import psycopg2
 from sqlalchemy import create_engine
 import redis
 from celery import Celery
-from helpers import extract_named_entities
+
+from sandbox_worker.helpers import extract_named_entities
 
 REDIS_DB = f"{os.getenv('REDIS_CONNECTION_STRING', 'redis://localhost:6379')}/0"
-DB_URI = os.getenv("DB_URI")
-assert DB_URI, "DB_URI environment variable must be set"
+DB_URI = os.getenv("POSTS_DB_URI")
+assert DB_URI, "POSTS_DB_URI environment variable must be set"
 
-app = Celery("tasks", backend=REDIS_DB, broker=REDIS_DB)
+BROKER = f"{os.getenv('CELERY_BROKER', 'redis://localhost:6380')}/0"
+BACKEND = f"{os.getenv('CELERY_BACKEND', 'redis://localhost:6380')}/0"
+app = Celery("tasks", backend=BACKEND, broker=BROKER)
+app.conf.task_default_queue = "tasks"
 
 
 @app.task
@@ -128,7 +132,7 @@ SELECT post_blob FROM posts WHERE created_at BETWEEN '{from_}' AND '{to}';"""
         con.close()
 
 
-@app.on_after_configure.connect
+@app.on_after_finalize.connect
 def setup_periodic_tasks(sender, **kwargs):
     """Setup periodic tasks for the worker.
 

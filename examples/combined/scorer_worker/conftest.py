@@ -6,6 +6,8 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 pytest_plugins = ("celery.contrib.pytest",)
 
+from scorer_worker.celery_app import app as celery_app
+
 
 @pytest.fixture(scope="session")
 def celery_config():
@@ -36,6 +38,6 @@ def celery_worker_parameters():
 
 @pytest.fixture(scope="session")
 def my_celery_app():
-    from scorer_worker.celery_app import app as celery_app
-
+    celery_app.conf.task_default_queue = "celery"
+    # ^ this is the default queue name used by test workers
     return celery_app

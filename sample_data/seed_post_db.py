@@ -6,10 +6,14 @@ import csv
 import tempfile
 import sqlite3
 import psycopg2
+from psycopg2.extensions import parse_dsn, ISOLATION_LEVEL_AUTOCOMMIT
+from psycopg2 import sql as pgsql
 import sys
 from typing import Optional
 
 import sql
+
+DuplicateDatabase = psycopg2.errors.lookup("42P04")
 
 logging.basicConfig(
     level=logging.INFO,
@@ -33,6 +37,23 @@ from user_pool import FeedParams
 platforms = ["facebook", "reddit", "twitter"]
 
 DBNAME = "sample_posts.db"
+
+
+def ensure_database(db_uri: str):
+    parsed_dsn = parse_dsn(db_uri)
+    dbname = parsed_dsn.pop("dbname")
+    connection = psycopg2.connect(**parsed_dsn)
+    connection.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+    cursor = connection.cursor()
+    try:
+        cursor.execute(
+            f"CREATE DATABASE {dbname}".format(dbname=pgsql.Identifier(dbname))
+        )
+    except DuplicateDatabase:
+        pass
+    finally:
+        cursor.close()
+        connection.close()
 
 
 def get_yes_no(prompt="Please enter 'yes' or 'no' [Y/n]: "):
@@ -202,6 +223,7 @@ def copy_sqlite_to_postgres(
 
 
 def do_seed_postgres(db_uri):
+    ensure_database(db_uri)
     con = psycopg2.connect(db_uri)
     sqlite_con = sqlite3.connect(DBNAME)
     try:
@@ -243,7 +265,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--seed-postgres",
         action="store_true",
-        help="Copy the SQLite table to postgres. Requires DB_URI env var to be set",
+        help="Copy the SQLite table to postgres. Requires POSTS_DB_URI env var to be set",
     )
 
     args = parser.parse_args()
@@ -258,11 +280,11 @@ if __name__ == "__main__":
     if args.dbname:
         DBNAME = args.dbname.removesuffix(".db") + ".db"
 
-    db_uri = os.environ.get("DB_URI")
+    db_uri = os.environ.get("POSTS_DB_URI")
     if args.seed_postgres:
         logger.info(f"Performing ETL from {DBNAME} to postgres")
         if not db_uri:
-            logger.error("DB_URI environment variable not set.")
+            logger.error("POSTS_DB_URI environment variable not set.")
             sys.exit(1)
         else:
             do_seed_postgres(db_uri)
@@ -294,7 +316,7 @@ if __name__ == "__main__":
 
     if not db_uri:
         logger.warning(
-            "DB_URI environment variable not set; skipping copying to postgres."
+            "POSTS_DB_URI environment variable not set; skipping copying to postgres."
         )
     else:
         do_seed_postgres(db_uri)

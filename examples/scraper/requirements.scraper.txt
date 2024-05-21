@@ -1,0 +1,6 @@
+celery[pytest]
+fastapi
+pytest
+redis
+git+https://github.com/vladkens/twscrape.git#egg=twscrape
+requests

@@ -7,7 +7,8 @@ from datetime import datetime, UTC
 
 import pytest
 import redis
-from tasks import (
+
+from sandbox_worker.tasks import (
     REDIS_DB,
     count_top_named_entities,
     query_posts_db,
@@ -15,7 +16,7 @@ from tasks import (
 )
 
 
-def test_query_posts_db(celery_app, celery_worker):
+def test_query_posts_db(my_celery_app, celery_worker):
     sql = """
 SELECT platform, post_blob FROM posts WHERE created_at BETWEEN '2017-05-31' AND '2017-06-01';
 """
@@ -24,7 +25,7 @@ SELECT platform, post_blob FROM posts WHERE created_at BETWEEN '2017-05-31' AND 
     assert len(result.get()) > 0
 
 
-def test_query_posts_db_invalid_sql(celery_app, celery_worker):
+def test_query_posts_db_invalid_sql(my_celery_app, celery_worker):
     sql = """
 SELECT foo FROM bar;
 """
@@ -33,7 +34,7 @@ SELECT foo FROM bar;
         result.get()
 
 
-def test_substring_matches_by_platform(celery_app, celery_worker):
+def test_substring_matches_by_platform(my_celery_app, celery_worker):
     result = substring_matches_by_platform.delay(
         "trump", "2017-05-31", "2017-06-01"
     ).get()
@@ -41,7 +42,7 @@ def test_substring_matches_by_platform(celery_app, celery_worker):
     assert result["total_rows"] > 0
 
 
-def test_count_top_named_entities(celery_app, celery_worker):
+def test_count_top_named_entities(my_celery_app, celery_worker):
     result_key = "my_worker_test:top_named_entities"
     result = count_top_named_entities.delay(10, "2017-05-31", "2017-06-01", result_key)
     success = result.get()

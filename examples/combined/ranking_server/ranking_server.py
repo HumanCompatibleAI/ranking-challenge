@@ -13,7 +13,7 @@ from ranking_challenge.response import RankingResponse
 
 from scorer_worker.scorer_basic import compute_scores as compute_scores_basic
 
-from .test_data import NEW_POSTS
+from ranking_server.test_data import NEW_POSTS
 
 logging.basicConfig(
     level=logging.INFO,
@@ -63,14 +63,18 @@ def rank(ranking_request: RankingRequest) -> RankingResponse:
     # get the named entities from redis
     result_key = "my_worker:scheduled:top_named_entities"
 
-    top_entities_record = json.loads(redis_client().get(result_key).decode("utf-8"))
-    top_entities = set(top_entities_record["top_named_entities"])
+    top_entities = []
+    cached_results = redis_client().get(result_key)
+    if cached_results != None:
+        top_entities_record = json.loads(cached_results.decode("utf-8"))
+        top_entities = set(x[0] for x in top_entities_record["top_named_entities"])
 
     for item in ranking_request.items:
         score = -1 if any(ne in item.text for ne in top_entities) else 1
         ranked_results.append({"id": item.id, "score": score})
 
     ranked_results.sort(key=lambda x: x["score"], reverse=True)
+
     ranked_ids = [content["id"] for content in ranked_results]
 
     result = {
@@ -91,4 +95,4 @@ def rank(ranking_request: RankingRequest) -> RankingResponse:
         else:
             logger.info(f"Computed scores: {scoring_result}")
 
-    return result
+    return RankingResponse(**result)
