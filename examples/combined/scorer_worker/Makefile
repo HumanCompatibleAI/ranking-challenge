@@ -14,6 +14,6 @@ DOCKER_COMPOSE := $(shell \
 )
 
 test:
-	$(DOCKER_COMPOSE) -f ../docker-compose.yml up -d redis-scorer-queue --build
+	$(DOCKER_COMPOSE) -f ../docker-compose.yml up -d redis-celery-broker --build
 	pytest scorer_test.py
 	$(DOCKER_COMPOSE) down

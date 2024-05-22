@@ -2,25 +2,21 @@
 #            with raw sample data WITHOUT the user pool (which modifies timestamps)
 #            i.e. with `python seed_post_db.py --no-user-pool`
 import json
-import os
-import sqlite3
+import psycopg2
 from datetime import datetime, UTC
 
 import pytest
 import redis
-from tasks import (POSTS_DB, REDIS_DB, count_top_named_entities,
-                   query_posts_db, substring_matches_by_platform)
+
+from sandbox_worker.tasks import (
+    REDIS_DB,
+    count_top_named_entities,
+    query_posts_db,
+    substring_matches_by_platform,
+)
 
 
-@pytest.fixture(scope="session", autouse=True)
-def assert_posts_db_exists():
-    if not os.path.exists(POSTS_DB):
-        pytest.exit(
-            f"Posts db file does not exist (POSTS_DB={POSTS_DB}). Ensure you've seeded the database and that its path is correct."
-        )
-
-
-def test_query_posts_db(celery_app, celery_worker):
+def test_query_posts_db(my_celery_app, celery_worker):
     sql = """
 SELECT platform, post_blob FROM posts WHERE created_at BETWEEN '2017-05-31' AND '2017-06-01';
 """
@@ -29,16 +25,16 @@ SELECT platform, post_blob FROM posts WHERE created_at BETWEEN '2017-05-31' AND 
     assert len(result.get()) > 0
 
 
-def test_query_posts_db_invalid_sql(celery_app, celery_worker):
+def test_query_posts_db_invalid_sql(my_celery_app, celery_worker):
     sql = """
 SELECT foo FROM bar;
 """
-    with pytest.raises(sqlite3.OperationalError):
+    with pytest.raises(psycopg2.errors.UndefinedTable):
         result = query_posts_db.delay(sql)
         result.get()
 
 
-def test_substring_matches_by_platform(celery_app, celery_worker):
+def test_substring_matches_by_platform(my_celery_app, celery_worker):
     result = substring_matches_by_platform.delay(
         "trump", "2017-05-31", "2017-06-01"
     ).get()
@@ -46,7 +42,7 @@ def test_substring_matches_by_platform(celery_app, celery_worker):
     assert result["total_rows"] > 0
 
 
-def test_count_top_named_entities(celery_app, celery_worker):
+def test_count_top_named_entities(my_celery_app, celery_worker):
     result_key = "my_worker_test:top_named_entities"
     result = count_top_named_entities.delay(10, "2017-05-31", "2017-06-01", result_key)
     success = result.get()

@@ -1,31 +1,27 @@
+import asyncio
+import logging
 import os
 from datetime import datetime
-from celery import Celery
-import asyncio
-from twscrape import API, gather
+from typing import Optional
+
 import requests
-import logging
+from twscrape import API, gather
+
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s [%(levelname)s] %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S'
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
 )
 logger = logging.getLogger(__name__)
 
-from typing import Optional
-
-from ingester import IngestData, SuccessData, ErrorData
-
-REDIS_DB = f"{os.getenv('REDIS_CONNECTION_STRING', 'redis://localhost:6379')}/0"
-
-
-app = Celery('tasks', backend=REDIS_DB, broker=REDIS_DB)
+from scraper_worker.celery_app import app
+from scraper_worker.ingester import ErrorData, IngestData, SuccessData
 
 
 def send_result(task_id: str, results: list[dict], error: Optional[str] = None):
-    results_endpoint = os.getenv('RESULTS_ENDPOINT')
+    results_endpoint = os.getenv("RESULTS_ENDPOINT")
     if not results_endpoint:
-        logger.error('RESULTS_ENDPOINT not set, skipping results submission.')
+        logger.error("RESULTS_ENDPOINT not set, skipping results submission.")
         return
     try:
         if error:
@@ -33,19 +29,19 @@ def send_result(task_id: str, results: list[dict], error: Optional[str] = None):
                 success=False,
                 task_id=task_id,
                 timestamp=datetime.now(),
-                error=ErrorData(message=error)
+                error=ErrorData(message=error),
             )
         else:
             request = IngestData(
                 success=True,
                 task_id=task_id,
                 timestamp=datetime.now(),
-                data=SuccessData(content_items=results)
+                data=SuccessData(content_items=results),
             )
-        response = requests.post(results_endpoint, json=request.model_dump(mode='json'))
+        response = requests.post(results_endpoint, json=request.model_dump(mode="json"))
         response.raise_for_status()
     except Exception as e:
-        logger.error(f'Error submitting results: {e}')
+        logger.error(f"Error submitting results: {e}")
 
 
 def process_success(task_id: str, results: list[dict]):
@@ -57,16 +53,18 @@ def process_error(task_id: str, message: str):
 
 
 async def _twitter_search_top(query: str, limit: int = 10) -> list[dict]:
-    cookies = os.getenv('TWITTER_SESSION_COOKIE')
-    username = os.getenv('TWITTER_USERNAME')
-    email = os.getenv('TWITTER_EMAIL')
+    cookies = os.getenv("TWITTER_SESSION_COOKIE")
+    username = os.getenv("TWITTER_USERNAME")
+    email = os.getenv("TWITTER_EMAIL")
     if not all([cookies, username, email]):
-        raise ValueError('Twitter session cookie, username, and email must be set.')
+        raise ValueError("Twitter session cookie, username, and email must be set.")
 
     api = API()
-    await api.pool.add_account(username, 'dummy-pass', email, 'dummy-mail-pass', cookies=cookies) #type: ignore
+    await api.pool.add_account(
+        username, "dummy-pass", email, "dummy-mail-pass", cookies=cookies
+    )  # type: ignore
 
-    tweets = await gather(api.search(query, limit=limit, kv={'product': 'Top'}))
+    tweets = await gather(api.search(query, limit=limit, kv={"product": "Top"}))
     results = []
     for tweet in tweets:
         results.append(tweet.dict())
@@ -91,18 +89,20 @@ def twitter_search_top(self, query: str, limit: int = 10) -> None:
         process_error(task_id, str(e))
 
 
-@app.on_after_configure.connect
+@app.on_after_finalize.connect
 def setup_periodic_tasks(sender, **kwargs):
     """Setup periodic tasks for the worker."""
     task_manifest = {
-        'twitter_top_musk': {
-            'function': twitter_search_top,
-            'args': ['elon musk', 10],
+        "twitter_top_musk": {
+            "function": twitter_search_top,
+            "args": ["elon musk", 10],
         },
-        'twitter_top_f1': {
-            'function': twitter_search_top,
-            'args': ['formula one', 10],
-        }
+        "twitter_top_f1": {
+            "function": twitter_search_top,
+            "args": ["formula one", 10],
+        },
     }
     for task_id, task in task_manifest.items():
-        sender.add_periodic_task(300, task['function'].s(*task['args']).set(task_id=task_id), name=task_id)
+        sender.add_periodic_task(
+            600, task["function"].s(*task["args"]).set(task_id=task_id), name=task_id
+        )

@@ -6,4 +6,4 @@ COPY requirements.scraper.txt .
 
 RUN pip install --no-cache-dir -r requirements.scraper.txt
 
-COPY tasks.py .
+COPY . scraper_worker/

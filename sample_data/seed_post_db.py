@@ -2,9 +2,18 @@ import argparse
 import inspect
 import logging
 import os
+import csv
+import tempfile
 import sqlite3
+import psycopg2
+from psycopg2.extensions import parse_dsn, ISOLATION_LEVEL_AUTOCOMMIT
+from psycopg2 import sql as pgsql
 import sys
 from typing import Optional
+
+import sql
+
+DuplicateDatabase = psycopg2.errors.lookup("42P04")
 
 logging.basicConfig(
     level=logging.INFO,
@@ -30,6 +39,33 @@ platforms = ["facebook", "reddit", "twitter"]
 DBNAME = "sample_posts.db"
 
 
+def ensure_database(db_uri: str):
+    parsed_dsn = parse_dsn(db_uri)
+    dbname = parsed_dsn.pop("dbname")
+    connection = psycopg2.connect(**parsed_dsn)
+    connection.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+    cursor = connection.cursor()
+    try:
+        cursor.execute(
+            f"CREATE DATABASE {dbname}".format(dbname=pgsql.Identifier(dbname))
+        )
+    except DuplicateDatabase:
+        pass
+    finally:
+        cursor.close()
+        connection.close()
+
+
+def get_yes_no(prompt="Please enter 'yes' or 'no' [Y/n]: "):
+    while True:
+        answer = input(prompt).strip().lower()
+        if answer in ["", "y", "yes"]:
+            return True
+        elif answer in ["n", "no"]:
+            return False
+        print("Invalid input.")
+
+
 def exists_table_post(con: sqlite3.Connection):
     cur = con.cursor()
     cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='posts'")
@@ -43,23 +79,8 @@ def drop_table_posts(con: sqlite3.Connection):
 
 
 def create_db(con: sqlite3.Connection):
-    sql_create_table = """
-CREATE TABLE posts (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  post_id TEXT,
-  session_timestamp TIMESTAMP,
-  session_user_id TEXT,
-  platform TEXT,
-  type TEXT,
-  author_name_hash TEXT,
-  created_at TIMESTAMP,
-  post_blob TEXT
-)"""
-    sql_create_indexes = """
-CREATE INDEX idx_created_at ON posts(created_at);
-CREATE INDEX idx_post_id ON posts(post_id);
-CREATE INDEX idx_session_user_id ON posts(session_user_id);
-    """
+    sql_create_table = sql.SQLITE_CREATE_TABLE_POSTS
+    sql_create_indexes = sql.SQLITE_CREATE_INDEXES_POSTS
     cur = con.cursor()
     cur.execute(sql_create_table)
     cur.executescript(sql_create_indexes)
@@ -144,6 +165,76 @@ def parse_platform_setting(value):
     )
 
 
+def ensure_postgres_table(con: psycopg2.extensions.connection):
+    cur = con.cursor()
+    cur.execute(sql.POSTGRES_CREATE_TABLE_POSTS)  # create table if not exists
+    cur.execute(sql.POSTGRES_CREATE_INDEXES_POSTS)  # create indexes if not exists
+    cur.execute("""
+        SELECT EXISTS(
+            SELECT 1
+            FROM posts
+        );
+    """)
+    try:
+        result = cur.fetchone()
+        if result is None:
+            raise Exception("Unable to check for table existence.")
+        if result[0]:
+            if get_yes_no(
+                "Postgres table 'posts' already exists and is not empty. Drop it? [Y/n]: "
+            ):
+                cur.execute("DROP TABLE posts")
+                cur.execute(sql.POSTGRES_CREATE_TABLE_POSTS)
+                cur.execute(sql.POSTGRES_CREATE_INDEXES_POSTS)
+                con.commit()
+    finally:
+        cur.close()
+
+
+from pathlib import Path
+
+
+def copy_sqlite_to_postgres(
+    con: psycopg2.extensions.connection, sqlite_con: sqlite3.Connection
+):
+    # Export table to CSV
+
+    temp_dir = Path(__file__).parent.resolve()
+    with tempfile.TemporaryDirectory() as temp_dir:
+        filename = "posts.csv"
+        cur = sqlite_con.cursor()
+        try:
+            with open(Path(temp_dir) / filename, "w+", newline="") as temp_csv:
+                cur.execute(f"SELECT * FROM posts")
+                csvwriter = csv.writer(
+                    temp_csv, escapechar="\\", doublequote=False, quoting=csv.QUOTE_NONE
+                )
+                csvwriter.writerows(cur.fetchall())
+        finally:
+            cur.close()
+
+        cur = con.cursor()
+        try:
+            with open(Path(temp_dir) / filename, "r", newline="") as temp_csv:
+                cur.copy_from(temp_csv, "posts", sep=",", null="")
+                logger.info("Data copied to postgres.")
+        finally:
+            cur.close()
+
+
+def do_seed_postgres(db_uri):
+    ensure_database(db_uri)
+    con = psycopg2.connect(db_uri)
+    sqlite_con = sqlite3.connect(DBNAME)
+    try:
+        ensure_postgres_table(con)
+        copy_sqlite_to_postgres(con, sqlite_con)
+    finally:
+        con.commit()
+        con.close()
+        sqlite_con.close()
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process feed parameters.")
     parser.add_argument("--n-users", required=False, type=int, default=500)
@@ -171,6 +262,11 @@ if __name__ == "__main__":
     table_controls.add_argument(
         "--upsert", action="store_true", help="Upsert into the table."
     )
+    parser.add_argument(
+        "--seed-postgres",
+        action="store_true",
+        help="Copy the SQLite table to postgres. Requires POSTS_DB_URI env var to be set",
+    )
 
     args = parser.parse_args()
 
@@ -183,6 +279,16 @@ if __name__ == "__main__":
 
     if args.dbname:
         DBNAME = args.dbname.removesuffix(".db") + ".db"
+
+    db_uri = os.environ.get("POSTS_DB_URI")
+    if args.seed_postgres:
+        logger.info(f"Performing ETL from {DBNAME} to postgres")
+        if not db_uri:
+            logger.error("POSTS_DB_URI environment variable not set.")
+            sys.exit(1)
+        else:
+            do_seed_postgres(db_uri)
+            sys.exit(0)
 
     feed_params = FeedParams(
         n_users=args.n_users,
@@ -207,3 +313,10 @@ if __name__ == "__main__":
         seed_db(None, seed=args.randomseed)
     else:
         seed_db(feed_params, seed=args.randomseed)
+
+    if not db_uri:
+        logger.warning(
+            "POSTS_DB_URI environment variable not set; skipping copying to postgres."
+        )
+    else:
+        do_seed_postgres(db_uri)

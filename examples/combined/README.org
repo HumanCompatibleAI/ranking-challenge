@@ -6,12 +6,13 @@ their output in the ranker's serving path to deliver the final results to the
 user.
 
 Specifically, we show the following components:
-- posts database (SQLite) with users' historical feeds
+- posts database (Postgres) with users' historical feeds
 - a job queue (Celery) that can be used to create ad hoc and scheduled jobs that
   perform background processing/analytics on this database
 - Redis instance to store these processing results for use by the ranking server
   and/or other stateful algorithms
 - scoring infrastructure (another Celery job queue)
+- scraping infrastructure (another set of Celery scheduled tasks)
 - the ranking server itself
 
 * Infrastructure
@@ -33,10 +34,43 @@ uvicorn ranking_server:app --reload
 
 ** Posts database
 
-The posts database is an SQLite file. It can be generated via running
-preprocessing followed by an ETL script:
+The posts database is stored in SQLite and mirrored in Postgres to better
+emulate the production deployment. In its most basic form, it can be generated
+via running preprocessing followed by an ETL script:
+
+*** Data models
+
+The posts database has the following schema:
+
+#+begin_src sql
+CREATE TABLE IF NOT EXISTS posts (
+  id SERIAL PRIMARY KEY,
+  post_id TEXT,
+  session_timestamp TIMESTAMP WITH TIME ZONE,
+  session_user_id TEXT,
+  platform TEXT,
+  type TEXT,
+  author_name_hash TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  post_blob JSONB
+);
+
+CREATE INDEX IF NOT EXISTS idx_created_at ON posts(created_at);
+CREATE INDEX IF NOT EXISTS idx_post_id ON posts(post_id);
+CREATE INDEX IF NOT EXISTS idx_session_user_id ON posts(session_user_id);
+#+end_src
+
+We index on ~created_at~, ~post_id~, and ~session_user_id~.
+
+The ~post_blob~ field contains a JSON representation of the ~ContentItem~
+pydantic model. The other fields are metadata derived from either the
+~ContentItem~ or ~Session~ models.
+
+*** Seeding the database from sample data
 
 #+begin_src shell
+export POSTS_DB_URI=postgres://postgres:postgres@localhost:5432/posts?sslmode=disable
+# ^ use the connection string appropriate for your postgres instance
 cd $PROJECT_ROOT/sample_data
 python preprocessing.py
 python seed_post_db.py --no-user-pool
@@ -84,6 +118,18 @@ It is important to note that when creating the simulated feeds, synthetic
 timestamps are generated for the sessions and posts. They maintain chronological
 order of the feed and are computed such that the newest timestamps are
 (approximately) current time.
+
+Note that in order to get the posts database into Postgres for use by the other
+examples, it is necessary to have a Postgres instance running and provide its
+URI in the ~POSTS_DB_URI~ environment variable. The easiest way to do this is to use
+the Docker container provided with the combined infrastructure example.
+
+Finally, it is possible to perform the ETL from the SQLite file into Postgres.
+Just run the script as follows:
+
+#+begin_src shell
+python seed_post_db.py --dbname=sample_posts.db --seed-postgres
+#+end_src
 
 ** Job queue
 
@@ -146,6 +192,10 @@ cd scorer_worker
 make test
 #+end_src
 
+** Scrapers
+
+Please see ~scraper_worker/README.org~
+
 ** Redis
 
 A Redis instance is used not only as part of Celery deployment, but also as a
@@ -161,30 +211,6 @@ changing the backend so as to not overload the Redis instance. For example, you 
 use the SQLAlchemy backend to store results in a local database file. You can assume
 that you will have a single worker host, so the local filesystem is a fine place for
 data that is not needed outside the worker.
-
-* Data models
-
-The posts database has the following schema:
-
-#+begin_src sql
-CREATE TABLE posts (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  post_id TEXT,
-  session_timestamp TIMESTAMP,
-  session_user_id TEXT,
-  platform TEXT,
-  type TEXT,
-  author_name_hash TEXT,
-  created_at TIMESTAMP,
-  post_blob TEXT
-)
-#+end_src
-
-We index on ~created_at~, ~post_id~, and ~session_user_id~.
-
-The ~post_blob~ field contains a JSON representation of the ~ContentItem~
-pydantic model. The other fields are metadata derived from either the
-~ContentItem~ or ~Session~ models.
 
 * Setting up your environment
 

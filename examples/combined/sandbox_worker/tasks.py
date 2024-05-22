@@ -1,19 +1,25 @@
 import json
 import os
-import sqlite3
 from collections import Counter
 from datetime import datetime, UTC
 from typing import Any
 
 import pandas as pd
+import psycopg2
+from sqlalchemy import create_engine
 import redis
 from celery import Celery
-from helpers import extract_named_entities
+
+from sandbox_worker.helpers import extract_named_entities
 
 REDIS_DB = f"{os.getenv('REDIS_CONNECTION_STRING', 'redis://localhost:6379')}/0"
-POSTS_DB = os.getenv("POSTS_DB_PATH", "../../../sample_data/sample_posts.db")
+DB_URI = os.getenv("POSTS_DB_URI")
+assert DB_URI, "POSTS_DB_URI environment variable must be set"
 
-app = Celery("tasks", backend=REDIS_DB, broker=REDIS_DB)
+BROKER = f"{os.getenv('CELERY_BROKER', 'redis://localhost:6380')}/0"
+BACKEND = f"{os.getenv('CELERY_BACKEND', 'redis://localhost:6380')}/0"
+app = Celery("tasks", backend=BACKEND, broker=BROKER)
+app.conf.task_default_queue = "tasks"
 
 
 @app.task
@@ -33,7 +39,7 @@ def query_posts_db(query: str) -> list[Any]:
     function only in prototyping or when a small result set is explicitly
     guaranteed.
     """
-    con = sqlite3.connect(POSTS_DB)
+    con = psycopg2.connect(DB_URI)
     try:
         cur = con.cursor()
         cur.execute(query)
@@ -64,9 +70,11 @@ def substring_matches_by_platform(match: str, from_: str, to: str) -> Any:
     """
 
     query = f"""
-SELECT platform, post_blob->>'$.text' as text FROM posts WHERE created_at BETWEEN '{from_}' AND '{to}';"""
+SELECT platform, post_blob->>'text' as text FROM posts WHERE created_at BETWEEN '{from_}' AND '{to}';"""
 
-    con = sqlite3.connect(POSTS_DB)
+    # For Postgres, Pandas requires SQLAlchemy engine to connect instead of psycopg2
+    engine = create_engine(DB_URI.replace("postgres", "postgresql+psycopg2", 1))
+    con = engine.connect()
     try:
         df = pd.read_sql_query(query, con)
         df["contains_match"] = df["text"].apply(lambda x: match in x.lower())
@@ -101,12 +109,12 @@ def count_top_named_entities(k: int, from_: str, to: str, result_key: str) -> bo
     query = f"""
 SELECT post_blob FROM posts WHERE created_at BETWEEN '{from_}' AND '{to}';"""
 
-    con = sqlite3.connect(POSTS_DB)
+    con = psycopg2.connect(DB_URI)
     ne_counter = Counter()
     try:
         cur = con.cursor()
         cur.execute(query)
-        post_bodies = [json.loads(x[0]).get("text", "") for x in cur.fetchall()]
+        post_bodies = [x[0].get("text", "") for x in cur.fetchall()]
         for post_body in post_bodies:
             ne_counter.update(set(extract_named_entities(post_body)))
         r = redis.Redis.from_url(REDIS_DB)
@@ -124,7 +132,7 @@ SELECT post_blob FROM posts WHERE created_at BETWEEN '{from_}' AND '{to}';"""
         con.close()
 
 
-@app.on_after_configure.connect
+@app.on_after_finalize.connect
 def setup_periodic_tasks(sender, **kwargs):
     """Setup periodic tasks for the worker.
 

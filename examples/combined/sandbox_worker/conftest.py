@@ -1,13 +1,20 @@
 import pytest
 
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
 pytest_plugins = ("celery.contrib.pytest",)
+
+from sandbox_worker.tasks import app as celery_app
 
 
 @pytest.fixture(scope="session")
 def celery_config():
     return {
-        "broker_url": "redis://localhost:6379",
-        "result_backend": "redis://localhost:6379",
+        "broker_url": "redis://localhost:6380",
+        "result_backend": "redis://localhost:6380",
     }
 
 
@@ -28,3 +35,10 @@ def celery_worker_parameters():
         # here is the ping task: `from celery.contrib.testing.tasks import ping`
         "perform_ping_check": False,
     }
+
+
+@pytest.fixture(scope="session")
+def my_celery_app():
+    celery_app.conf.task_default_queue = "celery"
+    # ^ this is the default queue name used by test workers
+    return celery_app
