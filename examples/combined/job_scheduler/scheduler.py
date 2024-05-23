@@ -1,7 +1,6 @@
-"""Celery app for the scorer worker
+"""Celery app definition for the scheduler
 
-It is important to keep the Celery app in a separate module from the tasks
-so that it can be imported without the possibly heavyweight task dependencies.
+Its role is to just enqueue beat tasks.
 """
 
 import os

@@ -5,3 +5,4 @@ redis
 psycopg2
 git+https://github.com/vladkens/twscrape.git#egg=twscrape
 requests
+celery-redbeat
