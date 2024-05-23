@@ -60,7 +60,7 @@ services:
       CELERY_BROKER: redis://redis-celery-broker:6380
       CELERY_BACKEND: redis://redis-celery-broker:6380
       POSTS_DB_URI: postgres://postgres:postgres@database:5432/posts?sslmode=disable
-    command: bash -c "celery -A sandbox_worker.tasks beat & celery -A sandbox_worker.tasks worker -Q tasks --loglevel=info"
+    command: celery -A sandbox_worker.tasks worker -Q tasks --loglevel=info
 
   celery-scorer-worker0:
     build:
@@ -98,7 +98,7 @@ services:
       TWITTER_USERNAME: ${TWITTER_USERNAME}
       TWITTER_EMAIL: ${TWITTER_EMAIL}
       RESULTS_ENDPOINT: http://scraper-ingester:8002/data/scraper
-    command: bash -c "celery -A scraper_worker.celery_app beat & celery -A scraper_worker.celery_app worker -Q scraper --loglevel=info"
+    command: celery -A scraper_worker.celery_app worker -Q scraper --loglevel=info
 
   scraper-ingester:
     build:
@@ -112,6 +112,16 @@ services:
       SCRAPER_DB_URI: postgres://postgres:postgres@database:5432/scraper?sslmode=disable
     command: uvicorn scraper_worker.ingester:app --host 0.0.0.0 --port 8002
 
+  job-scheduler:
+    build:
+      context: job_scheduler
+      dockerfile: Dockerfile
+    depends_on:
+      - redis-celery-broker
+    environment:
+      CELERY_BROKER: redis://redis-celery-broker:6380
+      CELERY_BACKEND: redis://redis-celery-broker:6380
+    command: celery -A job_scheduler.scheduler beat -S redbeat.RedBeatScheduler --loglevel=info
 
 volumes:
   postgres_data:

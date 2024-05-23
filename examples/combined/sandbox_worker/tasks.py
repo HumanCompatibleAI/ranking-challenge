@@ -10,7 +10,17 @@ from sqlalchemy import create_engine
 import redis
 from celery import Celery
 
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
+logger = logging.getLogger(__name__)
+
 from sandbox_worker.helpers import extract_named_entities
+from util import schedule_task
 
 REDIS_DB = f"{os.getenv('REDIS_CONNECTION_STRING', 'redis://localhost:6379')}/0"
 DB_URI = os.getenv("POSTS_DB_URI")
@@ -20,6 +30,7 @@ BROKER = f"{os.getenv('CELERY_BROKER', 'redis://localhost:6380')}/0"
 BACKEND = f"{os.getenv('CELERY_BACKEND', 'redis://localhost:6380')}/0"
 app = Celery("tasks", backend=BACKEND, broker=BROKER)
 app.conf.task_default_queue = "tasks"
+app.conf.beat_scheduler = "redbeat.RedBeatScheduler"
 
 
 @app.task
@@ -138,9 +149,13 @@ def setup_periodic_tasks(sender, **kwargs):
 
     This illustrates running the `count_top_named_entities` task every 5 minutes.
     """
+    logger.info("Setting up periodic tasks")
     result_key = "my_worker:scheduled:top_named_entities"
-    sender.add_periodic_task(
-        300,
-        count_top_named_entities.s(10, "2017-05-31", "2017-06-01", result_key),
-        name="run every 5 min",
+    logger.info(f"Scheduling")
+    schedule_task(
+        app,
+        count_top_named_entities.s().task,
+        interval_seconds=60,
+        task_args=(10, "2017-05-31", "2017-06-01", result_key),
+        logger=logger,
     )

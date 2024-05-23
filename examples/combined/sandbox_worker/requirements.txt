@@ -5,3 +5,4 @@ pandas
 nltk
 psycopg2
 sqlalchemy
+celery-redbeat
