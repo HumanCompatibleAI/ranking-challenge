@@ -13,6 +13,7 @@ from celery import Celery
 
 BROKER = f"{os.getenv('CELERY_BROKER', 'redis://localhost:6380')}/0"
 BACKEND = f"{os.getenv('CELERY_BACKEND', 'redis://localhost:6380')}/0"
-app = Celery("scorer_worker", backend=BACKEND, broker=BROKER)
-app.autodiscover_tasks(["scorer_worker.tasks"])
-app.conf.task_default_queue = "scorer"
+app = Celery("sandbox_worker", backend=BACKEND, broker=BROKER)
+app.autodiscover_tasks(["sandbox_worker.tasks"])
+app.conf.task_default_queue = "tasks"
+app.conf.beat_scheduler = "redbeat.RedBeatScheduler"
