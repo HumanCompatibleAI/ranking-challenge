@@ -13,6 +13,7 @@ Specifically, we show the following components:
   and/or other stateful algorithms
 - scoring infrastructure (another Celery job queue)
 - scraping infrastructure (another set of Celery scheduled tasks)
+- job scheduler (utility functions to schedule Celery tasks)
 - the ranking server itself
 
 * Infrastructure
@@ -148,6 +149,39 @@ Consult [[https://docs.celeryq.dev/en/stable/userguide/periodic-tasks.html][Cele
 We illustrate two ways of returning results from tasks:
 - using the ~AsyncResult~ object and its blocking ~.get()~ method
 - explicitly storing the result in the Redis
+
+** Job scheduler
+
+Scheduled tasks need to be implemented as Celery tasks. A separate scheduler service
+triggers their execution. Task definitions and schedules are persisted in Redis.
+The tasks are bound to the queue specified in the app definition associated with the
+particular task.
+
+We provide a simple interface to the Redis-backed scheduler in ~util/scheduler.py~.
+The following functions are available:
+
+- ~schedule_tasks(app: Celery, tasks: list[ScheduledTask])~:
+  Schedules a list of task to run.
+- ~clear_old_tasks(app: Celery, queue=None)~:
+  Removes all scheduled tasks bound to ~app.conf.task_default_queue~ (default) or
+  ~queue~ (if provided)
+
+The scheduled tasks are created using the ~ScheduledTask~ class as follows:
+
+#+begin_src python
+task = ScheduledTask(
+    count_top_named_entities,
+    args=(10, "2017-05-31", "2017-06-01", result_key),
+    kwargs=None,
+    options=None,
+    interval_seconds=60,
+)
+#+end_src
+
+Note that ~clear_old_tasks~ gets called by ~schedule_tasks~ to ensure that the
+deleted or renamed tasks are not left in the scheduler. If finer grained control
+is needed (e.g. when all tasks are deleted and now new tasks are provided, hence
+the ~schedule_tasks~ call is not made), the user should call ~clear_old_tasks~.
 
 ** Parallel scorers
 
