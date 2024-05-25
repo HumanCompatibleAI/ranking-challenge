@@ -29,7 +29,7 @@ dependencies = [
 requires-python = ">=3.9"
 
 [project.optional-dependencies]
-dev = ["black", "isort", "pip-tools", "pytest", "ruff"]
+dev = ["pip-tools", "pytest", "ruff"]
 
 [project.urls]
 Homepage = "https://humancompatible.ai/news/2024/01/18/the-prosocial-ranking-challenge-60000-in-prizes-for-better-social-media-algorithms/"
