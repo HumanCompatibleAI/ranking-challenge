@@ -41,6 +41,7 @@ from typing import Any
 
 from nltk.sentiment import SentimentIntensityAnalyzer
 from pydantic import BaseModel, Field
+
 from scorer_worker.celery_app import app
 
 logging.basicConfig(

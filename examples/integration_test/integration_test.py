@@ -11,9 +11,14 @@ from datetime import datetime
 
 import httpx
 from ranking_challenge.fake import fake_request
-from ranking_challenge.request import (ContentItem, FacebookEngagements,
-                                       RankingRequest, RedditEngagements,
-                                       Session, TwitterEngagements)
+from ranking_challenge.request import (
+    ContentItem,
+    FacebookEngagements,
+    RankingRequest,
+    RedditEngagements,
+    Session,
+    TwitterEngagements,
+)
 from ranking_challenge.response import RankingResponse
 
 parentdir = os.path.dirname(  # make it possible to import from ../ in a reliable way

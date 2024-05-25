@@ -4,9 +4,10 @@ from unittest.mock import patch
 
 import fakeredis
 import pytest
-import ranking_server
 import test_data
 from fastapi.testclient import TestClient
+
+import ranking_server
 
 
 @pytest.fixture

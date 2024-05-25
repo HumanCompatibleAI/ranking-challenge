@@ -27,6 +27,7 @@ from typing import Any, NamedTuple
 
 from celery import group
 from celery.utils import uuid
+
 from scorer_worker.celery_app import app as celery_app
 
 logging.basicConfig(

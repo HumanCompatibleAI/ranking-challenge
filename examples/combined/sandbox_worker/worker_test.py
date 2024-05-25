@@ -7,9 +7,13 @@ from datetime import UTC, datetime
 import psycopg2
 import pytest
 import redis
-from sandbox_worker.tasks import (REDIS_DB, count_top_named_entities,
-                                  query_posts_db,
-                                  substring_matches_by_platform)
+
+from sandbox_worker.tasks import (
+    REDIS_DB,
+    count_top_named_entities,
+    query_posts_db,
+    substring_matches_by_platform,
+)
 
 
 def test_query_posts_db(my_celery_app, celery_worker):

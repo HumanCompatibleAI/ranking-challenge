@@ -6,8 +6,12 @@ import sys
 
 import numpy as np
 import pandas as pd
-from ranking_challenge.request import (ContentItem, FacebookEngagements,
-                                       RedditEngagements, TwitterEngagements)
+from ranking_challenge.request import (
+    ContentItem,
+    FacebookEngagements,
+    RedditEngagements,
+    TwitterEngagements,
+)
 from tqdm import tqdm
 
 logging.basicConfig(

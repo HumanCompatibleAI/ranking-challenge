@@ -2,6 +2,7 @@ import sys
 from pathlib import Path
 
 import pytest
+
 from sandbox_worker.tasks import app as celery_app
 
 pytest_plugins = ("celery.contrib.pytest",)

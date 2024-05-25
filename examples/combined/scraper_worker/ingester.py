@@ -6,9 +6,15 @@ from typing import Optional
 
 from fastapi import FastAPI, HTTPException, status
 from pydantic import BaseModel, Field
-from scraper_worker.persistence import (ScraperData, ScraperErrors,
-                                        connect_ensure_tables, ensure_database,
-                                        persist_data, persist_error)
+
+from scraper_worker.persistence import (
+    ScraperData,
+    ScraperErrors,
+    connect_ensure_tables,
+    ensure_database,
+    persist_data,
+    persist_error,
+)
 
 logging.basicConfig(
     level=logging.INFO,

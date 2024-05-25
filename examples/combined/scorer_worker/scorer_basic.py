@@ -22,6 +22,7 @@ from typing import Any
 from celery import group
 from celery.exceptions import TimeoutError
 from celery.utils import uuid
+
 from scorer_worker.celery_app import app as celery_app
 
 logging.basicConfig(

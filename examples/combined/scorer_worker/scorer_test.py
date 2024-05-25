@@ -2,8 +2,8 @@
 from itertools import cycle
 
 import pytest
-from scorer_worker.scorer_advanced import (ScorerType, ScoringInput,
-                                           compute_scores)
+
+from scorer_worker.scorer_advanced import ScorerType, ScoringInput, compute_scores
 from scorer_worker.scorer_basic import compute_scores as compute_scores_basic
 from scorer_worker.tasks import TIME_LIMIT_SECONDS, RandomScoreInput
 

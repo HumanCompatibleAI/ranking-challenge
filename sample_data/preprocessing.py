@@ -8,8 +8,12 @@ from datetime import datetime
 from typing import Callable, Literal
 
 import pandas as pd
-from normalize_posts import (NORMALIZED_DATA_FILE_FN, process_facebook,
-                             process_reddit, process_twitter)
+from normalize_posts import (
+    NORMALIZED_DATA_FILE_FN,
+    process_facebook,
+    process_reddit,
+    process_twitter,
+)
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 

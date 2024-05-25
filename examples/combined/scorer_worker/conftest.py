@@ -2,6 +2,7 @@ import sys
 from pathlib import Path
 
 import pytest
+
 from scorer_worker.celery_app import app as celery_app
 
 sys.path.insert(0, str(Path(__file__).parent.parent))

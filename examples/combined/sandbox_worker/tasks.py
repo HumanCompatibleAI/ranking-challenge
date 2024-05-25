@@ -8,10 +8,11 @@ from typing import Any
 import pandas as pd
 import psycopg2
 import redis
-from sandbox_worker.celery_app import app
-from sandbox_worker.helpers import extract_named_entities
 from sqlalchemy import create_engine
 from util.scheduler import ScheduledTask, schedule_tasks
+
+from sandbox_worker.celery_app import app
+from sandbox_worker.helpers import extract_named_entities
 
 logging.basicConfig(
     level=logging.INFO,

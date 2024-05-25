@@ -4,10 +4,11 @@ from datetime import datetime
 from typing import Optional
 
 import psycopg2
-import scraper_worker.sql_statements as my_sql
 from psycopg2 import sql
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT, parse_dsn
 from psycopg2.extras import execute_values
+
+import scraper_worker.sql_statements as my_sql
 
 DuplicateDatabase = psycopg2.errors.lookup("42P04")
 

@@ -9,8 +9,12 @@
 # from the specified key.
 
 import redis
-from tasks import (REDIS_DB, count_top_named_entities, query_posts_db,
-                   substring_matches_by_platform)
+from tasks import (
+    REDIS_DB,
+    count_top_named_entities,
+    query_posts_db,
+    substring_matches_by_platform,
+)
 
 
 def get_timerange_posts():

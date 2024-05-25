@@ -5,10 +5,11 @@ from datetime import datetime
 from typing import Optional
 
 import requests
-from scraper_worker.celery_app import app
-from scraper_worker.ingester import ErrorData, IngestData, SuccessData
 from twscrape import API, gather
 from util.scheduler import ScheduledTask, schedule_tasks
+
+from scraper_worker.celery_app import app
+from scraper_worker.ingester import ErrorData, IngestData, SuccessData
 
 logging.basicConfig(
     level=logging.INFO,
