@@ -1,13 +1,13 @@
 import os
-import psycopg2
-from psycopg2 import sql
-from psycopg2.extensions import parse_dsn, ISOLATION_LEVEL_AUTOCOMMIT
-from psycopg2.extras import execute_values
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from datetime import datetime
 from typing import Optional
 
+import psycopg2
 import scraper_worker.sql_statements as my_sql
+from psycopg2 import sql
+from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT, parse_dsn
+from psycopg2.extras import execute_values
 
 DuplicateDatabase = psycopg2.errors.lookup("42P04")
 
@@ -98,10 +98,12 @@ def insert_rows(
     cur = con.cursor()
     keys = nonzero_keys(dbrows[0])
 
-    query = sql.SQL("""
+    query = sql.SQL(
+        """
     INSERT INTO {table} ({fields})
     VALUES %s ON CONFLICT DO NOTHING
-    """).format(
+    """
+    ).format(
         table=sql.Identifier(table_name),
         fields=sql.SQL(",").join(map(sql.Identifier, keys)),
     )

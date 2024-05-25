@@ -1,3 +1,4 @@
+# ruff: noqa: E501
 from datetime import datetime
 from typing import Literal, Optional, Union
 
@@ -80,13 +81,14 @@ class ContentItem(BaseModel):
         description="The time that the item was created in UTC, in `YYYY-MM-DD hh:mm:ss` format, at the highest resolution available (which may be as low as the hour)."
     )
 
-    engagements: Union[TwitterEngagements, RedditEngagements, FacebookEngagements] = (
-        Field(description="Engagement counts for the content item.")
+    engagements: Union[TwitterEngagements, RedditEngagements, FacebookEngagements] = Field(
+        description="Engagement counts for the content item."
     )
 
 
 class Session(BaseModel):
     """Data that is scoped to the user's browsing session (generally a single page view)"""
+
     session_id: str = Field(
         description="A unique ID for this page view, updated on navigation events. Use this to determine if two requests came from the same page."
     )
@@ -113,9 +115,7 @@ class Session(BaseModel):
 class RankingRequest(BaseModel):
     """A complete ranking request"""
 
-    session: Session = Field(
-        description="Data that is scoped to the user's browsing session"
-    )
+    session: Session = Field(description="Data that is scoped to the user's browsing session")
     survey: Optional[SurveyResponse] = Field(
         description="Responses to PRC survey. Added by the request router.",
         default=None,

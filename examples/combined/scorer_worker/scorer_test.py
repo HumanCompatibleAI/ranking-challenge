@@ -1,13 +1,11 @@
 # This is an integration test to illustrate the functionality of the scoring example.
-import pytest
 from itertools import cycle
 
-from scorer_worker.tasks import RandomScoreInput
-from scorer_worker.tasks import TIME_LIMIT_SECONDS
-
-from scorer_worker.scorer_advanced import ScorerType, ScoringInput, compute_scores
+import pytest
+from scorer_worker.scorer_advanced import (ScorerType, ScoringInput,
+                                           compute_scores)
 from scorer_worker.scorer_basic import compute_scores as compute_scores_basic
-
+from scorer_worker.tasks import TIME_LIMIT_SECONDS, RandomScoreInput
 
 sample_posts = [
     "That's horrible",

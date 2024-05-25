@@ -1,10 +1,14 @@
-import os
 import json
+import logging
+import os
 from datetime import datetime
+from typing import Optional
+
 from fastapi import FastAPI, HTTPException, status
 from pydantic import BaseModel, Field
-from typing import Optional
-import logging
+from scraper_worker.persistence import (ScraperData, ScraperErrors,
+                                        connect_ensure_tables, ensure_database,
+                                        persist_data, persist_error)
 
 logging.basicConfig(
     level=logging.INFO,
@@ -12,16 +16,6 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S",
 )
 logger = logging.getLogger(__name__)
-
-from scraper_worker.persistence import (
-    ScraperData,
-    ScraperErrors,
-    connect_ensure_tables,
-    ensure_database,
-    persist_data,
-    persist_error,
-    connect_ensure_tables,
-)
 
 DB_URI = os.getenv("SCRAPER_DB_URI")
 assert DB_URI, "SCRAPER_DB_URI environment variable must be set"

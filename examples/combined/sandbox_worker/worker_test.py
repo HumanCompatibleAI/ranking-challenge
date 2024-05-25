@@ -2,18 +2,14 @@
 #            with raw sample data WITHOUT the user pool (which modifies timestamps)
 #            i.e. with `python seed_post_db.py --no-user-pool`
 import json
-import psycopg2
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 
+import psycopg2
 import pytest
 import redis
-
-from sandbox_worker.tasks import (
-    REDIS_DB,
-    count_top_named_entities,
-    query_posts_db,
-    substring_matches_by_platform,
-)
+from sandbox_worker.tasks import (REDIS_DB, count_top_named_entities,
+                                  query_posts_db,
+                                  substring_matches_by_platform)
 
 
 def test_query_posts_db(my_celery_app, celery_worker):
@@ -51,7 +47,7 @@ def test_count_top_named_entities(my_celery_app, celery_worker):
     raw_result = r.get(result_key)
     assert raw_result is not None, f"Failed to retrieve result key {result_key}"
     r.delete(result_key)
-    assert r.get(result_key) is None, f"Failed to delete result"
+    assert r.get(result_key) is None, "Failed to delete result"
     top_entities = json.loads(raw_result.decode("utf-8"))  # type:ignore
     assert "top_named_entities" in top_entities.keys()
     assert "timestamp" in top_entities.keys()

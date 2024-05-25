@@ -1,13 +1,12 @@
-import pytest
-
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent.parent))
+import pytest
+from sandbox_worker.tasks import app as celery_app
 
 pytest_plugins = ("celery.contrib.pytest",)
 
-from sandbox_worker.tasks import app as celery_app
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 
 @pytest.fixture(scope="session")

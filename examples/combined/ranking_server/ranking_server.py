@@ -1,19 +1,14 @@
 import json
-import os
-import sys
-from concurrent.futures.thread import ThreadPoolExecutor
 import logging
+import os
+from concurrent.futures.thread import ThreadPoolExecutor
 
-from fastapi import FastAPI
 import redis
-
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from ranking_challenge.request import RankingRequest
 from ranking_challenge.response import RankingResponse
-
 from scorer_worker.scorer_basic import compute_scores as compute_scores_basic
-
-from ranking_server.test_data import NEW_POSTS
 
 logging.basicConfig(
     level=logging.INFO,
@@ -58,14 +53,14 @@ def redis_client():
 # will be less sad.
 @app.post("/rank")
 def rank(ranking_request: RankingRequest) -> RankingResponse:
-    logger.info(f"Received ranking request")
+    logger.info("Received ranking request")
     ranked_results = []
     # get the named entities from redis
     result_key = "my_worker:scheduled:top_named_entities"
 
     top_entities = []
     cached_results = redis_client().get(result_key)
-    if cached_results != None:
+    if cached_results is not None:
         top_entities_record = json.loads(cached_results.decode("utf-8"))
         top_entities = set(x[0] for x in top_entities_record["top_named_entities"])
 

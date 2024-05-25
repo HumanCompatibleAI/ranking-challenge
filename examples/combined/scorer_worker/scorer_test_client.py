@@ -5,10 +5,10 @@ ranking pipeline; it is janky and provided mostly for the convenience of the
 PRC dev team; use and modify it freely if you find it helpful.
 """
 
-import requests
 import time
 from itertools import count
 
+import requests
 
 URL = "http://localhost:8002/score"
 
