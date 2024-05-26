@@ -22,7 +22,7 @@ from typing import Any
 from celery import group
 from celery.exceptions import TimeoutError
 from celery.utils import uuid
-from celery_app import app as celery_app
+from .celery_app import app as celery_app
 
 logging.basicConfig(
     level=logging.INFO,

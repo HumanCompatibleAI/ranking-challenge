@@ -7,9 +7,9 @@ from faker import Faker
 
 fake = Faker(locale="la")  # remove locale to get rid of the fake latin
 
-from ranking_challenge.request import ContentItem, RankingRequest, Session
-from ranking_challenge.response import RankingResponse
-from ranking_challenge.survey import SurveyResponse
+from .request import ContentItem, RankingRequest, Session
+from .response import RankingResponse
+from .survey import SurveyResponse
 
 URI_PATHS = {
     "reddit": ["", "r/aww", "r/politics", "r/programming", "r/technology"],

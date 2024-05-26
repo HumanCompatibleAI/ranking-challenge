@@ -1,5 +1,5 @@
-from ranking_challenge import fake
-from ranking_challenge.request import RankingRequest
+import fake
+from request import RankingRequest
 
 
 def test_fake_request():

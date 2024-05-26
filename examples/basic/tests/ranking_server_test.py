@@ -1,9 +1,7 @@
-
 import pytest
-from src import ranking_server
+from ..src import ranking_server
 
 import sample_data
-
 
 @pytest.fixture
 def app():

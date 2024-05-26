@@ -2,7 +2,7 @@ import json
 
 import pytest
 from fastapi.testclient import TestClient
-from src import ranking_server, sample_data
+from ..src import ranking_server, sample_data
 
 
 @pytest.fixture

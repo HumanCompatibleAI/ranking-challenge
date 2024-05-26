@@ -3,11 +3,9 @@ from pathlib import Path
 
 import pytest
 
-sys.path.insert(0, str(Path(__file__).parent.parent))
-
 pytest_plugins = ("celery.contrib.pytest",)
 
-from scorer_worker.celery_app import app as celery_app
+from ..src import celery_app
 
 
 @pytest.fixture(scope="session")

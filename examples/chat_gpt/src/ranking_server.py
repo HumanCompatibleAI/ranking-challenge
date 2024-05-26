@@ -8,7 +8,7 @@ from openai import OpenAI
 from ranking_challenge.request import RankingRequest
 from ranking_challenge.response import RankingResponse
 
-from sample_data import NEW_POSTS
+from .sample_data import NEW_POSTS
 
 load_dotenv()  # if a .env file exists, load environment variables from it
 

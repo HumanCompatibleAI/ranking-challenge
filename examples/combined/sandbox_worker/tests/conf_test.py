@@ -3,7 +3,7 @@ import pytest
 
 pytest_plugins = ("celery.contrib.pytest",)
 
-from sandbox_worker import app as celery_app
+from ..src import celery_app
 
 
 @pytest.fixture(scope="session")

@@ -2,14 +2,13 @@
 from itertools import cycle
 
 import pytest
-from scorer_worker import (
+from ..src.scorer_basic import (
     TIME_LIMIT_SECONDS,
     RandomScoreInput,
     ScorerType,
     ScoringInput,
     compute_scores,
 )
-from scorer_worker import compute_scores as compute_scores_basic
 
 sample_posts = [
     "That's horrible",
@@ -82,5 +81,5 @@ def test_scoring_jobs_basic(my_celery_app, celery_worker, sample_data):
     data = sample_data
     # when running pytest from the parent directory of this test,
     # the task name is the following
-    scores = compute_scores_basic("scorer_worker.tasks.random_scorer", data)
+    scores = compute_scores("scorer_worker.tasks.random_scorer", data)
     assert len(scores) == len(data)
