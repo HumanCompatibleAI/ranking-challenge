@@ -11,7 +11,6 @@ from ranking_challenge.request import ContentItem, RankingRequest, Session
 from ranking_challenge.response import RankingResponse
 from ranking_challenge.survey import SurveyResponse
 
-
 URI_PATHS = {
     "reddit": ["", "r/aww", "r/politics", "r/programming", "r/technology"],
     "twitter": ["", "jack", "TiredActor", "horse_ebooks"],

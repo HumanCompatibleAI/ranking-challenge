@@ -14,23 +14,26 @@ license = "MIT"
 homepage = "https://humancompatible.ai/news/2024/01/18/the-prosocial-ranking-challenge-60000-in-prizes-for-better-social-media-algorithms/"
 repository = "https://github.com/humancompatibleai/ranking-challenge"
 keywords = ["ranking", "social media", "challenge"]
+package-mode = false
 
 [tool.poetry.dependencies]
-python = ">=3.9"
-pydantic = ">=2.6.0"
-faker = "*"
-fastapi = ">=0.110.0"
-requests = "*"
-flask-cors = "*"
-pytest = "*"
-openai = "*"
-nltk = "*"
-httpx = "*"
-fakeredis = "*"
-uvicorn = {extras = ["standard"], version = "*"}
-ranking-challenge = "*"
-flask = "*"
-python-dotenv = "*"
+python = ">=3.10"
+pytest = "^6.2"
+pydantic = "^1.8"
+faker = "^8.0"
+pandas = "^1.2"
+numpy = "^1.19"
+celery = "^5.0"
+redis = "^3.5"
+uvicorn = "^0.13"
+ranking_challenge = { path = "module" }
+fastapi = "^0.63"
+psycopg2 = "^2.8"
+sqlalchemy = "^1.3"
+requests = "^2.25"
+twscrape = { git = "https://github.com/vladkens/twscrape.git", rev = "main" }
+celery-redbeat = "^1.0"
+nltk = "^3.5"
 
 [tool.poetry.dev-dependencies]
 pip-tools = "*"
@@ -40,11 +43,23 @@ ruff = "*"
 [tool.poetry.extras]
 module = ["pytest", "pydantic", "faker"]
 sample_data = ["pandas", "numpy"]
-examples_combined_ranking_server = ["celery", "uvicorn", "ranking-challenge", "redis", "pytest"]
+examples_combined_ranking_server = ["celery", "uvicorn", "ranking_challenge", "redis", "pytest"]
 examples_combined_scorer_worker = ["pydantic", "celery", "fastapi", "redis", "pytest", "pandas", "nltk", "uvicorn"]
-examples_combined = ["celery", "redis", "pytest", "pandas", "nltk", "uvicorn", "ranking-challenge"]
+examples_combined = ["celery", "redis", "pytest", "pandas", "nltk", "uvicorn", "ranking_challenge"]
 examples_combined_job_scheduler = ["celery", "celery-redbeat"]
 examples_combined_sandbox_worker = ["celery", "redis", "pytest", "pandas", "nltk", "psycopg2", "celery-redbeat", "sqlalchemy"]
+examples_combined_scraper_worker = [
+    "celery",
+    "fastapi",
+    "pytest",
+    "redis",
+    "psycopg2",
+    "requests",
+    "celery-redbeat",
+    "uvicorn",
+    "twscrape"
+]
+util = ["celery", "celery-redbeat"]
 
 [tool.poetry.urls]
 homepage = "https://humancompatible.ai/news/2024/01/18/the-prosocial-ranking-challenge-60000-in-prizes-for-better-social-media-algorithms/"

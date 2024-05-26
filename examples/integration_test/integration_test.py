@@ -15,11 +15,17 @@ parentdir = os.path.dirname(  # make it possible to import from ../ in a reliabl
 sys.path.insert(0, parentdir)
 
 import httpx
-from ranking_challenge.fake import fake_request
-from ranking_challenge.request import (ContentItem, FacebookEngagements,
-                                       RankingRequest, RedditEngagements,
-                                       Session, TwitterEngagements)
-from ranking_challenge.response import RankingResponse
+
+from ..ranking_challenge.fake import fake_request
+from ..ranking_challenge.request import (
+    ContentItem,
+    FacebookEngagements,
+    RankingRequest,
+    RedditEngagements,
+    Session,
+    TwitterEngagements,
+)
+from ..ranking_challenge.response import RankingResponse
 
 # Note: this magical url fixture is defined in conftest.py
 

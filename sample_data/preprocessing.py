@@ -6,7 +6,6 @@ import sys
 from datetime import datetime
 from typing import Callable, Literal
 
-import numpy as np
 import pandas as pd
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -20,8 +19,12 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-from normalize_posts import (NORMALIZED_DATA_FILE_FN, process_facebook,
-                             process_reddit, process_twitter)
+from normalize_posts import (
+    NORMALIZED_DATA_FILE_FN,
+    process_facebook,
+    process_reddit,
+    process_twitter,
+)
 
 FB_DATA_FILE = "facebook_data/processed/filtered_comment_post.csv"
 REDDIT_DATA_FILE = "reddit_data/processed/filtered_reddit_data.csv"
@@ -306,7 +309,7 @@ for file_name in files:
                         )
                     jsons.append(data_part)
 
-logger.info(f"Starting preprocessing")
+logger.info("Starting preprocessing")
 
 with open(
     os.path.join(script_dir, TWITTER_DATA_FILE), "w", encoding="utf-8"
@@ -321,4 +324,4 @@ for platform, data_file in platform_filtered_data.items():
         for item in items:
             f.write(item.model_dump_json() + "\n")
 
-logger.info(f"Finished preprocessing")
+logger.info("Finished preprocessing")

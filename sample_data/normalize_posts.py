@@ -21,9 +21,12 @@ parentdir = os.path.dirname(  # make it possible to import from ../ in a reliabl
 )
 sys.path.insert(0, parentdir)
 
-from ranking_challenge.request import (ContentItem, FacebookEngagements,
-                                       RankingRequest, RedditEngagements,
-                                       Session, TwitterEngagements)
+from ranking_challenge.request import (
+    ContentItem,
+    FacebookEngagements,
+    RedditEngagements,
+    TwitterEngagements,
+)
 
 script_dir = os.path.dirname(__file__)
 

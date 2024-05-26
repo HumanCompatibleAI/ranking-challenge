@@ -1,17 +1,17 @@
 import argparse
+import csv
 import inspect
 import logging
 import os
-import csv
-import tempfile
 import sqlite3
-import psycopg2
-from psycopg2.extensions import parse_dsn, ISOLATION_LEVEL_AUTOCOMMIT
-from psycopg2 import sql as pgsql
 import sys
+import tempfile
 from typing import Optional
 
+import psycopg2
 import sql
+from psycopg2 import sql as pgsql
+from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT, parse_dsn
 
 DuplicateDatabase = psycopg2.errors.lookup("42P04")
 
@@ -205,7 +205,7 @@ def copy_sqlite_to_postgres(
         cur = sqlite_con.cursor()
         try:
             with open(Path(temp_dir) / filename, "w+", newline="") as temp_csv:
-                cur.execute(f"SELECT * FROM posts")
+                cur.execute("SELECT * FROM posts")
                 csvwriter = csv.writer(
                     temp_csv, escapechar="\\", doublequote=False, quoting=csv.QUOTE_NONE
                 )
@@ -305,7 +305,7 @@ if __name__ == "__main__":
             pass
         else:
             logger.error(
-                f"Table posts already exists. Use --drop-table or --upsert to control behavior."
+                "Table posts already exists. Use --drop-table or --upsert to control behavior."
             )
             sys.exit(1)
 
