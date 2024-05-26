@@ -19,7 +19,6 @@ logger = logging.getLogger(__name__)
 parentdir = os.path.dirname(  # make it possible to import from ../ in a reliable way
     os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 )
-sys.path.insert(0, parentdir)
 
 from ranking_challenge.request import (
     ContentItem,

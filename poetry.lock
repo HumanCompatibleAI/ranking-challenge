@@ -1415,6 +1415,16 @@ files = [
 ]
 
 [[package]]
+name = "sql"
+version = "2022.4.0"
+description = "DB API 2.0 for Humans"
+optional = false
+python-versions = "*"
+files = [
+    {file = "sql-2022.4.0.tar.gz", hash = "sha256:f8cae71ac27e8bf763c4313497ba68f7e6ec577a1eb997738aaad3b3d5f7a600"},
+]
+
+[[package]]
 name = "sqlalchemy"
 version = "1.4.52"
 description = "Database Abstraction Library"
@@ -1727,4 +1737,4 @@ util = ["celery", "celery-redbeat"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.11,<4.0"
-content-hash = "c55f84e15b1410eeaf528853d0fbb3cb1daabaf47e9a3c41abd7f6f7b66baad0"
+content-hash = "c77a372528b4d76ef31febb709d7344f937f81587434fee6f8a25714b23d8d7a"

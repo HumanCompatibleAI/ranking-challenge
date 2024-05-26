@@ -39,6 +39,7 @@ flask-cors = "^4.0.1"
 openai = "^1.30.3"
 python-dotenv = "^1.0.1"
 fakeredis = "^2.23.2"
+sql = "^2022.4.0"
 
 [tool.poetry.dev-dependencies]
 pip-tools = "*"
