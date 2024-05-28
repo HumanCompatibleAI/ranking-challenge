@@ -42,6 +42,8 @@ from typing import Any
 from nltk.sentiment import SentimentIntensityAnalyzer
 from pydantic import BaseModel, Field
 
+from scorer_worker.celery_app import app
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
@@ -49,7 +51,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-from scorer_worker.celery_app import app
 
 KILL_DEADLINE_SECONDS = 5
 TIME_LIMIT_SECONDS = 4

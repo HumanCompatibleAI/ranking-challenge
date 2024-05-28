@@ -1,13 +1,13 @@
-from datetime import datetime, UTC
 import json
+from datetime import UTC, datetime
 from unittest.mock import patch
 
 import fakeredis
-from fastapi.testclient import TestClient
 import pytest
+import test_data
+from fastapi.testclient import TestClient
 
 import ranking_server
-import test_data
 
 
 @pytest.fixture
@@ -32,7 +32,7 @@ def test_rank(client, redis_client):
     # put named entities in redis
     result_key = "my_worker:scheduled:top_named_entities"
 
-    fake_named_entities = ['foo', 'bar', 'baz']
+    fake_named_entities = ["foo", "bar", "baz"]
     redis_client.set(
         result_key,
         json.dumps(

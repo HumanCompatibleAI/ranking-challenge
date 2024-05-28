@@ -36,7 +36,9 @@ def analyze_sentiment():
         sentiment = (
             "positive"
             if scores["compound"] > 0
-            else "negative" if scores["compound"] < 0 else "neutral"
+            else "negative"
+            if scores["compound"] < 0
+            else "neutral"
         )
         ranked_results.append(
             {"id": id, "text": text, "sentiment": sentiment, "scores": scores}

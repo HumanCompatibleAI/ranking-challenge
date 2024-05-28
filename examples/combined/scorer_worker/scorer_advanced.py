@@ -172,7 +172,7 @@ def compute_scores(input: list[ScoringInput]) -> list[ScoringOutput]:
             )
         )
 
-    logger.info(f"Sending the task group")
+    logger.info("Sending the task group")
     t_sent = time.time() - t_start
     async_result = group(tasks).apply_async()
     t_enqueued = time.time() - t_start
@@ -201,14 +201,14 @@ def compute_scores(input: list[ScoringInput]) -> list[ScoringOutput]:
     pending = {result.id: result for result in async_result.results}
     while True:
         if time.time() - t_start > DEADLINE_SECONDS:
-            logger.info(f"Timeout error")
+            logger.info("Timeout error")
             break
         for result_id in list(pending.keys()):
             if pending[result_id].ready():
                 result = pending.pop(result_id)
                 result_callback(result.id, result.result)
         if len(pending) == 0:
-            logger.info(f"Received all results")
+            logger.info("Received all results")
             break
         time.sleep(0.02)
 
@@ -217,7 +217,7 @@ def compute_scores(input: list[ScoringInput]) -> list[ScoringOutput]:
         item_output.error = "Timed out waiting for results"
         output.append(item_output)
 
-    logger.info(f"Sending results")
+    logger.info("Sending results")
     return output
 
 

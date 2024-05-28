@@ -6,6 +6,12 @@ import sys
 
 import numpy as np
 import pandas as pd
+from ranking_challenge.request import (
+    ContentItem,
+    FacebookEngagements,
+    RedditEngagements,
+    TwitterEngagements,
+)
 from tqdm import tqdm
 
 logging.basicConfig(
@@ -21,15 +27,17 @@ parentdir = os.path.dirname(  # make it possible to import from ../ in a reliabl
 )
 sys.path.insert(0, parentdir)
 
-from ranking_challenge.request import (ContentItem, FacebookEngagements,
-                                       RankingRequest, RedditEngagements,
-                                       Session, TwitterEngagements)
 
 script_dir = os.path.dirname(__file__)
 
 platforms = ["facebook", "reddit", "twitter"]
 
-NORMALIZED_DATA_FILE_FN = lambda x: f"{x}_data/processed/normalized_posts_{x}.json"
+
+def normalized_data_file_fn(x):
+    return f"{x}_data/processed/normalized_posts_{x}.json"
+
+
+NORMALIZED_DATA_FILE_FN = normalized_data_file_fn
 
 FB_DATA_FILE = "facebook_data/processed/filtered_comment_post.csv"
 REDDIT_DATA_FILE = "reddit_data/processed/filtered_reddit_data.csv"

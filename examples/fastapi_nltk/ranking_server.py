@@ -38,7 +38,9 @@ def rank(ranking_request: RankingRequest) -> RankingResponse:
         sentiment = (
             "positive"
             if scores["compound"] > 0
-            else "negative" if scores["compound"] < 0 else "neutral"
+            else "negative"
+            if scores["compound"] < 0
+            else "neutral"
         )
         ranked_results.append(
             {"id": item.id, "text": item.text, "sentiment": sentiment, "scores": scores}

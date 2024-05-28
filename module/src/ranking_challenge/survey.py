@@ -1,3 +1,4 @@
+# ruff: noqa: E501
 from enum import IntEnum
 from typing import Annotated, Literal, Optional
 
@@ -72,9 +73,7 @@ class SurveyResponse(BaseModel):
     """
 
     # Demographic metrics
-    party_id: Literal[
-        "democrat", "republican", "independent", "other", "no_preference"
-    ] = Field(
+    party_id: Literal["democrat", "republican", "independent", "other", "no_preference"] = Field(
         description="Generally speaking, do you usually think of yourself as a Republican, Democrat, Independent, etc?"
     )
 

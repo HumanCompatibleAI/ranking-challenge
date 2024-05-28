@@ -9,6 +9,10 @@ import pandas as pd
 import psycopg2
 import redis
 from sqlalchemy import create_engine
+from util.scheduler import ScheduledTask, schedule_tasks
+
+from sandbox_worker.celery_app import app
+from sandbox_worker.helpers import extract_named_entities
 
 logging.basicConfig(
     level=logging.INFO,
@@ -17,15 +21,10 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-from util.scheduler import ScheduledTask, schedule_tasks
-
-from sandbox_worker.helpers import extract_named_entities
 
 REDIS_DB = f"{os.getenv('REDIS_CONNECTION_STRING', 'redis://localhost:6379')}/0"
 DB_URI = os.getenv("POSTS_DB_URI")
 assert DB_URI, "POSTS_DB_URI environment variable must be set"
-
-from sandbox_worker.celery_app import app
 
 
 @app.task

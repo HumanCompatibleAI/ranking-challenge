@@ -4,12 +4,11 @@ import string
 from dataclasses import dataclass, field
 
 import numpy as np
+from ranking_challenge.request import Session
 
 SALT = b"9vB8nz93vD5T7Khw"
 
 DEFAULT_PLATFORMS = ["facebook", "reddit", "twitter"]
-
-from ranking_challenge.request import Session
 
 
 @dataclass
@@ -96,7 +95,6 @@ class FeedParams:
 
 
 class UserPool:
-
     def __init__(self, feed_params: FeedParams, seed=None):
         """
         Container class for the user pool that defines basic helper methods
@@ -141,7 +139,6 @@ class UserPool:
         return rng.choice(levels, size=self.n, p=probabilities)
 
     def _generate(self, seed=None):
-
         def user_gen():
             while True:
                 yield User.generate_random(seed)
