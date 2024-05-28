@@ -22,11 +22,9 @@ faker = "*"
 fastapi = ">=0.110.0"
 requests = "*"
 flask-cors = "*"
-pytest = "*"
 openai = "*"
 nltk = "*"
 httpx = "*"
-fakeredis = "*"
 uvicorn = {extras = ["standard"], version = "*"}
 ranking-challenge = "*"
 flask = "*"
@@ -36,6 +34,8 @@ python-dotenv = "*"
 pip-tools = "*"
 pytest = "*"
 ruff = "*"
+pre-commit = "^3.7.1"
+fakeredis = "*"
 
 [tool.poetry.extras]
 module = ["pytest", "pydantic", "faker"]

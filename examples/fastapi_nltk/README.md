@@ -9,7 +9,8 @@ This example uses [pydantic](https://docs.pydantic.dev/) to validate the schema 
 ## Setting up your environment
 
 1. Create a virtual environment using your preferred method
-2. `poetry install --no-root` at the repo root. This will install only the dependencies listed in `pyproject.toml` without trying to install the current project as a package
+2. `pip install poetry`
+3. `poetry install --no-root` at the repo root. This will install only the dependencies listed in `pyproject.toml` without trying to install the current project as a package
 
 ## Running tests
 
