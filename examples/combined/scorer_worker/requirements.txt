@@ -1,8 +1,0 @@
-celery[pytest]
-pytest
-fastapi
-uvicorn[standard]
-pydantic
-redis
-pandas
-nltk
