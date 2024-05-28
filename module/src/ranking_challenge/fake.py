@@ -4,19 +4,18 @@ from random import randint
 from uuid import uuid4
 
 from faker import Faker
-
-fake = Faker(locale="la")  # remove locale to get rid of the fake latin
-
 from ranking_challenge.request import ContentItem, RankingRequest, Session
 from ranking_challenge.response import RankingResponse
 from ranking_challenge.survey import SurveyResponse
 
+fake = Faker(locale="la")  # remove locale to get rid of the fake latin
 
 URI_PATHS = {
     "reddit": ["", "r/aww", "r/politics", "r/programming", "r/technology"],
     "twitter": ["", "jack", "TiredActor", "horse_ebooks"],
     "facebook": ["", "photo", "groups"],
 }
+
 
 def fake_request(n_posts=1, n_comments=0, platform="reddit"):
     posts = [fake_item(platform=platform, type="post") for _ in range(n_posts)]

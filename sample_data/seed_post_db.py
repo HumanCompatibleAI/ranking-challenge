@@ -1,17 +1,22 @@
 import argparse
+import csv
 import inspect
 import logging
 import os
-import csv
-import tempfile
 import sqlite3
-import psycopg2
-from psycopg2.extensions import parse_dsn, ISOLATION_LEVEL_AUTOCOMMIT
-from psycopg2 import sql as pgsql
 import sys
+import tempfile
+from pathlib import Path
 from typing import Optional
 
+import psycopg2
 import sql
+from data_pull import bulk_feed_generator, count_lines_by_platform
+from normalize_posts import NORMALIZED_DATA_FILE_FN
+from psycopg2 import sql as pgsql
+from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT, parse_dsn
+from ranking_challenge.request import ContentItem, Session
+from user_pool import FeedParams
 
 DuplicateDatabase = psycopg2.errors.lookup("42P04")
 
@@ -29,10 +34,6 @@ parentdir = os.path.dirname(  # make it possible to import from ../ in a reliabl
 sys.path.insert(0, parentdir)
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from data_pull import bulk_feed_generator, count_lines_by_platform
-from normalize_posts import NORMALIZED_DATA_FILE_FN
-from ranking_challenge.request import ContentItem, Session
-from user_pool import FeedParams
 
 platforms = ["facebook", "reddit", "twitter"]
 
@@ -169,12 +170,14 @@ def ensure_postgres_table(con: psycopg2.extensions.connection):
     cur = con.cursor()
     cur.execute(sql.POSTGRES_CREATE_TABLE_POSTS)  # create table if not exists
     cur.execute(sql.POSTGRES_CREATE_INDEXES_POSTS)  # create indexes if not exists
-    cur.execute("""
+    cur.execute(
+        """
         SELECT EXISTS(
             SELECT 1
             FROM posts
         );
-    """)
+    """
+    )
     try:
         result = cur.fetchone()
         if result is None:
@@ -191,9 +194,6 @@ def ensure_postgres_table(con: psycopg2.extensions.connection):
         cur.close()
 
 
-from pathlib import Path
-
-
 def copy_sqlite_to_postgres(
     con: psycopg2.extensions.connection, sqlite_con: sqlite3.Connection
 ):
@@ -205,7 +205,7 @@ def copy_sqlite_to_postgres(
         cur = sqlite_con.cursor()
         try:
             with open(Path(temp_dir) / filename, "w+", newline="") as temp_csv:
-                cur.execute(f"SELECT * FROM posts")
+                cur.execute("SELECT * FROM posts")
                 csvwriter = csv.writer(
                     temp_csv, escapechar="\\", doublequote=False, quoting=csv.QUOTE_NONE
                 )
@@ -305,7 +305,7 @@ if __name__ == "__main__":
             pass
         else:
             logger.error(
-                f"Table posts already exists. Use --drop-table or --upsert to control behavior."
+                "Table posts already exists. Use --drop-table or --upsert to control behavior."
             )
             sys.exit(1)
 

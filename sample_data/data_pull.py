@@ -8,6 +8,10 @@ from datetime import datetime, timedelta
 from itertools import cycle, islice
 from typing import Optional
 
+from normalize_posts import NORMALIZED_DATA_FILE_FN
+from ranking_challenge.request import ContentItem, RankingRequest, Session
+from user_pool import FeedParams, User, UserPool
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
@@ -21,10 +25,6 @@ parentdir = os.path.dirname(  # make it possible to import from ../ in a reliabl
 )
 sys.path.insert(0, parentdir)
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-
-from normalize_posts import NORMALIZED_DATA_FILE_FN
-from ranking_challenge.request import ContentItem, RankingRequest, Session
-from user_pool import FeedParams, User, UserPool
 
 platforms = ["facebook", "reddit", "twitter"]
 
@@ -53,7 +53,6 @@ def batched(iterable, n):
 
 
 class UserFeedBuilder:
-
     def __init__(
         self, user: User, feed_params: FeedParams, feed_end_jitter_hours=12, seed=None
     ):

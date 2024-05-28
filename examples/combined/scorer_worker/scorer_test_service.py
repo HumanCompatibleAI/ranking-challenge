@@ -24,11 +24,13 @@ Add the following to docker-compose in order to use it:
 """
 
 import logging
+from typing import Any
 
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
-from typing import Any
-
+from scorer_advanced import ScorerType, ScoringInput, compute_scores
+from scorer_basic import compute_scores as compute_scores_basic
+from tasks import RandomScoreInput, random_scorer
 
 logging.basicConfig(
     level=logging.INFO,
@@ -36,10 +38,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-from tasks import RandomScoreInput, RandomScoreOutput, random_scorer
-from tasks import SentimentScoreInput, SentimentScoreOutput, sentiment_scorer
-from scorer_advanced import ScorerType, ScoringInput, compute_scores
-from scorer_basic import compute_scores as compute_scores_basic
 
 app = FastAPI(
     title="Scoring service",
@@ -60,7 +58,7 @@ class ScoringResponse(BaseModel):
 
 @app.post("/score")
 def score(input: ScoringRequest) -> ScoringResponse:
-    logger.info(f"Received scoring request")
+    logger.info("Received scoring request")
     results_placeholder = {scorer_type.name: None for scorer_type in ScorerType}
     job_list = []
     for scorer_type in ScorerType:
@@ -84,12 +82,9 @@ def score(input: ScoringRequest) -> ScoringResponse:
     return ScoringResponse(data=output)
 
 
-from scorer_basic import compute_scores as compute_scores_basic
-
-
 @app.post("/score_basic")
 def score_basic(input: ScoringRequest) -> ScoringResponse:
-    logger.info(f"Received scoring request")
+    logger.info("Received scoring request")
     data = [RandomScoreInput(**x).model_dump() for x in input.data]
     scores = compute_scores_basic(random_scorer, data)
     # results = {}

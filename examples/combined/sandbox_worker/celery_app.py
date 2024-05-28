@@ -9,6 +9,7 @@ NOTE: When specifying the app location in the `celery` command, you should
 """
 
 import os
+
 from celery import Celery
 
 BROKER = f"{os.getenv('CELERY_BROKER', 'redis://localhost:6380')}/0"
