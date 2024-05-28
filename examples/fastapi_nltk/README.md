@@ -9,7 +9,7 @@ This example uses [pydantic](https://docs.pydantic.dev/) to validate the schema 
 ## Setting up your environment
 
 1. Create a virtual environment using your preferred method
-2. `pip install -r requirements.txt` at the repo root
+2. `poetry install --no-root` at the repo root. This will install only the dependencies listed in `pyproject.toml` without trying to install the current project as a package
 
 ## Running tests
 
@@ -36,3 +36,7 @@ With a running server, visit `http://127.0.0.1:8000/docs`. You can send requests
 ```bash
 uvicorn ranking_server:app --host 0.0.0.0 --port 5000
 ```
+
+## Adding dependencies
+
+To add a new dependency use `poetry add <dependency>` and if it is package specific please move to extra in pyproject.toml
