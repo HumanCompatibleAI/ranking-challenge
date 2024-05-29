@@ -35,7 +35,7 @@ services:
   ranker:
     build:
       context: .
-      dockerfile: Dockerfile.ranking_server
+      dockerfile: docker/Dockerfile.ranking_server
     volumes:
       - .:/app
     depends_on:
@@ -51,7 +51,7 @@ services:
   celery-worker:
     build:
       context: .
-      dockerfile: Dockerfile.sandbox_worker
+      dockerfile: docker/Dockerfile.sandbox_worker
     depends_on:
       - redis
       - redis-celery-broker
@@ -65,7 +65,7 @@ services:
   celery-scorer-worker0:
     build:
       context: .
-      dockerfile: Dockerfile.scorer_worker
+      dockerfile: docker/Dockerfile.scorer_worker
     depends_on:
       - redis-celery-broker
     environment:
@@ -76,7 +76,7 @@ services:
   celery-scorer-worker1:
     build:
       context: .
-      dockerfile: Dockerfile.scorer_worker
+      dockerfile: docker/Dockerfile.scorer_worker
     depends_on:
       - redis-celery-broker
     environment:
@@ -87,7 +87,7 @@ services:
   celery-scraper-worker0:
     build:
       context: .
-      dockerfile: Dockerfile.scraper_worker.scraper
+      dockerfile: docker/Dockerfile.scraper_worker.scraper
     depends_on:
       - redis-celery-broker
     environment:
@@ -103,7 +103,7 @@ services:
   scraper-ingester:
     build:
       context: .
-      dockerfile: Dockerfile.scraper_worker.ingester
+      dockerfile: docker/Dockerfile.scraper_worker.ingester
     ports:
       - "8002:8002"
     volumes:
@@ -115,7 +115,7 @@ services:
   job-scheduler:
     build:
       context: .
-      dockerfile: Dockerfile.job_scheduler
+      dockerfile: docker/Dockerfile.job_scheduler
     depends_on:
       - redis-celery-broker
     environment:
