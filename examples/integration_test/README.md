@@ -2,9 +2,11 @@
 
 A somewhat-complete integration test for a ranker. This is what we are using for basic functional evaluation of a first-round submission.
 
-## Setup
+## Setting up your environment
 
-`pip install -r requirements.txt` at the repo root
+1. Create a virtual environment using your preferred method
+2. `pip install poetry`
+3. `poetry install --no-root` at the repo root. This will install only the dependencies listed in `pyproject.toml` without trying to install the current project as a package
 
 ## Running the test
 
@@ -26,4 +28,4 @@ There should be items in the response. If new items are added, they should be us
 
 ### Performance
 
-During the first round, we are not overly concerned about performance. However, the test does have a 30 second request timeout. We expect to rank as many as 100  items in a batch, and the ranker should be able to complete that in 30 seconds. Keep in mind that finalists will have an SLA for the same task of 500ms p95.
+During the first round, we are not overly concerned about performance. However, the test does have a 30 second request timeout. We expect to rank as many as 100 items in a batch, and even a prototype ranker should be able to complete that in 30 seconds. Keep in mind that finalists will have an SLA for the same task of 500ms p95.
