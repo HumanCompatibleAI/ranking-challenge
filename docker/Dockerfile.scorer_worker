@@ -1,21 +1,17 @@
 FROM python:3.11
 
-# Set the working directory in the container
 WORKDIR /app
 
 # Install Poetry
 RUN pip install poetry
 
-# Copy the necessary files to export dependencies with Poetry
+# Copy only the necessary files to install dependencies with Poetry
 COPY pyproject.toml poetry.lock ./
 
-# Export dependencies to requirements.txt
-RUN poetry export --without-hashes --format=requirements.txt > requirements.txt
-
-# Install dependencies from requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+# Install dependencies using Poetry
+RUN poetry config virtualenvs.create false && poetry install --only main --no-interaction --no-ansi
 
 # Download necessary NLTK data
 RUN python -m nltk.downloader vader_lexicon movie_reviews punkt
 
-COPY . .
+COPY examples/combined /app

@@ -5,13 +5,15 @@ WORKDIR /app
 # Install Poetry
 RUN pip install poetry
 
-# Copy only the necessary files to export dependencies with Poetry
+# Copy only the necessary files to install dependencies with Poetry
 COPY pyproject.toml poetry.lock ./
 
-# Export dependencies to requirements.txt
-RUN poetry export --without-hashes --format=requirements.txt > requirements.txt
+# Install dependencies using Poetry
+RUN poetry config virtualenvs.create false && poetry install --only main --no-interaction --no-ansi
 
-RUN pip install --no-cache-dir -r requirements.txt
-RUN python -m nltk.downloader maxent_ne_chunker words punkt averaged_perceptron_tagger
+# Copy the rest of the application code
+# Copy the rest of the application code
+COPY examples/combined /app
 
-COPY . .
+# Set the entrypoint and command to run the Celery worker
+CMD ["poetry", "run", "celery", "-A", "sandbox_worker.tasks", "worker", "-Q", "tasks", "--loglevel=info"]

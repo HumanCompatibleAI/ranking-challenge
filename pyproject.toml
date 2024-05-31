@@ -16,7 +16,7 @@ repository = "https://github.com/humancompatibleai/ranking-challenge"
 keywords = ["ranking", "social media", "challenge"]
 
 [tool.poetry.dependencies]
-python = ">=3.9"
+python = ">=3.10"
 pydantic = ">=2.6.0"
 faker = "*"
 fastapi = ">=0.110.0"
@@ -25,7 +25,7 @@ flask-cors = "*"
 openai = "*"
 nltk = "*"
 httpx = "*"
-uvicorn = {extras = ["standard"], version = "*"}
+uvicorn = {extras = ["standard"], version = "^0.18.3"}
 ranking-challenge = "*"
 flask = "*"
 python-dotenv = "*"
@@ -33,6 +33,8 @@ redis = ">= 4.4.4"
 psycopg2-binary = "*"
 sqlalchemy = "*"
 celery-redbeat = "*"
+pandas = "^1.4.2" 
+twscrape = "^0.1.0"
 
 [tool.poetry.dev-dependencies]
 pip-tools = "*"
