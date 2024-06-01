@@ -110,7 +110,8 @@ services:
       - ../../sample_data:/data
     environment:
       SCRAPER_DB_URI: postgres://postgres:postgres@database:5432/scraper?sslmode=disable
-    command: ["poetry", "run", "uvicorn", "combined.scraper_worker.ingester:app", "--host", "0.0.0.0", "--port", "8002"]
+      PYTHONPATH: /app/examples/combined
+    command: ["poetry", "run", "uvicorn", "scraper_worker.ingester:app", "--host", "0.0.0.0", "--port", "8002"]
 
   job-scheduler:
     build:
