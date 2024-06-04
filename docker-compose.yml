@@ -35,8 +35,6 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile.ranking_server
-    volumes:
-      - .:/app
     depends_on:
       - redis
     environment:

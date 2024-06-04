@@ -17,9 +17,9 @@ run:
 	$(DOCKER_COMPOSE) up --build
 
 test:
-	$(DOCKER_COMPOSE) up -d database redis-celery-broker
-	pytest sandbox_worker/*_test.py
-	pytest scorer_worker/*_test.py
+	$(DOCKER_COMPOSE) up -d database redis-celery-broker redis
+	pytest examples/combined/sandbox_worker/*_test.py
+	pytest examples/combined/scorer_worker/*_test.py
 	$(DOCKER_COMPOSE) down
 
 ci:
