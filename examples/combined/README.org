@@ -248,48 +248,76 @@ data that is not needed outside the worker.
 
 * Setting up your environment
 
-To run this example, you need to have the following installed:
-- celery
-- redis-py
-- pytest
-- pandas
-- nltk
+The combined example relies on the following:
+- docker compose to run Redis, Celery and Postgres
+- an assortment of Python libraries, including celery, redis-py, pytest, pandas,
+  nltk, etc.
+- sample data (see "Running tests" below)
 
-You will need to use a virtual environment using your preferred tool.
-We provide ~environment.yml~ for conda users which can be used to install all dependencies.
+You will need to use a virtual environment using your preferred tool. We
+recommend Poetry, as this is what the PRC infrastructure team is currently
+using. Please ensure your Poetry version is at least 1.8.3.
+
+When setting up this project for the first time, at the repo root, run
+
+: poetry install --no-root
+
+This will install only the dependencies listed in pyproject.toml without trying
+to install the current project as a package.
+
+For Conda users, you may refer to ~environment.yml~.
 To use it: ~conda env create -f environment.yml~
-
 To re-export dependencies, use ~conda env export > environment.yml~.
-
-You will also need docker compose to run Redis and Celery.
+Please note that Conda flows are no longer maintained and we don't guarantee
+that this file is up to date.
 
 * Running tests
 
-We provide a makefile to run tests. You can run the tests using ~make test~.
+We provide a makefile to run tests. You can run the tests using ~make test~ in
+repo root.
 
-This will spin up a Redis container, run the tests, and tear down the container.
+This will spin up Redis + db containers, run the tests, and tear down the containers.
 Running this command is a good way to ensure that your environment is set up correctly.
 
 Be aware that due to the way pytest interacts with Celery, you need to ensure
 that no other Celery workers are running when you run the tests.
 
-In addition, the tests use the raw data timestamps in SQL queries, thus they
-will fail unless ~--no-user-pool~ flag is used when seeding the database. A
-self-contained test setup (from the current directory) is therefore something like this:
+Note also that test code runs outside docker, therefore Redis and Postgres are
+made available in the localhost test environment via port mappings in the docker
+compose file.
+
+Test rely on sample data being present in a test database (~posts_test_db~).
+Note that this is a /different/ database from the one discuss in the /sample
+data/ section above, and contains a small subset of test records.
+
+We provide a script that seeds both the test database and the sample posts
+database (with a simulated user pool). You are welcome to adjust the sample post
+database seeding process as best fits your needs. This script is available as
+~ci.sh~, and is best executed as ~make ci~ in repo root, as it relies on the db container.
+
+Simplified script is reproduced below for your reference:
 
 #+begin_src bash
-export PROJECT_ROOT=$(git rev-parse --show-toplevel)
-export TEST_POSTS_DB=sample_posts_test.db
-export POSTS_DB_PATH=${PROJECT_ROOT}/sample_data/${TEST_POSTS_DB}
-cd ${PROJECT_ROOT}/sample_data
-python seed_post_db.py --no-user-pool --dbname=${TEST_POSTS_DB}
-python -m nltk.downloader maxent_ne_chunker words punkt averaged_perceptron_tagger
-cd ${PROJECT_ROOT}/examples/combined
-make test
-rm ${POSTS_DB_PATH}
-#+end_src
+# Postgres connection setup. This will depend on your specific port mappings
+# and other settings.
+PGHOST=localhost
+PGPORT=5435
 
-(this is available as a shell script you can run in ~ci.sh~ or ~make ci~)
+PGDB_PYTEST_TESTS=posts_test_db
+PGDB_SAMPLE_DATA=posts
+
+POSTS_DB_URI_PYTEST_TESTS=postgresql://postgres:postgres@${PGHOST}:${PGPORT}/${PGDB_PYTEST_TESTS}
+export POSTS_DB_URI=postgresql://postgres:postgres@${PGHOST}:${PGPORT}/${PGDB_SAMPLE_DATA}
+
+cd "${PROJECT_ROOT}/sample_data" || exit 1
+
+POSTS_DB_URI=${POSTS_DB_URI_PYTEST_TESTS} poetry run python seed_post_db.py --dbname ${TEST_POSTS_DB} --seed-postgres
+
+# Setup sample posts database
+# This simulates a pool of 500 users with varying activity levels.
+
+poetry run python seed_post_db.py --n-users=500 --activity-distribution=0.2:20,1:65,5:15
+#+end_src
 
 * Running examples
 
