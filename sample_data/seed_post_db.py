@@ -65,6 +65,11 @@ def get_yes_no(prompt="Please enter 'yes' or 'no' [Y/n]: "):
         print("Invalid input.")
 
 
+def format_dsn(con: psycopg2.extensions.connection):
+    params = con.get_dsn_parameters()
+    return f"postgresql://{params['user']}:<elided>@{params['host']}:{params['port']}/{params['dbname']}"
+
+
 def exists_table_post(con: sqlite3.Connection):
     cur = con.cursor()
     cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='posts'")
@@ -179,7 +184,7 @@ def ensure_postgres_table(con: psycopg2.extensions.connection):
             raise Exception("Unable to check for table existence.")
         if result[0]:
             if args.drop_postgres_table or get_yes_no(
-                "Postgres table 'posts' already exists and is not empty. Drop it? [Y/n]: "
+                f"Postgres table 'posts' in {format_dsn(con)} already exists and is not empty. Drop it? [Y/n]: "
             ):
                 cur.execute("DROP TABLE posts")
                 cur.execute(sql.POSTGRES_CREATE_TABLE_POSTS)
@@ -239,6 +244,11 @@ if __name__ == "__main__":
     parser.add_argument("--no-user-pool", action="store_true", help="Disable user pool.")
     parser.add_argument("--dbname", type=str, help="Database file name")
     parser.add_argument("--drop-postgres-table", action="store_true", help="Drop postgres table")
+    parser.add_argument(
+        "--setup-blank-sqlite-db",
+        action="store_true",
+        help="This can be used to prepare tables in a blank db, e.g. for testing",
+    )
     table_controls = parser.add_mutually_exclusive_group()
     table_controls.add_argument(
         "--drop-sqlite-table", action="store_true", help="Drop the table before seeding."
@@ -262,13 +272,18 @@ if __name__ == "__main__":
     if args.dbname:
         DBNAME = args.dbname.removesuffix(".db") + ".db"
 
+    if args.setup_blank_sqlite_db:
+        con = sqlite3.connect(DBNAME)
+        create_db(con)
+        sys.exit(0)
+
     db_uri = os.environ.get("POSTS_DB_URI")
     if args.seed_postgres:
-        logger.info(f"Performing ETL from {DBNAME} to postgres")
         if not db_uri:
             logger.error("POSTS_DB_URI environment variable not set.")
             sys.exit(1)
         else:
+            logger.info(f"Performing ETL from {DBNAME} to postgres db {db_uri}")
             do_seed_postgres(db_uri)
             sys.exit(0)
 
@@ -281,13 +296,15 @@ if __name__ == "__main__":
     )
 
     if exists_table_post(sqlite3.connect(DBNAME)):
-        if args.drop_sqlite_table:
-            drop_table_posts(sqlite3.connect(DBNAME))
-        elif args.upsert:
+        if args.upsert:
             pass
+        elif args.drop_sqlite_table or get_yes_no(
+            f"SQLite table 'posts' in {DBNAME} already exists and is not empty. Drop it? [Y/n]: "
+        ):
+            drop_table_posts(sqlite3.connect(DBNAME))
         else:
             logger.error(
-                "Table posts already exists. Use --drop-table or --upsert to control behavior."
+                "Table posts already exists. Use --drop-sqlite-table or --upsert to control behavior."
             )
             sys.exit(1)
 

@@ -2,6 +2,13 @@ import sys
 from pathlib import Path
 
 import pytest
+from pytest import MonkeyPatch
+import psycopg2
+from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT, parse_dsn
+
+TEST_DB_DSN = "postgres://postgres:postgres@localhost:5435/posts_test_db?sslmode=disable"
+mp = pytest.MonkeyPatch()
+mp.setenv("POSTS_DB_URI", TEST_DB_DSN)
 
 from sandbox_worker.tasks import app as celery_app
 
