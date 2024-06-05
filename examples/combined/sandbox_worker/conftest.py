@@ -1,10 +1,10 @@
 import sys
 from pathlib import Path
 
-import pytest
-from pytest import MonkeyPatch
 import psycopg2
+import pytest
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT, parse_dsn
+from pytest import MonkeyPatch
 
 TEST_DB_DSN = "postgres://postgres:postgres@localhost:5435/posts_test_db?sslmode=disable"
 mp = pytest.MonkeyPatch()

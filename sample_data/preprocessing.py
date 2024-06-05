@@ -178,9 +178,7 @@ merged["parent_id"] = None
 
 # For posts, we need to count the number of comments and drop duplicates
 merged = merged.drop_duplicates(subset=["message", "c_post_id"])
-comments_count = (
-    merged[merged["type"] == "Comment"]["c_post_id"].value_counts().reset_index()
-)
+comments_count = merged[merged["type"] == "Comment"]["c_post_id"].value_counts().reset_index()
 comments_count.columns = ["all_post_ids", "comments_count"]
 
 # We then merge this back to the dataframe and replace NaN with 0 and comment counts for comments to 0
@@ -216,9 +214,7 @@ merged.loc[:, columns] = merged[columns].fillna(0)
 # There are several erroneous created_at values we must remove and change the data type of
 merged["created_at_temp"] = pd.to_datetime(merged["created_at"], errors="coerce")
 merged = merged[~pd.isna(merged["created_at_temp"])]
-merged["created_at"] = pd.to_datetime(merged["created_at"]).dt.strftime(
-    "%Y-%m-%d %H:%M:%S"
-)
+merged["created_at"] = pd.to_datetime(merged["created_at"]).dt.strftime("%Y-%m-%d %H:%M:%S")
 for item in merged["created_at"]:
     item = str(item)
 
@@ -277,9 +273,7 @@ for file_name in files:
                 if "author_id" in data_part:
                     data_part["author_id"] = hashed(data_part["author_id"])
                 if "created_at" in data_part:
-                    created = datetime.strptime(
-                        data_part["created_at"], "%Y-%m-%dT%H:%M:%S.%fZ"
-                    )
+                    created = datetime.strptime(data_part["created_at"], "%Y-%m-%dT%H:%M:%S.%fZ")
                     data_part["created_at"] = str(created.strftime("%Y-%m-%d %H:%M:%S"))
 
                 # Check for expanded_url
@@ -297,12 +291,8 @@ for file_name in files:
                     if user_metrics:
                         data_part.update(
                             {
-                                "followers_count": user_metrics.get(
-                                    "followers_count", 0
-                                ),
-                                "following_count": user_metrics.get(
-                                    "following_count", 0
-                                ),
+                                "followers_count": user_metrics.get("followers_count", 0),
+                                "following_count": user_metrics.get("following_count", 0),
                                 "tweet_count": user_metrics.get("tweet_count", 0),
                                 "listed_count": user_metrics.get("listed_count", 0),
                             }
@@ -311,9 +301,7 @@ for file_name in files:
 
 logger.info("Starting preprocessing")
 
-with open(
-    os.path.join(script_dir, TWITTER_DATA_FILE), "w", encoding="utf-8"
-) as output_file:
+with open(os.path.join(script_dir, TWITTER_DATA_FILE), "w", encoding="utf-8") as output_file:
     json.dump(jsons, output_file, indent=4)
 
 for platform, data_file in platform_filtered_data.items():

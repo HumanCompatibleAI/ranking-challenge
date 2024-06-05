@@ -77,9 +77,7 @@ def rank(ranking_request: RankingRequest) -> RankingResponse:
     }
     with ThreadPoolExecutor() as executor:
         data = [{"item_id": x.id, "text": x.text} for x in ranking_request.items]
-        future = executor.submit(
-            compute_scores_basic, "scorer_worker.tasks.sentiment_scorer", data
-        )
+        future = executor.submit(compute_scores_basic, "scorer_worker.tasks.sentiment_scorer", data)
         try:
             # logger.info("Submitting score computation task")
             scoring_result = future.result(timeout=0.5)

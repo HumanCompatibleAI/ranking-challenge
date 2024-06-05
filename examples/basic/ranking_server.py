@@ -40,9 +40,7 @@ def analyze_sentiment():
             if scores["compound"] < 0
             else "neutral"
         )
-        ranked_results.append(
-            {"id": id, "text": text, "sentiment": sentiment, "scores": scores}
-        )
+        ranked_results.append({"id": id, "text": text, "sentiment": sentiment, "scores": scores})
 
     ranked_results.sort(key=lambda x: x["scores"]["compound"], reverse=True)
     ranked_ids = [content.get("id", None) for content in ranked_results]
