@@ -167,9 +167,7 @@ def compute_scores(input: list[ScoringInput]) -> list[ScoringOutput]:
         task_id = uuid()
         task_params[task_id] = TaskParams(scorer_type=scorer_type, item_id=item_id)
         tasks.append(
-            celery_app.signature(
-                scorer_type.runner, kwargs=item.data, options={"task_id": task_id}
-            )
+            celery_app.signature(scorer_type.runner, kwargs=item.data, options={"task_id": task_id})
         )
 
     logger.info("Sending the task group")

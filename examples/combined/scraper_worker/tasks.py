@@ -61,9 +61,7 @@ async def _twitter_search_top(query: str, limit: int = 10) -> list[dict]:
         raise ValueError("Twitter session cookie, username, and email must be set.")
 
     api = API()
-    await api.pool.add_account(
-        username, "dummy-pass", email, "dummy-mail-pass", cookies=cookies
-    )  # type: ignore
+    await api.pool.add_account(username, "dummy-pass", email, "dummy-mail-pass", cookies=cookies)  # type: ignore
 
     tweets = await gather(api.search(query, limit=limit, kv={"product": "Top"}))
     results = []

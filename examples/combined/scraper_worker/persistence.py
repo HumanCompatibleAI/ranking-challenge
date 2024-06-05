@@ -26,9 +26,7 @@ def ensure_database():
     connection.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
     cursor = connection.cursor()
     try:
-        cursor.execute(
-            f"CREATE DATABASE {dbname}".format(dbname=sql.Identifier(dbname))
-        )
+        cursor.execute(f"CREATE DATABASE {dbname}".format(dbname=sql.Identifier(dbname)))
     except DuplicateDatabase:
         pass
     finally:
