@@ -177,6 +177,8 @@ def check_response(url, platform, items):
             cohort="AB",
             platform=platform,
             current_time=datetime.now(),
+            url="https://reddit.com/foo/bar",
+            session_id="fake_session_id",
         ),
         items=items,
     )
