@@ -1,4 +1,0 @@
-faker
-pydantic
-pytest
-

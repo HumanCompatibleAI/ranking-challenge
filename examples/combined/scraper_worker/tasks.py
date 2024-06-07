@@ -6,6 +6,10 @@ from typing import Optional
 
 import requests
 from twscrape import API, gather
+from util.scheduler import ScheduledTask, schedule_tasks
+
+from scraper_worker.celery_app import app
+from scraper_worker.ingester import ErrorData, IngestData, SuccessData
 
 logging.basicConfig(
     level=logging.INFO,
@@ -13,9 +17,6 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S",
 )
 logger = logging.getLogger(__name__)
-
-from scraper_worker.celery_app import app
-from scraper_worker.ingester import ErrorData, IngestData, SuccessData
 
 
 def send_result(task_id: str, results: list[dict], error: Optional[str] = None):
@@ -60,9 +61,7 @@ async def _twitter_search_top(query: str, limit: int = 10) -> list[dict]:
         raise ValueError("Twitter session cookie, username, and email must be set.")
 
     api = API()
-    await api.pool.add_account(
-        username, "dummy-pass", email, "dummy-mail-pass", cookies=cookies
-    )  # type: ignore
+    await api.pool.add_account(username, "dummy-pass", email, "dummy-mail-pass", cookies=cookies)  # type: ignore
 
     tweets = await gather(api.search(query, limit=limit, kv={"product": "Top"}))
     results = []
@@ -102,7 +101,13 @@ def setup_periodic_tasks(sender, **kwargs):
             "args": ["formula one", 10],
         },
     }
-    for task_id, task in task_manifest.items():
-        sender.add_periodic_task(
-            600, task["function"].s(*task["args"]).set(task_id=task_id), name=task_id
+    scheduled_tasks = [
+        ScheduledTask(
+            task["function"],
+            args=task["args"],
+            options={"task_id": task_id},
+            interval_seconds=600,
         )
+        for task_id, task in task_manifest.items()
+    ]
+    schedule_tasks(app, scheduled_tasks, logger=logger)

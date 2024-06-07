@@ -4,12 +4,11 @@ import string
 from dataclasses import dataclass, field
 
 import numpy as np
+from ranking_challenge.request import Session
 
 SALT = b"9vB8nz93vD5T7Khw"
 
 DEFAULT_PLATFORMS = ["facebook", "reddit", "twitter"]
-
-from ranking_challenge.request import Session
 
 
 @dataclass
@@ -30,8 +29,7 @@ class User:
         random.seed(seed)
         if username is None:
             username = "".join(
-                random.choices(string.ascii_lowercase, k=8)
-                + random.choices(string.digits, k=3)
+                random.choices(string.ascii_lowercase, k=8) + random.choices(string.digits, k=3)
             )
         hashed_user = hashlib.sha256(username.encode()).hexdigest()
         # let's make user id deterministic from username
@@ -47,9 +45,7 @@ class User:
 
     def get_session(self, platform, current_time):
         if platform not in self.platforms:
-            raise ValueError(
-                f"User {self.username} is not registered on platform {platform}"
-            )
+            raise ValueError(f"User {self.username} is not registered on platform {platform}")
         session_id = "".join(random.choices(string.ascii_lowercase, k=32))
         url_slug = "".join(random.choices(string.ascii_lowercase, k=8))
         url = f"https://{platform}.com/{url_slug}"
@@ -96,7 +92,6 @@ class FeedParams:
 
 
 class UserPool:
-
     def __init__(self, feed_params: FeedParams, seed=None):
         """
         Container class for the user pool that defines basic helper methods
@@ -107,12 +102,8 @@ class UserPool:
             seed (int|None): A seed for the random number generator.
         """
         self.n = feed_params.n_users
-        self.activity_distribution = self._normalize_distribution(
-            feed_params.activity_distribution
-        )
-        self.platform_distribution = self._normalize_distribution(
-            feed_params.platform_distribution
-        )
+        self.activity_distribution = self._normalize_distribution(feed_params.activity_distribution)
+        self.platform_distribution = self._normalize_distribution(feed_params.platform_distribution)
         self.users = self._generate(seed=seed)
 
     def by_platform(self) -> dict[str, list[User]]:
@@ -141,7 +132,6 @@ class UserPool:
         return rng.choice(levels, size=self.n, p=probabilities)
 
     def _generate(self, seed=None):
-
         def user_gen():
             while True:
                 yield User.generate_random(seed)

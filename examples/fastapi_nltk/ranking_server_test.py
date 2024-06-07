@@ -5,6 +5,7 @@ sys.path.append(".")  # allows for importing from the current directory
 
 import pytest
 from fastapi.testclient import TestClient
+
 from fastapi_nltk import ranking_server, sample_data
 
 

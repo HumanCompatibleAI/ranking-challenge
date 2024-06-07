@@ -42,6 +42,8 @@ from typing import Any
 from nltk.sentiment import SentimentIntensityAnalyzer
 from pydantic import BaseModel, Field
 
+from scorer_worker.celery_app import app
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
@@ -49,7 +51,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-from scorer_worker.celery_app import app
 
 KILL_DEADLINE_SECONDS = 5
 TIME_LIMIT_SECONDS = 4
@@ -64,13 +65,9 @@ class RandomScoreInput(BaseModel):
     item_id: str = Field(description="The ID of the item to score")
     text: str = Field(description="The body of the post for scoring")
     mean: float = Field(description="Mean of the random score", default=0.5)
-    sdev: float = Field(
-        description="Standard deviation of the radom score", default=0.1
-    )
+    sdev: float = Field(description="Standard deviation of the radom score", default=0.1)
     sleep: float | None = Field(description="Sleep time for testing", default=None)
-    raise_exception: bool = Field(
-        description="Raise an exception for testing", default=False
-    )
+    raise_exception: bool = Field(description="Raise an exception for testing", default=False)
 
 
 class ScoreOutput(BaseModel):
@@ -103,9 +100,7 @@ def do_random_scoring(input: RandomScoreInput) -> RandomScoreOutput:
     )
 
 
-@app.task(
-    bind=True, time_limit=KILL_DEADLINE_SECONDS, soft_time_limit=TIME_LIMIT_SECONDS
-)
+@app.task(bind=True, time_limit=KILL_DEADLINE_SECONDS, soft_time_limit=TIME_LIMIT_SECONDS)
 def random_scorer(self, **kwargs) -> dict[str, Any]:
     """Output random score
 
@@ -139,9 +134,7 @@ def do_sentiment_scoring(input: SentimentScoreInput) -> SentimentScoreOutput:
     )
 
 
-@app.task(
-    bind=True, time_limit=KILL_DEADLINE_SECONDS, soft_time_limit=TIME_LIMIT_SECONDS
-)
+@app.task(bind=True, time_limit=KILL_DEADLINE_SECONDS, soft_time_limit=TIME_LIMIT_SECONDS)
 def sentiment_scorer(self, **kwargs) -> dict[str, Any]:
     """Use NLTK to perform sentiment scoring
 

@@ -8,6 +8,10 @@ from datetime import datetime, timedelta
 from itertools import cycle, islice
 from typing import Optional
 
+from normalize_posts import NORMALIZED_DATA_FILE_FN
+from ranking_challenge.request import ContentItem, RankingRequest, Session
+from user_pool import FeedParams, User, UserPool
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
@@ -22,17 +26,11 @@ parentdir = os.path.dirname(  # make it possible to import from ../ in a reliabl
 sys.path.insert(0, parentdir)
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from normalize_posts import NORMALIZED_DATA_FILE_FN
-from ranking_challenge.request import ContentItem, RankingRequest, Session
-from user_pool import FeedParams, User, UserPool
-
 platforms = ["facebook", "reddit", "twitter"]
 
 
 def make_random_user_session(platform, username=None, seed_no=None) -> Session:
-    return User.generate_random(platform, username, seed_no).get_session(
-        platform, datetime.now()
-    )
+    return User.generate_random(platform, username, seed_no).get_session(platform, datetime.now())
 
 
 def count_lines_by_platform():
@@ -53,29 +51,20 @@ def batched(iterable, n):
 
 
 class UserFeedBuilder:
-
-    def __init__(
-        self, user: User, feed_params: FeedParams, feed_end_jitter_hours=12, seed=None
-    ):
+    def __init__(self, user: User, feed_params: FeedParams, feed_end_jitter_hours=12, seed=None):
         random.seed(seed)
         self.user = user
         self.feed_params = feed_params
         now = datetime.now()
-        self.is_inactive = (
-            user.activity_level == 0 or feed_params.baseline_sessions_per_day == 0
-        )
+        self.is_inactive = user.activity_level == 0 or feed_params.baseline_sessions_per_day == 0
         self.dt_days = 0
         feed_end = now - timedelta(hours=feed_end_jitter_hours * random.random())
         self.last_session_timestamp = feed_end
 
-    def make_request(
-        self, platform: str, items_batch: list[ContentItem]
-    ) -> RankingRequest:
+    def make_request(self, platform: str, items_batch: list[ContentItem]) -> RankingRequest:
         if self.is_inactive:
             raise ValueError("Inactive user")
-        session_interval = (
-            1 / self.user.activity_level / self.feed_params.baseline_sessions_per_day
-        )
+        session_interval = 1 / self.user.activity_level / self.feed_params.baseline_sessions_per_day
         self.last_session_timestamp -= timedelta(days=session_interval)
         item_timestamp = self.last_session_timestamp - timedelta(days=session_interval)
         dt = session_interval / len(items_batch)
@@ -170,9 +159,7 @@ def random_user_feed_generator(platform, x, seed_no, username):
     session = make_random_user_session(platform, username, seed_no)
 
     with open(NORMALIZED_DATA_FILE_FN(platform), "r", encoding="utf-8") as f:
-        feed_sample = random.sample(
-            [ContentItem.model_validate_json(line) for line in f], x
-        )
+        feed_sample = random.sample([ContentItem.model_validate_json(line) for line in f], x)
         request = RankingRequest(session=session, items=feed_sample)
         print(request.model_dump_json(indent=4))
 
@@ -188,14 +175,8 @@ if __name__ == "__main__":
         nargs="?",
         default=100,
     )
-    parser.add_argument(
-        "-r", "--randomseed", type=int, help="random seed", nargs="?", default=None
-    )
-    parser.add_argument(
-        "-u", "--username", type=str, help="username", nargs="?", default=None
-    )
+    parser.add_argument("-r", "--randomseed", type=int, help="random seed", nargs="?", default=None)
+    parser.add_argument("-u", "--username", type=str, help="username", nargs="?", default=None)
     args = parser.parse_args()
 
-    random_user_feed_generator(
-        args.platform, args.numposts, args.randomseed, args.username
-    )
+    random_user_feed_generator(args.platform, args.numposts, args.randomseed, args.username)

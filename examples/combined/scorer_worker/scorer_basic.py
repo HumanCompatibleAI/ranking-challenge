@@ -20,8 +20,8 @@ import time
 from typing import Any
 
 from celery import group
-from celery.utils import uuid
 from celery.exceptions import TimeoutError
+from celery.utils import uuid
 
 from scorer_worker.celery_app import app as celery_app
 
@@ -51,11 +51,9 @@ def compute_scores(task_name: str, input: list[dict[str, Any]]) -> list[dict[str
 
     tasks = []
     for item in input:
-        tasks.append(
-            celery_app.signature(task_name, kwargs=item, options={"task_id": uuid()})
-        )
+        tasks.append(celery_app.signature(task_name, kwargs=item, options={"task_id": uuid()}))
 
-    logger.info(f"Sending the task group")
+    logger.info("Sending the task group")
     async_result = group(tasks).apply_async()
     finished_tasks = []
     start = time.time()
@@ -64,9 +62,7 @@ def compute_scores(task_name: str, input: list[dict[str, Any]]) -> list[dict[str
         # to get higher polling frequency
         finished_tasks = async_result.get(timeout=DEADLINE_SECONDS, interval=0.1)
     except TimeoutError:
-        logger.error(
-            f"Timed out waiting for results after {time.time() - start} seconds"
-        )
+        logger.error(f"Timed out waiting for results after {time.time() - start} seconds")
     except Exception as e:
         logger.error(f"Task runner threw an error: {e}")
 

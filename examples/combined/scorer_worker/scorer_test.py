@@ -1,13 +1,11 @@
 # This is an integration test to illustrate the functionality of the scoring example.
-import pytest
 from itertools import cycle
 
-from scorer_worker.tasks import RandomScoreInput
-from scorer_worker.tasks import TIME_LIMIT_SECONDS
+import pytest
 
 from scorer_worker.scorer_advanced import ScorerType, ScoringInput, compute_scores
 from scorer_worker.scorer_basic import compute_scores as compute_scores_basic
-
+from scorer_worker.tasks import TIME_LIMIT_SECONDS, RandomScoreInput
 
 sample_posts = [
     "That's horrible",
@@ -56,18 +54,14 @@ def test_scoring_jobs(my_celery_app, celery_worker, sample_data):
     assert all(x.error is None for x in scores)
 
 
-def test_scoring_jobs_with_timeout(
-    my_celery_app, celery_worker, sample_data_with_timeout
-):
+def test_scoring_jobs_with_timeout(my_celery_app, celery_worker, sample_data_with_timeout):
     data = [ScoringInput(ScorerType.RANDOM, x) for x in sample_data_with_timeout]
     scores = compute_scores(data)
     assert len(scores) == len(data)
     assert not all(x.error is None for x in scores)
 
 
-def test_scoring_jobs_with_exception(
-    my_celery_app, celery_worker, sample_data_with_exception
-):
+def test_scoring_jobs_with_exception(my_celery_app, celery_worker, sample_data_with_exception):
     data = [ScoringInput(ScorerType.RANDOM, x) for x in sample_data_with_exception]
     scores = compute_scores(data)
     assert len(scores) == len(data)

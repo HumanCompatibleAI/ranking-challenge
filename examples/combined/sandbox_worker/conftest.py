@@ -1,13 +1,20 @@
-import pytest
-
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent.parent))
+import psycopg2
+import pytest
+from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT, parse_dsn
+from pytest import MonkeyPatch
+
+TEST_DB_DSN = "postgres://postgres:postgres@localhost:5435/posts_test_db?sslmode=disable"
+mp = pytest.MonkeyPatch()
+mp.setenv("POSTS_DB_URI", TEST_DB_DSN)
+
+from sandbox_worker.tasks import app as celery_app
 
 pytest_plugins = ("celery.contrib.pytest",)
 
-from sandbox_worker.tasks import app as celery_app
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 
 @pytest.fixture(scope="session")

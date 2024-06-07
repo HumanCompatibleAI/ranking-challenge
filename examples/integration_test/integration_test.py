@@ -9,17 +9,22 @@ import time
 import uuid
 from datetime import datetime
 
+import httpx
+from ranking_challenge.fake import fake_request
+from ranking_challenge.request import (
+    ContentItem,
+    FacebookEngagements,
+    RankingRequest,
+    RedditEngagements,
+    Session,
+    TwitterEngagements,
+)
+from ranking_challenge.response import RankingResponse
+
 parentdir = os.path.dirname(  # make it possible to import from ../ in a reliable way
     os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 )
 sys.path.insert(0, parentdir)
-
-import httpx
-from ranking_challenge.fake import fake_request
-from ranking_challenge.request import (ContentItem, FacebookEngagements,
-                                       RankingRequest, RedditEngagements,
-                                       Session, TwitterEngagements)
-from ranking_challenge.response import RankingResponse
 
 # Note: this magical url fixture is defined in conftest.py
 
@@ -36,9 +41,7 @@ def test_rank_fake(url):
         follow_redirects=True,
     )
 
-    assert (
-        response.status_code == 200
-    ), f"Request failed with content: {response.content}"
+    assert response.status_code == 200, f"Request failed with content: {response.content}"
 
     result = RankingResponse.model_validate_json(response.content)
     print(result, file=sys.stderr)
@@ -50,9 +53,7 @@ def test_rank_facebook(url):
         items = []
         reader = csv.DictReader(f)
         for row in reader:
-            embedded_urls = re.findall(
-                r"https?://(?:[-\w.]|(?:%[\da-fA-F]{2}))+", row["text"]
-            )
+            embedded_urls = re.findall(r"https?://(?:[-\w.]|(?:%[\da-fA-F]{2}))+", row["text"])
             engagements_dict = {
                 key: int(float(row[key] or 0))
                 for key in [
@@ -95,9 +96,7 @@ def test_rank_reddit(url):
         items = []
         reader = csv.DictReader(f)
         for row in reader:
-            embedded_urls = re.findall(
-                r"https?://(?:[-\w.]|(?:%[\da-fA-F]{2}))+", row["text"]
-            )
+            embedded_urls = re.findall(r"https?://(?:[-\w.]|(?:%[\da-fA-F]{2}))+", row["text"])
             engagements = RedditEngagements(
                 upvote=int(float(row["upvotes"])),
                 downvote=int(float(row["downvotes"])),
@@ -140,9 +139,7 @@ def test_rank_twitter(url):
             if i > 100:
                 break
 
-            embedded_urls = re.findall(
-                r"https?://(?:[-\w.]|(?:%[\da-fA-F]{2}))+", row["text"]
-            )
+            embedded_urls = re.findall(r"https?://(?:[-\w.]|(?:%[\da-fA-F]{2}))+", row["text"])
             engagements = TwitterEngagements(
                 retweet=row["public_metrics"]["retweet_count"],
                 like=row["public_metrics"]["like_count"],
@@ -195,9 +192,7 @@ def check_response(url, platform, items):
     total_time = time.time() - start
     print(f"Request took {total_time:.2f} seconds")
 
-    assert (
-        response.status_code == 200
-    ), f"Request failed with content: {response.content}"
+    assert response.status_code == 200, f"Request failed with content: {response.content}"
 
     try:
         result = RankingResponse.model_validate_json(response.content)

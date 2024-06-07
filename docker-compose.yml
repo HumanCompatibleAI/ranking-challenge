@@ -1,21 +1,20 @@
-services:
+version: '3.8'
 
+services:
   database:
     image: postgres:15.7-alpine
     ports:
       - "5435:5432"
-    # command: -c 'log_statement=all'  # uncomment to debug
     environment:
       POSTGRES_DB: "postgres"
       POSTGRES_USER: "postgres"
       POSTGRES_PASSWORD: "postgres"
       POSTGRES_HOST_AUTH_METHOD: "trust"
       PGPORT: "5432"
-    # We want persistence for our database
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 1s
       timeout: 14s
       retries: 15
@@ -34,24 +33,22 @@ services:
 
   ranker:
     build:
-      context: ranking_server
-      dockerfile: Dockerfile
-    volumes:
-      - .:/app
+      context: .
+      dockerfile: docker/Dockerfile.ranking_server
     depends_on:
       - redis
     environment:
       REDIS_CONNECTION_STRING: redis://redis:6379
       CELERY_BROKER: redis://redis-celery-broker:6380
       CELERY_BACKEND: redis://redis-celery-broker:6380
-    command: uvicorn ranking_server.ranking_server:app --host 0.0.0.0 --port 8001 --log-config ranking_server/logging_config.yaml
+    command: ["poetry", "run", "uvicorn", "ranking_server.ranking_server:app", "--host", "0.0.0.0", "--port", "8001", "--log-config", "ranking_server/logging_config.yaml"]
     ports:
       - "8001:8001"
 
   celery-worker:
     build:
-      context: sandbox_worker
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: docker/Dockerfile.sandbox_worker
     depends_on:
       - redis
       - redis-celery-broker
@@ -60,34 +57,34 @@ services:
       CELERY_BROKER: redis://redis-celery-broker:6380
       CELERY_BACKEND: redis://redis-celery-broker:6380
       POSTS_DB_URI: postgres://postgres:postgres@database:5432/posts?sslmode=disable
-    command: bash -c "celery -A sandbox_worker.tasks beat & celery -A sandbox_worker.tasks worker -Q tasks --loglevel=info"
+    command: ["poetry", "run", "celery", "-A", "sandbox_worker.tasks", "worker", "-Q", "tasks", "--loglevel=info"]
 
   celery-scorer-worker0:
     build:
-      context: scorer_worker
-      dockerfile: Dockerfile.scorer_worker
+      context: .
+      dockerfile: docker/Dockerfile.scorer_worker
     depends_on:
       - redis-celery-broker
     environment:
       CELERY_BROKER: redis://redis-celery-broker:6380
       CELERY_BACKEND: redis://redis-celery-broker:6380
-    command: celery -A scorer_worker.celery_app worker -Q scorer --loglevel=info
+    command: ["poetry", "run", "celery", "-A", "scorer_worker.tasks", "worker", "-Q", "scorer", "--loglevel=info"]
 
   celery-scorer-worker1:
     build:
-      context: scorer_worker
-      dockerfile: Dockerfile.scorer_worker
+      context: .
+      dockerfile: docker/Dockerfile.scorer_worker
     depends_on:
       - redis-celery-broker
     environment:
       CELERY_BROKER: redis://redis-celery-broker:6380
       CELERY_BACKEND: redis://redis-celery-broker:6380
-    command: celery -A scorer_worker.celery_app worker -Q scorer --loglevel=info
+    command: ["poetry", "run", "celery", "-A", "scorer_worker.tasks", "worker", "-Q", "scorer", "--loglevel=info"]
 
   celery-scraper-worker0:
     build:
-      context: scraper_worker
-      dockerfile: Dockerfile.scraper
+      context: .
+      dockerfile: docker/Dockerfile.scraper_worker.scraper
     depends_on:
       - redis-celery-broker
     environment:
@@ -98,20 +95,32 @@ services:
       TWITTER_USERNAME: ${TWITTER_USERNAME}
       TWITTER_EMAIL: ${TWITTER_EMAIL}
       RESULTS_ENDPOINT: http://scraper-ingester:8002/data/scraper
-    command: bash -c "celery -A scraper_worker.celery_app beat & celery -A scraper_worker.celery_app worker -Q scraper --loglevel=info"
+    command: ["poetry", "run", "celery", "-A", "scraper_worker.tasks", "worker", "-Q", "scraper", "--loglevel=info"]
 
   scraper-ingester:
     build:
-      context: scraper_worker
-      dockerfile: Dockerfile.ingester
+      context: .
+      dockerfile: docker/Dockerfile.scraper_worker.ingester
     ports:
       - "8002:8002"
     volumes:
       - .:/app
+      - ../../sample_data:/data
     environment:
       SCRAPER_DB_URI: postgres://postgres:postgres@database:5432/scraper?sslmode=disable
-    command: uvicorn scraper_worker.ingester:app --host 0.0.0.0 --port 8002
+      PYTHONPATH: /app/examples/combined
+    command: ["poetry", "run", "uvicorn", "scraper_worker.ingester:app", "--host", "0.0.0.0", "--port", "8002"]
 
+  job-scheduler:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.job_scheduler
+    depends_on:
+      - redis-celery-broker
+    environment:
+      CELERY_BROKER: redis://redis-celery-broker:6380
+      CELERY_BACKEND: redis://redis-celery-broker:6380
+    command: ["poetry", "run", "celery", "-A", "job_scheduler.scheduler", "beat", "-S", "redbeat.RedBeatScheduler", "--loglevel=info"]
 
 volumes:
   postgres_data:

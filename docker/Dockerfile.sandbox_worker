@@ -1,0 +1,21 @@
+FROM python:3.11
+
+WORKDIR /app
+
+# Install Poetry
+RUN pip install poetry
+
+# Copy only the necessary files to install dependencies with Poetry
+COPY pyproject.toml poetry.lock ./
+
+# Install dependencies using Poetry
+RUN poetry config virtualenvs.create false && poetry install --only main --no-interaction --no-ansi
+
+# Download necessary NLTK data
+RUN python -m nltk.downloader maxent_ne_chunker words punkt averaged_perceptron_tagger
+
+# Copy the rest of the application code
+COPY examples/combined /app
+
+# Set the entrypoint and command to run the Celery worker
+CMD ["poetry", "run", "celery", "-A", "sandbox_worker.tasks", "worker", "-Q", "tasks", "--loglevel=info"]
