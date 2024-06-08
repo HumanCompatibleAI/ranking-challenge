@@ -76,9 +76,7 @@ def score(input: ScoringRequest) -> ScoringResponse:
         )
     output = []
     for item_id, scores in results.items():
-        output.append(
-            {"item_id": item_id, "scores": scores, "timings": timings[item_id]}
-        )
+        output.append({"item_id": item_id, "scores": scores, "timings": timings[item_id]})
     return ScoringResponse(data=output)
 
 

@@ -35,9 +35,7 @@ SELECT foo FROM bar;
 
 
 def test_substring_matches_by_platform(my_celery_app, celery_worker):
-    result = substring_matches_by_platform.delay(
-        "trump", "2017-05-31", "2017-06-01"
-    ).get()
+    result = substring_matches_by_platform.delay("trump", "2017-05-31", "2017-06-01").get()
     assert "total_rows" in result.keys()
     assert result["total_rows"] > 0
 
@@ -57,6 +55,4 @@ def test_count_top_named_entities(my_celery_app, celery_worker):
     assert "timestamp" in top_entities.keys()
     result_time = datetime.fromisoformat(top_entities["timestamp"])
     dt = datetime.now(UTC) - result_time
-    assert (
-        dt.total_seconds() < 10
-    ), f"Result timesteamp {result_time} appears to be stale"
+    assert dt.total_seconds() < 10, f"Result timesteamp {result_time} appears to be stale"

@@ -92,9 +92,7 @@ def health_check():
 
 
 def process_success(task_id: str, timestamp: datetime, results: list[dict]):
-    logger.info(
-        f"Received results for {task_id} completed at {timestamp}: length={len(results)}"
-    )
+    logger.info(f"Received results for {task_id} completed at {timestamp}: length={len(results)}")
     rows = [
         ScraperData(
             post_id=result["id_str"],

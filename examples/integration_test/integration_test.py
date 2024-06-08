@@ -41,9 +41,7 @@ def test_rank_fake(url):
         follow_redirects=True,
     )
 
-    assert (
-        response.status_code == 200
-    ), f"Request failed with content: {response.content}"
+    assert response.status_code == 200, f"Request failed with content: {response.content}"
 
     result = RankingResponse.model_validate_json(response.content)
     print(result, file=sys.stderr)
@@ -55,9 +53,7 @@ def test_rank_facebook(url):
         items = []
         reader = csv.DictReader(f)
         for row in reader:
-            embedded_urls = re.findall(
-                r"https?://(?:[-\w.]|(?:%[\da-fA-F]{2}))+", row["text"]
-            )
+            embedded_urls = re.findall(r"https?://(?:[-\w.]|(?:%[\da-fA-F]{2}))+", row["text"])
             engagements_dict = {
                 key: int(float(row[key] or 0))
                 for key in [
@@ -100,9 +96,7 @@ def test_rank_reddit(url):
         items = []
         reader = csv.DictReader(f)
         for row in reader:
-            embedded_urls = re.findall(
-                r"https?://(?:[-\w.]|(?:%[\da-fA-F]{2}))+", row["text"]
-            )
+            embedded_urls = re.findall(r"https?://(?:[-\w.]|(?:%[\da-fA-F]{2}))+", row["text"])
             engagements = RedditEngagements(
                 upvote=int(float(row["upvotes"])),
                 downvote=int(float(row["downvotes"])),
@@ -145,9 +139,7 @@ def test_rank_twitter(url):
             if i > 100:
                 break
 
-            embedded_urls = re.findall(
-                r"https?://(?:[-\w.]|(?:%[\da-fA-F]{2}))+", row["text"]
-            )
+            embedded_urls = re.findall(r"https?://(?:[-\w.]|(?:%[\da-fA-F]{2}))+", row["text"])
             engagements = TwitterEngagements(
                 retweet=row["public_metrics"]["retweet_count"],
                 like=row["public_metrics"]["like_count"],
@@ -200,9 +192,7 @@ def check_response(url, platform, items):
     total_time = time.time() - start
     print(f"Request took {total_time:.2f} seconds")
 
-    assert (
-        response.status_code == 200
-    ), f"Request failed with content: {response.content}"
+    assert response.status_code == 200, f"Request failed with content: {response.content}"
 
     try:
         result = RankingResponse.model_validate_json(response.content)

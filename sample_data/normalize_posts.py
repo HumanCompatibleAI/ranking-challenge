@@ -44,9 +44,7 @@ REDDIT_DATA_FILE = "reddit_data/processed/filtered_reddit_data.csv"
 TWITTER_DATA_FILE = "twitter_data/processed/filtered_jan_2023.json"
 
 
-def process_facebook(
-    data_file=FB_DATA_FILE, num_samples=-1, seed=0
-) -> list[ContentItem]:
+def process_facebook(data_file=FB_DATA_FILE, num_samples=-1, seed=0) -> list[ContentItem]:
     """
     This function seeks to convert our sample data into the appropriate JSON format.
 
@@ -65,9 +63,7 @@ def process_facebook(
     # Instantiate empty list and set
     final_items = []
 
-    for _, row in tqdm(
-        posts.iterrows(), "Processing Facebook posts", total=posts.shape[0]
-    ):
+    for _, row in tqdm(posts.iterrows(), "Processing Facebook posts", total=posts.shape[0]):
         item = row.to_dict()
         item = {k: v if v == v else "" for k, v in item.items()}  # replace NaN with ""
 
@@ -130,9 +126,7 @@ def process_facebook(
     return final_items
 
 
-def process_twitter(
-    data_file=TWITTER_DATA_FILE, num_samples=-1, seed=0
-) -> list[ContentItem]:
+def process_twitter(data_file=TWITTER_DATA_FILE, num_samples=-1, seed=0) -> list[ContentItem]:
     """
     This function seeks to convert our sample data into the appropriate JSON format.
 
@@ -173,9 +167,7 @@ def process_twitter(
     def assign_parents(df):
         ids = df["id"].tolist()
         for idx, post_id in enumerate(ids):
-            if (
-                random.random() > 0.7
-            ):  # 30% chance to start a new thread; adjust as needed
+            if random.random() > 0.7:  # 30% chance to start a new thread; adjust as needed
                 continue
             possible_parents = ids[:idx]
             while possible_parents:
@@ -227,8 +219,7 @@ def process_twitter(
     np.random.seed(like_seed)
     df["simulated_likes"] = (
         round(
-            (df["followers_count"] * 0.01)
-            + np.random.normal(loc=0, scale=noise_std, size=len(df)),
+            (df["followers_count"] * 0.01) + np.random.normal(loc=0, scale=noise_std, size=len(df)),
             0,
         )
         .clip(lower=0)
@@ -283,9 +274,7 @@ def process_twitter(
     return transformed_data
 
 
-def process_reddit(
-    data_file=REDDIT_DATA_FILE, num_samples=-1, seed=0
-) -> list[ContentItem]:
+def process_reddit(data_file=REDDIT_DATA_FILE, num_samples=-1, seed=0) -> list[ContentItem]:
     """
     This function seeks to convert our sample data into the appropriate JSON format.
 
@@ -313,9 +302,7 @@ def process_reddit(
     ):
         # General structure for posts
         post_item = post_row.to_dict()
-        post_item = {
-            k: v if v == v else "" for k, v in post_item.items()
-        }  # replace NaN with ""
+        post_item = {k: v if v == v else "" for k, v in post_item.items()}  # replace NaN with ""
         if post_item["upvotes"] < 0:
             post_item["upvotes"] = 0
         if post_item["downvotes"] < 0:
