@@ -1,6 +1,7 @@
 # ruff: noqa: E501
 from datetime import datetime
 from typing import Literal, Optional, Union
+import warnings
 
 from pydantic import BaseModel, Field, HttpUrl
 from pydantic.types import NonNegativeInt
@@ -19,9 +20,11 @@ class TwitterEngagements(BaseModel):
 
 class RedditEngagements(BaseModel):
     """Engagement counts from Reddit"""
-
-    upvote: NonNegativeInt
-    downvote: NonNegativeInt
+    
+    warnings.warn('The upvotes and `downvotes` field is deprecated as it is net of upvotes and downvotes; use `score` instead.', DeprecationWarning)
+    upvote: Optional[NonNegativeInt]
+    downvote: Optional[NonNegativeInt]
+    score: Optional[int]
     comment: NonNegativeInt
     award: NonNegativeInt
 
@@ -47,6 +50,11 @@ class ContentItem(BaseModel):
         description="A unique ID describing a specific piece of content. We will do our best to make an ID for a given item persist between requests, but that property is not guaranteed."
     )
 
+    original_rank: Optional[NonNegativeInt] = Field(
+        description="The rank of the item in the original feed. Useful for debugging and analysis of performance.",
+        default=None
+    )
+    
     post_id: Optional[str] = Field(
         description="The ID of the post to which this comment belongs. Useful for linking comments to their post when comments are shown in a feed. Currently this UX only exists on Facebook.",
         default=None,
@@ -84,6 +92,7 @@ class ContentItem(BaseModel):
     engagements: Union[TwitterEngagements, RedditEngagements, FacebookEngagements] = Field(
         description="Engagement counts for the content item."
     )
+    
 
 
 class Session(BaseModel):
@@ -100,6 +109,11 @@ class Session(BaseModel):
     )
     cohort: str = Field(
         description="The cohort to which the user has been assigned. You can safely ignore this. It is used by the PRC request router."
+    )
+    
+    cohort_index: Optional[NonNegativeInt] = Field(
+        description="The index of the cohort to which the user has been assigned. Used to select cohort when request comes through.",
+        
     )
     platform: Literal["twitter", "reddit", "facebook"] = Field(
         description="The platform on which the user is viewing content."

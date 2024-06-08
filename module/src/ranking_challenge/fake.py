@@ -40,6 +40,7 @@ def fake_request(n_posts=1, n_comments=0, platform="reddit"):
             url=f"https://{platform}.com/{fake.random_element(URI_PATHS[platform])}",
             user_name_hash=hashlib.sha256(fake.name().encode()).hexdigest(),
             cohort="AB",
+            cohort_index=randint(0,4096),
             platform=platform,
             current_time=time.time(),
         ),
@@ -66,6 +67,7 @@ def fake_item(platform="reddit", type="post", post_id=None, parent_id=None):
         engagements = {
             "upvote": randint(0, 50),
             "downvote": randint(0, 50),
+            "score": randint(-50, 50),
             "comment": randint(0, 50),
             "award": randint(0, 50),
         }
@@ -91,8 +93,9 @@ def fake_item(platform="reddit", type="post", post_id=None, parent_id=None):
     else:
         raise ValueError(f"Unknown platform: {platform}")
 
-    return ContentItem(
+    item = ContentItem(
         id=str(uuid4()),
+        original_rank=randint(0, 100),
         text=fake.text(),
         post_id=post_id,
         parent_id=parent_id,
@@ -102,6 +105,9 @@ def fake_item(platform="reddit", type="post", post_id=None, parent_id=None):
         embedded_urls=[fake.url() for _ in range(randint(0, 3))],
         engagements=engagements,
     )
+
+    return item
+    
 
 
 def fake_response(ids, n_new_items=1):
@@ -129,7 +135,6 @@ def main():
     response = fake_response([item.id for item in request.items], 2)
     print("\nResponse:")
     print(response.model_dump_json(indent=2))
-
 
 if __name__ == "__main__":
     main()

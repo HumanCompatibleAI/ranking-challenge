@@ -325,6 +325,7 @@ def process_reddit(
             **{
                 "upvote": post_item.pop("upvotes", 0),
                 "downvote": post_item.pop("downvotes", 0),
+                "score": post_item.pop("score", 0),
                 "comment": 0,
                 "award": 0,
             }
@@ -349,6 +350,7 @@ def process_reddit(
                 **{
                     "upvote": comment_item.pop("upvotes", 0),
                     "downvote": comment_item.pop("downvotes", 0),
+                    "score": comment_item.pop("score", 0),
                     "comment": 0,
                     "award": 0,
                 }
