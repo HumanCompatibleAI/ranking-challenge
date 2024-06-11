@@ -99,7 +99,10 @@ class Session(BaseModel):
         description="A (salted) hash of the user's username. We'll do our best to make it match the `item.author_name_hash` on posts authored by the current user."
     )
     cohort: str = Field(
-        description="The cohort to which the user has been assigned. You can safely ignore this. It is used by the PRC request router."
+        description="The cohort to which the user has been assigned. You can most likely ignore this. It is used by the PRC request router."
+    )
+    cohort_index: Optional[NonNegativeInt] = Field(
+        description="The user's randomly-assigned cohort index. You can ignore this. The request router uses it to place users into buckets (cohorts).",
     )
     platform: Literal["twitter", "reddit", "facebook"] = Field(
         description="The platform on which the user is viewing content."
