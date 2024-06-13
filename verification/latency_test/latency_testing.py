@@ -1,31 +1,31 @@
-import json
-import random
-import time
 import argparse
+import time
+from collections import defaultdict
+
+import numpy as np
 import pandas as pd
 import requests
-from collections import defaultdict
 from fastapi.encoders import jsonable_encoder
 from ranking_challenge.fake import fake_request
-from ranking_challenge.request import ContentItem, RankingRequest
+from ranking_challenge.request import ContentItem
+from ranking_challenge.response import RankingResponse
 from tqdm import tqdm
-import numpy as np
 
-facebook = pd.read_json('facebook_feed.json')
-reddit = pd.read_json('reddit_feed.json')
-twitter = pd.read_json('twitter_feed.json')
+facebook = pd.read_json("facebook_feed.json")
+reddit = pd.read_json("reddit_feed.json")
+twitter = pd.read_json("twitter_feed.json")
 
 TARGET_LATENCY = 0.5  # Target latency in seconds (500ms p95)
-NUM_REQUESTS = 600   # Number of requests for each platform to generate a statistically valid sample
-PLATFORMS = ['Facebook', 'Reddit', 'Twitter']
-SAMPLES = {'Facebook' : facebook, 'Reddit' : reddit, 'Twitter': twitter}
+NUM_REQUESTS = 600  # Number of requests for each platform to generate a statistically valid sample
+PLATFORMS = ["Facebook", "Reddit", "Twitter"]
+SAMPLES = {"Facebook": facebook, "Reddit": reddit, "Twitter": twitter}
 
-results_df = pd.DataFrame(columns=['Platform', 'Latency', 'Num_Items'])
+results_df = pd.DataFrame(columns=["Platform", "Latency", "Num_Items"])
+
 
 # Generates the next request for the platform by iterating through the
 # dataframe for the next sample, and returning it in json format. Goes through
 # each dataframe individually
-selected_rows = {}
 def generate_items(platform):
     selected_rows = {}
     df = SAMPLES.get(platform)
@@ -43,42 +43,50 @@ def generate_items(platform):
     content_items = [ContentItem.model_validate(item_df) for item_df in next_row]
     return content_items
 
-def issue_request(platform, url):
+
+# make a request and add it to results_df
+def issue_request(platform, url, results_df):
     items = generate_items(platform)
     request = fake_request(n_posts=0, n_comments=0, platform=platform.lower())
     request.items = items
 
     start_time = time.time()
-    # application should be running on localhost:8000
     response = requests.post(url, json=jsonable_encoder(request))
-    if response.status_code != 200:
-        raise Exception('Request failed with status code: {}, error: {}'.format(response.status_code, response.text))
-
-    # Validate response is JSON-parsable
-    try:
-        json_response = response.json()
-    except json.JSONDecodeError as e:
-        raise Exception('Response is not JSON parsable: {}'.format(e))
-    
     end_time = time.time()
+    if response.status_code != 200:
+        raise Exception(
+            "Request failed with status code: {}, error: {}".format(
+                response.status_code, response.text
+            )
+        )
+
+    # Validate response is JSON-parsable, and is a valid response
+    try:
+        json_response = RankingResponse.model_validate_json(response.text)
+    except Exception as e:
+        raise Exception("Response did not validate: {}".format(e))
+
     latency = end_time - start_time
 
     # Store latency, platform, and number of items in DataFrame
     results_df.loc[len(results_df)] = [platform, latency, len(request.items)]
-    return latency
+
 
 # Main function to run the test
 latencies = defaultdict(list)
+
+
 def run_test(url):
     for platform in PLATFORMS:
         for _ in tqdm(range(NUM_REQUESTS), f"Platform: {platform}"):
-            latency = issue_request(platform, url)
+            latency = issue_request(platform, url, results_df)
             latencies[platform].append(latency)
 
-def check_p95_threshold(results_df):
-    latencies = results_df['Latency'].values
-    p95_latency = np.percentile(latencies, 95)
-    return p95_latency <= TARGET_LATENCY
+
+def get_p95_latency(results_df):
+    latencies = results_df["Latency"].values
+    return np.percentile(latencies, 95)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run ranking challenge test.")
@@ -88,8 +96,8 @@ if __name__ == "__main__":
     run_test(args.url)
 
     for platform in PLATFORMS:
-        passes_95 = check_p95_threshold(results_df.where(results_df['Platform'] == platform))
-        if passes_95:
-            print(f"All requests pass p95 for {platform}!")
+        p95 = get_p95_latency(results_df[results_df["Platform"] == platform])
+        if p95 <= TARGET_LATENCY:
+            print(f"All requests pass for {platform}! p95 was {p95:.3f} seconds.")
         else:
-            print(f"Some requests do not pass p95 for {platform}.")
+            print(f"Some requests do not pass for {platform}. p95 was {p95:.3f} seconds.")
