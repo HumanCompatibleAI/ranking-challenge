@@ -98,7 +98,7 @@ class Session(BaseModel):
     user_name_hash: str = Field(
         description="A (salted) hash of the user's username. We'll do our best to make it match the `item.author_name_hash` on posts authored by the current user."
     )
-    cohort: str = Field(
+    cohort: Optional[str] = Field(
         description="The cohort to which the user has been assigned. You can most likely ignore this. It is used by the PRC request router."
     )
     cohort_index: Optional[NonNegativeInt] = Field(
