@@ -112,7 +112,7 @@ class Session(BaseModel):
     )
     
     cohort_index: Optional[NonNegativeInt] = Field(
-        description="The index of the cohort to which the user has been assigned. Used to select cohort when request comes through.",
+        description="The user's randomly-assigned cohort index. You can ignore this. The request router uses it to place users into buckets (cohorts).",
         
     )
     platform: Literal["twitter", "reddit", "facebook"] = Field(
