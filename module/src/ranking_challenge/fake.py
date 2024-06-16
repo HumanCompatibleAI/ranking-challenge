@@ -16,8 +16,9 @@ URI_PATHS = {
     "facebook": ["", "photo", "groups"],
 }
 
+platform = "twitter"
 
-def fake_request(n_posts=1, n_comments=0, platform="reddit"):
+def fake_request(n_posts=1, n_comments=0, platform=platform):
     posts = [fake_item(platform=platform, type="post") for _ in range(n_posts)]
     comments = []
     for post in posts:
@@ -137,7 +138,7 @@ def fake_response(ids, n_new_items=1):
 def fake_new_item():
     return {
         "id": str(uuid4()),
-        "url": fake.url(),
+        "url": f"https://{platform}.com/{fake.random_element(URI_PATHS[platform])}",
     }
 
 
