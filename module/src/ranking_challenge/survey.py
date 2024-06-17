@@ -130,67 +130,67 @@ class SurveyResponse(BaseModel):
         description="Think of the past two weeks. How much time did you spend on social media, on average, per day?"
     )
 
-    feed_lean: SocmedLean = Field(
+    feed_lean: Optional[SocmedLean] = Field(
         description="Do you think your social media feeds tend to favour liberal content, conservative content, or neither?"
     )
     
-    socmed_censorship: Literal["not_at_all_likely",  "not_very_likely", "somewhat_likely", "very_likely"] = Field(
+    socmed_censorship: Optional[Literal["not_at_all_likely",  "not_very_likely", "somewhat_likely", "very_likely"]] = Field(
         description="How likely, if at all, do you think it is that social media sites intentionally censor political viewpoints that they find objectionable?"
     )
     
-    socmed_trust: Literal["strongly_distrust", "somewhat_distrust", "neither_trust_nor_distrust", "somewhat_trust", "strongly_trust"] = Field(
+    socmed_trust: Optional[Literal["strongly_distrust", "somewhat_distrust", "neither_trust_nor_distrust", "somewhat_trust", "strongly_trust"]] = Field(
         description="On balance, to what extent do you trust that you receive accurate information from social media?"
     )
     
-    percieved_racism: Literal["Not_a_problem" , "slight_problem" ,"moderate_problem", "significant_problem", "major_problem"] = Field(
+    percieved_racism: Optional[Literal["Not_a_problem" , "slight_problem" ,"moderate_problem", "significant_problem", "major_problem"]] = Field(
         description="To what extent do you view racism against Black Americans as a problem today?"
     )
     
-    trump: Literal["strongly_unfavorable", "somewhat_unfavorable", "neither_favorable_nor_unfavorable" "somewhat_favorable", "strongly_favorable"] = Field(
+    trump: Optional[Literal["strongly_unfavorable", "somewhat_unfavorable", "neither_favorable_nor_unfavorable" "somewhat_favorable", "strongly_favorable"]] = Field(
         description="How favorable/unfavorable are your views towards Donald Trump?"
     )
     
-    economic: Literal["extremely_negative", "somewhat_negative", "neither_positive_nor_negative", "somewhat_positive", "extremely_positive"] = Field(
+    economic: Optional[Literal["extremely_negative", "somewhat_negative", "neither_positive_nor_negative", "somewhat_positive", "extremely_positive"]] = Field(
         description="How positive/negative do you feel about the current U.S. economic situation?"
     )
     
-    msm_trust: Literal["strongly_distrust", "somewhat_distrust", "neither_trust_nor_distrust", "somewhat_trust", "strongly_trust"] = Field(
+    msm_trust: Optional[Literal["strongly_distrust", "somewhat_distrust", "neither_trust_nor_distrust", "somewhat_trust", "strongly_trust"]] = Field(
         description="How much do you trust mainstream mass media -- such as newspapers, TV and radio – to report the news fully, accurately, and fairly?"
     )
     
-    immigration: Literal["greatly_decreased", "somewhat_decreased", "kept_the_same", "somewhat_increased", "greatly_increased"] = Field(
+    immigration: Optional[Literal["greatly_decreased", "somewhat_decreased", "kept_the_same", "somewhat_increased", "greatly_increased"]] = Field(
         description="In your view, should immigration to the U.S. be increased, decreased, or kept about the same?"
     )
     
-    israel_palestine: Literal["strongly_oppose", "somewhat_oppose", "neither_support_nor_oppose" "somewhat_support", "strongly_support"] = Field(
+    israel_palestine: Optional[Literal["strongly_oppose", "somewhat_oppose", "neither_support_nor_oppose" "somewhat_support", "strongly_support"]] = Field(
         description="How strongly do you support/oppose Israel in the Israeli-Palestinian conflict?"
     )
     
-    abortion: Literal["strongly_oppose", "somewhat_oppose", "neither_support_nor_oppose" "somewhat_support", "strongly_support"] = Field(
+    abortion: Optional[Literal["strongly_oppose", "somewhat_oppose", "neither_support_nor_oppose" "somewhat_support", "strongly_support"]] = Field(
         description="How strongly do you support/oppose the legal right to abortion?"
     )
     
-    climate_change: Literal["not_concerned", "slightly_concerned", "moderately_concerned", "very_concerned", "extremely_concerned"] = Field(
+    climate_change: Optional[Literal["not_concerned", "slightly_concerned", "moderately_concerned", "very_concerned", "extremely_concerned"]] = Field(
         description="How concerned are you about climate change?"
     )
     
-    military: Literal["strongly_unfavorable", "somewhat_unfavorable", "neither_favorable_nor_unfavorable" "somewhat_favorable", "strongly_favorable"] = Field(
+    military: Optional[Literal["strongly_unfavorable", "somewhat_unfavorable", "neither_favorable_nor_unfavorable" "somewhat_favorable", "strongly_favorable"]] = Field(
         description="How favorable/unfavorable are your views towards the U.S. military?"
     )
     
-    political_complexity: Literal["never", "some_of_the_time", "half_the_time", "most_of_the_time", "always"] = Field(
+    political_complexity: Optional[Literal["never", "some_of_the_time", "half_the_time", "most_of_the_time", "always"]] = Field(
         description="How often do politics and government seem so complicated that you can't really understand what's going on?"
     )
     
-    political_understanding: Literal["extremely_well", "very_well",  "moderately_well", "slightly_well", "not_well_at_all"] = Field(
+    political_understanding: Optional[Literal["extremely_well", "very_well",  "moderately_well", "slightly_well", "not_well_at_all"]] = Field(
         description="How well do you understand the important political issues facing our country?"
     )
     
-    political_focus: Literal["never", "some_of_the_time", "half_the_time", "most_of_the_time", "always"] = Field(
+    political_focus: Optional[Literal["never", "some_of_the_time", "half_the_time", "most_of_the_time", "always"]] = Field(
         description="How often do you pay attention to what’s going on in government and politics?"
     )
     
-    voting_likelihood: Literal["will_not_vote", "probably_will_not_vote", "probably_will_vote", "definitely_will_vote"] = Field(
+    voting_likelihood: Optional[Literal["will_not_vote", "probably_will_not_vote", "probably_will_vote", "definitely_will_vote"]] = Field(
         description="How likely are you to vote in the general election this November?"
     )
     

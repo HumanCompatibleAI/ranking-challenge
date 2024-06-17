@@ -1,7 +1,6 @@
 # ruff: noqa: E501
 from datetime import datetime
 from typing import Literal, Optional, Union
-import warnings
 
 from pydantic import BaseModel, Field, HttpUrl
 from pydantic.types import NonNegativeInt
@@ -20,10 +19,9 @@ class TwitterEngagements(BaseModel):
 
 class RedditEngagements(BaseModel):
     """Engagement counts from Reddit"""
-    
-    warnings.warn('The upvotes and `downvotes` field is deprecated as it is net of upvotes and downvotes; use `score` instead.', DeprecationWarning)
-    upvote: Optional[NonNegativeInt]
-    downvote: Optional[NonNegativeInt]
+
+    upvote: Optional[NonNegativeInt] = Field(description='The reddit upvote field is deprecated, use score instead', deprecated=True, default=None)
+    downvote: Optional[NonNegativeInt] = Field(description='The reddit downvote field is deprecated, use score instead', deprecated=True, default=None)
     score: Optional[int]
     comment: NonNegativeInt
     award: NonNegativeInt
