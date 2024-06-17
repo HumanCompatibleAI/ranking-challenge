@@ -312,6 +312,7 @@ def process_reddit(data_file=REDDIT_DATA_FILE, num_samples=-1, seed=0) -> list[C
             **{
                 "upvote": post_item.pop("upvotes", 0),
                 "downvote": post_item.pop("downvotes", 0),
+                "score": post_item.pop("score", 0),
                 "comment": 0,
                 "award": 0,
             }
@@ -336,6 +337,7 @@ def process_reddit(data_file=REDDIT_DATA_FILE, num_samples=-1, seed=0) -> list[C
                 **{
                     "upvote": comment_item.pop("upvotes", 0),
                     "downvote": comment_item.pop("downvotes", 0),
+                    "score": comment_item.pop("score", 0),
                     "comment": 0,
                     "award": 0,
                 }

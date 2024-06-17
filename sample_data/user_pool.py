@@ -39,6 +39,7 @@ class User:
             user_id=user_id,
             user_name_hash=hashed_user,
             cohort="XX",
+            cohort_index=random.randint(0, 4096),
             activity_level=1,
             platforms=[platform],
         )
@@ -55,6 +56,7 @@ class User:
             user_id=self.user_id,
             user_name_hash=self.user_name_hash,
             cohort=self.cohort,
+            cohort_index=self.cohort_index,
             platform=platform,
             current_time=current_time,
         )

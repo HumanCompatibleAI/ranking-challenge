@@ -16,8 +16,9 @@ URI_PATHS = {
     "facebook": ["", "photo", "groups"],
 }
 
+platform = "twitter"
 
-def fake_request(n_posts=1, n_comments=0, platform="reddit"):
+def fake_request(n_posts=1, n_comments=0, platform=platform):
     posts = [fake_item(platform=platform, type="post") for _ in range(n_posts)]
     comments = []
     for post in posts:
@@ -40,6 +41,7 @@ def fake_request(n_posts=1, n_comments=0, platform="reddit"):
             url=f"https://{platform}.com/{fake.random_element(URI_PATHS[platform])}",
             user_name_hash=hashlib.sha256(fake.name().encode()).hexdigest(),
             cohort="AB",
+            cohort_index=randint(0,4096),
             platform=platform,
             current_time=time.time(),
         ),
@@ -56,6 +58,22 @@ def fake_request(n_posts=1, n_comments=0, platform="reddit"):
             socmed_use=7,
             browser_perc=0.8,
             mobile_perc=0.2,
+            feed_lean=3,
+            socmed_censorship="not_at_all_likely",
+            socmed_trust="strongly_distrust",
+            percieved_racism="Not_a_problem",
+            trump="strongly_unfavorable",
+            economic="extremely_negative",
+            msm_trust="strongly_distrust",
+            immigration="greatly_decreased",
+            israel_palestine="strongly_oppose",
+            abortion="strongly_oppose",
+            climate_change="not_concerned",
+            military="strongly_unfavorable",
+            political_complexity="never",
+            political_understanding="extremely_well",
+            political_focus="never",
+            voting_likelihood="will_not_vote"
         ),
         items=posts + comments,
     )
@@ -66,6 +84,7 @@ def fake_item(platform="reddit", type="post", post_id=None, parent_id=None):
         engagements = {
             "upvote": randint(0, 50),
             "downvote": randint(0, 50),
+            "score": randint(-50, 50),
             "comment": randint(0, 50),
             "award": randint(0, 50),
         }
@@ -91,8 +110,9 @@ def fake_item(platform="reddit", type="post", post_id=None, parent_id=None):
     else:
         raise ValueError(f"Unknown platform: {platform}")
 
-    return ContentItem(
+    item = ContentItem(
         id=str(uuid4()),
+        original_rank=randint(0, 100),
         text=fake.text(),
         post_id=post_id,
         parent_id=parent_id,
@@ -102,6 +122,9 @@ def fake_item(platform="reddit", type="post", post_id=None, parent_id=None):
         embedded_urls=[fake.url() for _ in range(randint(0, 3))],
         engagements=engagements,
     )
+
+    return item
+    
 
 
 def fake_response(ids, n_new_items=1):
@@ -115,7 +138,7 @@ def fake_response(ids, n_new_items=1):
 def fake_new_item():
     return {
         "id": str(uuid4()),
-        "url": fake.url(),
+        "url": f"https://{platform}.com/{fake.random_element(URI_PATHS[platform])}",
     }
 
 
@@ -129,7 +152,6 @@ def main():
     response = fake_response([item.id for item in request.items], 2)
     print("\nResponse:")
     print(response.model_dump_json(indent=2))
-
 
 if __name__ == "__main__":
     main()
