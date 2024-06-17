@@ -1,0 +1,48 @@
+# pyproject.toml
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "ranking_challenge"
+version = "2.1.4"
+description = "The Prosocial Ranking Challenge"
+authors = ["Ian Baker <ian@sonic.net>"]
+readme = "README.md"
+license = "MIT"
+homepage = "https://humancompatible.ai/news/2024/01/18/the-prosocial-ranking-challenge-60000-in-prizes-for-better-social-media-algorithms/"
+repository = "https://github.com/humancompatibleai/ranking-challenge"
+keywords = ["ranking", "social media", "challenge"]
+
+[tool.poetry.dependencies]
+python = ">=3.10"
+pydantic = ">=2.6.0"
+faker = "*"
+
+[tool.poetry.dev-dependencies]
+pip-tools = "*"
+pytest = "*"
+ruff = "*"
+pre-commit = "^3.7.1"
+
+[tool.poetry.extras]
+module = ["pytest", "pydantic", "faker"]
+
+[tool.poetry.urls]
+homepage = "https://humancompatible.ai/news/2024/01/18/the-prosocial-ranking-challenge-60000-in-prizes-for-better-social-media-algorithms/"
+repository = "https://github.com/humancompatibleai/ranking-challenge"
+blog = "https://rankingchallenge.substack.com/"
+
+[tool.poetry.scripts]
+rcfaker = "ranking_challenge.fake:main"
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+extend-select = ["E501"]
+
+[[tool.poetry.packages]]
+include = "ranking_challenge"
+from = "src"
