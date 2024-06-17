@@ -10,7 +10,7 @@ Your ranker should accept a list of social media posts and comments, each with a
 
 ### Request
 
-(this example is a single post with two threaded comments)
+(this example is a single post with two threaded comments, please note that upvote and downvote are now deprecated fields)
 
 ```jsonc
 Request:
@@ -20,6 +20,7 @@ Request:
     "user_id": "41d01393-090a-4fcb-942b-28d87a7a06f3",
     "user_name_hash": "62a7c41518817a23706dfd600f29b1329eee18c69b014ae34265d7cf0ed183f1",
     "cohort": "AB",
+    "cohort_index": "1000",
     "platform": "reddit",
     "url": "https://reddit.com/r/technology",
     "current_time": "2024-05-13T21:08:32.211000Z"
@@ -43,6 +44,7 @@ Request:
   "items": [
     {
       "id": "368ba07d-a25f-49b1-a9dc-c1e909defe38",
+      "original_rank": 5,
       "post_id": null,
       "parent_id": null,
       "title": null,
@@ -54,12 +56,14 @@ Request:
       "engagements": {
         "upvote": 4,
         "downvote": 6,
+        "score": -2,
         "comment": 12,
         "award": 4
       }
     },
     {
       "id": "8421a4c8-f21b-482f-a8f4-ff1489365470",
+      "original_rank": 204,
       "post_id": "368ba07d-a25f-49b1-a9dc-c1e909defe38",
       "parent_id": null,
       "title": null,
@@ -73,12 +77,14 @@ Request:
       "engagements": {
         "upvote": 27,
         "downvote": 19,
+        "score": 8,
         "comment": 21,
         "award": 29
       }
     },
     {
       "id": "10b94628-b443-4b0a-ba9f-2efaafd19bff",
+      "original_rank": 77,
       "post_id": "368ba07d-a25f-49b1-a9dc-c1e909defe38",
       "parent_id": "8421a4c8-f21b-482f-a8f4-ff1489365470",
       "title": null,
@@ -94,6 +100,7 @@ Request:
       "engagements": {
         "upvote": 34,
         "downvote": 27,
+        "score": 7,
         "comment": 5,
         "award": 16
       }
@@ -146,6 +153,7 @@ To use them, just `pip install ranking-challenge`, and use them to generate and 
 - `user_name_hash`: A (salted) hash of the user's username. We'll do our best to make it match the `author_name_hash` on posts authored by the current user.
 - `session_id`: A unique ID for this page view, updated on navigation events. Use this to determine if two requests came from the same page.
 - `cohort`: The cohort to which the user has been assigned. You can safely ignore this. It is used by the PRC request router.
+- 'cohort_index': The index of the cohort. Determines which cohort the post will belong to.
 - `platform`: One of `reddit`, `twitter`, `facebook`
 - `url`: The URL of the page that the user is viewing, minus the query string portion. This can help you to determine which part of the application the user is in.
 - `current_time`: The current time according to the user's browser, in UTC, in `YYYY-MM-DD hh:mm:ss` format.
@@ -157,6 +165,7 @@ Demographic information about the user from the PRC intake survey. More document
 ### Content items
 
 - `id`: A unique ID describing a specific piece of content. We will do our best to make an ID for a given item persist between requests, but that property is not guaranteed.
+- 'original_ranking': The original ranking of the post for the platform.
 - `parent_id`: For threaded comments, this identifies the comment to which this one is a reply. Blank for top-level comments.
 - `post_id`: The ID of the post to which this comment belongs. Useful for linking comments to their post when comments are shown in a feed. Currently this only happens on Facebook.
 - `text`: The text of the content item. Assume UTF-8, and that leading and trailing whitespace have been trimmed.
@@ -168,7 +177,7 @@ Demographic information about the user from the PRC intake survey. More document
 
 Integer counts of engagements
 
-- Reddit, `upvote, downvote`.
+- Reddit, `score', ('upvote', 'downvote' have since been deprecated as they are net values and can be replaced with score)
 - X (Twitter): `reply, repost, like, view`
 - Facebook: `like, love, care, haha, wow, sad, angry, comment, share`
 
