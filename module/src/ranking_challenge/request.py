@@ -30,7 +30,9 @@ class RedditEngagements(BaseModel):
         deprecated=True,
         default=None,
     )
-    score: Optional[int]
+    score: Optional[int] = Field(
+        description="The reddit post score (sum of upvote/downvote)", default=None
+    )
     comment: NonNegativeInt
     award: NonNegativeInt
 
