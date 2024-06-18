@@ -6,7 +6,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "ranking_challenge_examples"
-version = "2.1.4"
+version = "2.1.5"
 description = "The Prosocial Ranking Challenge"
 authors = ["Ian Baker <ian@sonic.net>"]
 readme = "README.md"
@@ -25,7 +25,7 @@ flask-cors = "*"
 openai = "*"
 nltk = "*"
 httpx = "*"
-uvicorn = {extras = ["standard"], version = "^0.18.3"}
+uvicorn = { extras = ["standard"], version = "^0.18.3" }
 ranking-challenge = "*"
 flask = "*"
 python-dotenv = "*"
@@ -33,7 +33,7 @@ redis = ">= 4.4.4"
 psycopg2-binary = "*"
 sqlalchemy = "*"
 celery-redbeat = "*"
-pandas = "^1.4.2" 
+pandas = "^1.4.2"
 twscrape = "^0.1.0"
 
 [tool.poetry.dev-dependencies]
@@ -46,11 +46,45 @@ fakeredis = "*"
 [tool.poetry.extras]
 module = ["pytest", "pydantic", "faker"]
 sample_data = ["pandas", "numpy"]
-examples_combined_ranking_server = ["celery", "uvicorn", "ranking-challenge", "redis", "pytest"]
-examples_combined_scorer_worker = ["pydantic", "celery", "fastapi", "redis", "pytest", "pandas", "nltk", "uvicorn"]
-examples_combined = ["celery", "redis", "pytest", "pandas", "nltk", "uvicorn", "ranking-challenge", "psycopg2-binary"]
+examples_combined_ranking_server = [
+    "celery",
+    "uvicorn",
+    "ranking-challenge",
+    "redis",
+    "pytest",
+]
+examples_combined_scorer_worker = [
+    "pydantic",
+    "celery",
+    "fastapi",
+    "redis",
+    "pytest",
+    "pandas",
+    "nltk",
+    "uvicorn",
+]
+examples_combined = [
+    "celery",
+    "redis",
+    "pytest",
+    "pandas",
+    "nltk",
+    "uvicorn",
+    "ranking-challenge",
+    "psycopg2-binary",
+]
 examples_combined_job_scheduler = ["celery", "celery-redbeat"]
-examples_combined_sandbox_worker = ["celery", "redis", "pytest", "pandas", "nltk", "psycopg2", "celery-redbeat", "sqlalchemy", "psycopg2-binary"]
+examples_combined_sandbox_worker = [
+    "celery",
+    "redis",
+    "pytest",
+    "pandas",
+    "nltk",
+    "psycopg2",
+    "celery-redbeat",
+    "sqlalchemy",
+    "psycopg2-binary",
+]
 
 [tool.poetry.urls]
 homepage = "https://humancompatible.ai/news/2024/01/18/the-prosocial-ranking-challenge-60000-in-prizes-for-better-social-media-algorithms/"
