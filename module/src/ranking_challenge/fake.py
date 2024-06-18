@@ -18,6 +18,7 @@ URI_PATHS = {
 
 platform = "twitter"
 
+
 def fake_request(n_posts=1, n_comments=0, platform=platform):
     posts = [fake_item(platform=platform, type="post") for _ in range(n_posts)]
     comments = []
@@ -41,7 +42,7 @@ def fake_request(n_posts=1, n_comments=0, platform=platform):
             url=f"https://{platform}.com/{fake.random_element(URI_PATHS[platform])}",
             user_name_hash=hashlib.sha256(fake.name().encode()).hexdigest(),
             cohort="AB",
-            cohort_index=randint(0,4096),
+            cohort_index=randint(0, 4095),
             platform=platform,
             current_time=time.time(),
         ),
@@ -73,7 +74,7 @@ def fake_request(n_posts=1, n_comments=0, platform=platform):
             political_complexity="never",
             political_understanding="extremely_well",
             political_focus="never",
-            voting_likelihood="will_not_vote"
+            voting_likelihood="will_not_vote",
         ),
         items=posts + comments,
     )
@@ -81,10 +82,18 @@ def fake_request(n_posts=1, n_comments=0, platform=platform):
 
 def fake_item(platform="reddit", type="post", post_id=None, parent_id=None):
     if platform == "reddit":
+        score = randint(-50, 50)
+        if score > 0:
+            upvote = score
+            downvote = 0
+        else:
+            upvote = 0
+            downvote = -score
+
         engagements = {
-            "upvote": randint(0, 50),
-            "downvote": randint(0, 50),
-            "score": randint(-50, 50),
+            "upvote": upvote,
+            "downvote": downvote,
+            "score": score,
             "comment": randint(0, 50),
             "award": randint(0, 50),
         }
@@ -124,7 +133,6 @@ def fake_item(platform="reddit", type="post", post_id=None, parent_id=None):
     )
 
     return item
-    
 
 
 def fake_response(ids, n_new_items=1):
@@ -152,6 +160,7 @@ def main():
     response = fake_response([item.id for item in request.items], 2)
     print("\nResponse:")
     print(response.model_dump_json(indent=2))
+
 
 if __name__ == "__main__":
     main()
