@@ -33,11 +33,11 @@ def build_db_uri(source_uri=None):
           {"username": "myuser", "password": "mypass"}
     - if none of the above conditions apply, return DB_URI as given
     """
-    if source_uri is not None:
+    if source_uri is None:
         source_uri = os.getenv("DB_URI")
     if source_uri is None:
-        logger.error("DB_URI not set")
-        raise Exception("DB_URI not set")
+        logger.error("DB_URI not set and source_uri not provided")
+        raise Exception("DB_URI not set and source_uri not provided")
     parsed_uri = urlparse(source_uri)
     if parsed_uri.scheme == "":
         logger.error("Invalid URI scheme")

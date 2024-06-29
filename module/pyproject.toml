@@ -6,7 +6,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "ranking_challenge"
-version = "2.2.0"
+version = "2.2.1"
 description = "The Prosocial Ranking Challenge"
 authors = ["Ian Baker <ian@sonic.net>"]
 readme = "README.md"
