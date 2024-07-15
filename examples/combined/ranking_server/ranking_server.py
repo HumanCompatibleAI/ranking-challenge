@@ -4,7 +4,7 @@ import os
 from concurrent.futures.thread import ThreadPoolExecutor
 
 import redis
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from ranking_challenge.request import RankingRequest
 from ranking_challenge.response import RankingResponse
@@ -52,7 +52,18 @@ def redis_client():
 # down-rank anything with text that contains them. Then maybe they
 # will be less sad.
 @app.post("/rank")
-def rank(ranking_request: RankingRequest) -> RankingResponse:
+async def rank(fastapi_req: Request) -> RankingResponse:
+    # Validating the json manually like this allows the request body to be text/plain or
+    # application/json. This allows the browser to consider the request "simple" CORS, and
+    # skips the preflight OPTIONS request. Doing it this way greatly simplifies working
+    # with proxies like cloudfront, and eliminates ~80ms of request latency.
+    #
+    # This is only necessary if you're planning to test the ranker directly from a browser
+    # extension. Otherwise, you can use the `RankingRequest` model directly like so:
+    # def rank(ranking_request: RankingRequest) -> RankingResponse:
+    #    (etc)
+    ranking_request = RankingRequest.model_validate_json(await fastapi_req.body())
+
     logger.info("Received ranking request")
     ranked_results = []
     # get the named entities from redis

@@ -1,7 +1,7 @@
 import random
 
 import nltk
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from ranking_challenge.request import RankingRequest
@@ -31,7 +31,13 @@ app.add_middleware(
 
 
 @app.post("/rank")
-def rank(ranking_request: RankingRequest) -> RankingResponse:
+async def rank(fastapi_req: Request) -> RankingResponse:
+    # Validating the json manually like this allows the request body to be text/plain or
+    # application/json. This allows the browser to consider the request "simple" CORS, and
+    # skips the preflight OPTIONS request. Doing it this way greatly simplifies working
+    # with proxies like cloudfront.
+    ranking_request = RankingRequest.model_validate_json(await fastapi_req.body())
+
     ranked_results = []
     for item in ranking_request.items:
         scores = analyzer.polarity_scores(item.text)
