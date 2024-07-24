@@ -102,36 +102,45 @@ class SurveyResponse(BaseModel):
         default=None,
     )
 
-    sex: Literal["female", "male", "nonbinary", "prefer_not_to_say"]
-
-    age: AgeEnum = Field(description="What age are you?")
-
-    education: EducationEnum = Field(
-        description="What is the highest level of education you have completed?"
+    sex: Optional[Literal["female", "male", "nonbinary", "prefer_not_to_say"]] = Field(
+        description="Participant's gender", default=None
     )
 
-    ideology: IdeologyEnum = Field(
-        description="Here is a scale on which the political views that people might hold are arranged from liberal to conservative. Where would you place yourself on this scale?"
+    age: Optional[AgeEnum] = Field(description="What age are you?", default=None)
+
+    education: Optional[EducationEnum] = Field(
+        description="What is the highest level of education you have completed?",
+        default=None,
     )
 
-    income: IncomeEnum = Field(description="What is your annual household income?")
+    ideology: Optional[IdeologyEnum] = Field(
+        description="Here is a scale on which the political views that people might hold are arranged from liberal to conservative. Where would you place yourself on this scale?",
+        default=None,
+    )
 
-    ethnicity: Literal[
-        "native_american",
-        "asian_or_pacific_islander",
-        "black_or_african_american",
-        "hispanic_or_latino",
-        "white_or_caucasian",
-        "multiple_or_other",
-    ] = Field(description="Which race or ethnicity best describes you?")
+    income: Optional[IncomeEnum] = Field(
+        description="What is your annual household income?", default=None
+    )
+
+    ethnicity: Optional[
+        Literal[
+            "native_american",
+            "asian_or_pacific_islander",
+            "black_or_african_american",
+            "hispanic_or_latino",
+            "white_or_caucasian",
+            "multiple_or_other",
+        ]
+    ] = Field(description="Which race or ethnicity best describes you?", default=None)
 
     ethnicity_write_in: Optional[str] = Field(
         description="If you selected 'multiple' or 'other' for your ethnicity, please specify.",
         default=None,
     )
 
-    socmed_use: SocmedUseEnum = Field(
-        description="Think of the past two weeks. How much time did you spend on social media, on average, per day?"
+    socmed_use: Optional[SocmedUseEnum] = Field(
+        description="Think of the past two weeks. How much time did you spend on social media, on average, per day?",
+        default=None,
     )
 
     feed_lean: Optional[SocmedLeanEnum] = Field(
