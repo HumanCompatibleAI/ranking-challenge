@@ -62,7 +62,7 @@ def fake_request(n_posts=1, n_comments=0, platform=platform):
             feed_lean=3,
             socmed_censorship="not_at_all_likely",
             socmed_trust="strongly_distrust",
-            percieved_racism="Not_a_problem",
+            percieved_racism="not_a_problem",
             trump="strongly_unfavorable",
             economic="extremely_negative",
             msm_trust="strongly_distrust",

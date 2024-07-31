@@ -61,9 +61,11 @@ class SocmedUseEnum(IntEnum):
     two_to_three_hours = 5
     three_to_four_hours = 6
     more_than_four_hours = 7
-    
-class SocmedLean(IntEnum):
+
+
+class SocmedLeanEnum(IntEnum):
     """Enum for social media feed lean"""
+
     strong_liberal = 1
     moderate_liberal = 2
     neutral = 3
@@ -90,124 +92,264 @@ class SurveyResponse(BaseModel):
         default=None,
     )
 
-    support: Literal["strong", "not_strong"] = Field(
-        description="Would you call yourself a strong or not a very strong supporter of your party?"
+    support: Optional[Literal["strong", "not_strong"]] = Field(
+        description="Would you call yourself a strong or not a very strong supporter of your party?",
+        default=None,
     )
 
-    party_lean: Literal["democrat", "republican"] = Field(
-        description="Do you think of yourself as closer to the Republican or Democratic party?"
+    party_lean: Optional[Literal["democrat", "republican"]] = Field(
+        description="Do you think of yourself as closer to the Republican or Democratic party?",
+        default=None,
     )
 
-    sex: Literal["female", "male", "nonbinary", "prefer_not_to_say"]
-
-    age: AgeEnum = Field(description="What age are you?")
-
-    education: EducationEnum = Field(
-        description="What is the highest level of education you have completed?"
+    sex: Optional[Literal["female", "male", "nonbinary", "prefer_not_to_say"]] = Field(
+        description="Participant's gender", default=None
     )
 
-    ideology: IdeologyEnum = Field(
-        description="Here is a scale on which the political views that people might hold are arranged from liberal to conservative. Where would you place yourself on this scale?"
+    age: Optional[AgeEnum] = Field(description="What age are you?", default=None)
+
+    education: Optional[EducationEnum] = Field(
+        description="What is the highest level of education you have completed?",
+        default=None,
     )
 
-    income: IncomeEnum = Field(description="What is your annual household income?")
+    ideology: Optional[IdeologyEnum] = Field(
+        description="Here is a scale on which the political views that people might hold are arranged from liberal to conservative. Where would you place yourself on this scale?",
+        default=None,
+    )
 
-    ethnicity: Literal[
-        "native_american",
-        "asian_or_pacific_islander",
-        "black_or_african_american",
-        "hispanic_or_latino",
-        "white_or_caucasian",
-        "multiple_or_other",
-    ] = Field(description="Which race or ethnicity best describes you?")
+    income: Optional[IncomeEnum] = Field(
+        description="What is your annual household income?", default=None
+    )
+
+    ethnicity: Optional[
+        Literal[
+            "native_american",
+            "asian_or_pacific_islander",
+            "black_or_african_american",
+            "hispanic_or_latino",
+            "white_or_caucasian",
+            "multiple_or_other",
+        ]
+    ] = Field(description="Which race or ethnicity best describes you?", default=None)
 
     ethnicity_write_in: Optional[str] = Field(
         description="If you selected 'multiple' or 'other' for your ethnicity, please specify.",
         default=None,
     )
 
-    socmed_use: SocmedUseEnum = Field(
-        description="Think of the past two weeks. How much time did you spend on social media, on average, per day?"
+    socmed_use: Optional[SocmedUseEnum] = Field(
+        description="Think of the past two weeks. How much time did you spend on social media, on average, per day?",
+        default=None,
     )
 
-    feed_lean: Optional[SocmedLean] = Field(
-        description="Do you think your social media feeds tend to favour liberal content, conservative content, or neither?"
+    feed_lean: Optional[SocmedLeanEnum] = Field(
+        description="Do you think your social media feeds tend to favour liberal content, conservative content, or neither?",
+        default=None,
     )
-    
-    socmed_censorship: Optional[Literal["not_at_all_likely",  "not_very_likely", "somewhat_likely", "very_likely"]] = Field(
-        description="How likely, if at all, do you think it is that social media sites intentionally censor political viewpoints that they find objectionable?"
+
+    socmed_censorship: Optional[
+        Literal["not_at_all_likely", "not_very_likely", "somewhat_likely", "very_likely"]
+    ] = Field(
+        description="How likely, if at all, do you think it is that social media sites intentionally censor political viewpoints that they find objectionable?",
+        default=None,
     )
-    
-    socmed_trust: Optional[Literal["strongly_distrust", "somewhat_distrust", "neither_trust_nor_distrust", "somewhat_trust", "strongly_trust"]] = Field(
-        description="On balance, to what extent do you trust that you receive accurate information from social media?"
+
+    socmed_trust: Optional[
+        Literal[
+            "strongly_distrust",
+            "somewhat_distrust",
+            "neither_trust_nor_distrust",
+            "somewhat_trust",
+            "strongly_trust",
+        ]
+    ] = Field(
+        description="On balance, to what extent do you trust that you receive accurate information from social media?",
+        default=None,
     )
-    
-    percieved_racism: Optional[Literal["Not_a_problem" , "slight_problem" ,"moderate_problem", "significant_problem", "major_problem"]] = Field(
-        description="To what extent do you view racism against Black Americans as a problem today?"
+
+    percieved_racism: Optional[
+        Literal[
+            "not_a_problem",
+            "slight_problem",
+            "moderate_problem",
+            "significant_problem",
+            "major_problem",
+        ]
+    ] = Field(
+        description="To what extent do you view racism against Black Americans as a problem today?",
+        default=None,
     )
-    
-    trump: Optional[Literal["strongly_unfavorable", "somewhat_unfavorable", "neither_favorable_nor_unfavorable" "somewhat_favorable", "strongly_favorable"]] = Field(
-        description="How favorable/unfavorable are your views towards Donald Trump?"
+
+    trump: Optional[
+        Literal[
+            "strongly_unfavorable",
+            "somewhat_unfavorable",
+            "neither_favorable_nor_unfavorable",
+            "somewhat_favorable",
+            "strongly_favorable",
+        ]
+    ] = Field(
+        description="How favorable/unfavorable are your views towards Donald Trump?",
+        default=None,
     )
-    
-    economic: Optional[Literal["extremely_negative", "somewhat_negative", "neither_positive_nor_negative", "somewhat_positive", "extremely_positive"]] = Field(
-        description="How positive/negative do you feel about the current U.S. economic situation?"
+
+    economic: Optional[
+        Literal[
+            "extremely_negative",
+            "somewhat_negative",
+            "neither_positive_nor_negative",
+            "somewhat_positive",
+            "extremely_positive",
+        ]
+    ] = Field(
+        description="How positive/negative do you feel about the current U.S. economic situation?",
+        default=None,
     )
-    
-    msm_trust: Optional[Literal["strongly_distrust", "somewhat_distrust", "neither_trust_nor_distrust", "somewhat_trust", "strongly_trust"]] = Field(
-        description="How much do you trust mainstream mass media -- such as newspapers, TV and radio – to report the news fully, accurately, and fairly?"
+
+    msm_trust: Optional[
+        Literal[
+            "strongly_distrust",
+            "somewhat_distrust",
+            "neither_trust_nor_distrust",
+            "somewhat_trust",
+            "strongly_trust",
+        ]
+    ] = Field(
+        description="How much do you trust mainstream mass media--such as newspapers, TV and radio--to report the news fully, accurately, and fairly?",
+        default=None,
     )
-    
-    immigration: Optional[Literal["greatly_decreased", "somewhat_decreased", "kept_the_same", "somewhat_increased", "greatly_increased"]] = Field(
-        description="In your view, should immigration to the U.S. be increased, decreased, or kept about the same?"
+
+    immigration: Optional[
+        Literal[
+            "greatly_decreased",
+            "somewhat_decreased",
+            "kept_the_same",
+            "somewhat_increased",
+            "greatly_increased",
+        ]
+    ] = Field(
+        description="In your view, should immigration to the U.S. be increased, decreased, or kept about the same?",
+        default=None,
     )
-    
-    israel_palestine: Optional[Literal["strongly_oppose", "somewhat_oppose", "neither_support_nor_oppose" "somewhat_support", "strongly_support"]] = Field(
-        description="How strongly do you support/oppose Israel in the Israeli-Palestinian conflict?"
+
+    israel_palestine: Optional[
+        Literal[
+            "strongly_oppose",
+            "somewhat_oppose",
+            "neither_support_nor_oppose",
+            "somewhat_support",
+            "strongly_support",
+        ]
+    ] = Field(
+        description="How strongly do you support/oppose Israel in the Israeli-Palestinian conflict?",
+        default=None,
     )
-    
-    abortion: Optional[Literal["strongly_oppose", "somewhat_oppose", "neither_support_nor_oppose" "somewhat_support", "strongly_support"]] = Field(
-        description="How strongly do you support/oppose the legal right to abortion?"
+
+    abortion: Optional[
+        Literal[
+            "strongly_oppose",
+            "somewhat_oppose",
+            "neither_support_nor_oppose",
+            "somewhat_support",
+            "strongly_support",
+        ]
+    ] = Field(
+        description="How strongly do you support/oppose the legal right to abortion?",
+        default=None,
     )
-    
-    climate_change: Optional[Literal["not_concerned", "slightly_concerned", "moderately_concerned", "very_concerned", "extremely_concerned"]] = Field(
-        description="How concerned are you about climate change?"
+
+    climate_change: Optional[
+        Literal[
+            "not_concerned",
+            "slightly_concerned",
+            "moderately_concerned",
+            "very_concerned",
+            "extremely_concerned",
+        ]
+    ] = Field(
+        description="How concerned are you about climate change?",
+        default=None,
     )
-    
-    military: Optional[Literal["strongly_unfavorable", "somewhat_unfavorable", "neither_favorable_nor_unfavorable" "somewhat_favorable", "strongly_favorable"]] = Field(
-        description="How favorable/unfavorable are your views towards the U.S. military?"
+
+    military: Optional[
+        Literal[
+            "strongly_unfavorable",
+            "somewhat_unfavorable",
+            "neither_favorable_nor_unfavorable",
+            "somewhat_favorable",
+            "strongly_favorable",
+        ]
+    ] = Field(
+        description="How favorable/unfavorable are your views towards the U.S. military?",
+        default=None,
     )
-    
-    political_complexity: Optional[Literal["never", "some_of_the_time", "half_the_time", "most_of_the_time", "always"]] = Field(
-        description="How often do politics and government seem so complicated that you can't really understand what's going on?"
+
+    political_complexity: Optional[
+        Literal["never", "some_of_the_time", "half_the_time", "most_of_the_time", "always"]
+    ] = Field(
+        description="How often do politics and government seem so complicated that you can't really understand what's going on?",
+        default=None,
     )
-    
-    political_understanding: Optional[Literal["extremely_well", "very_well",  "moderately_well", "slightly_well", "not_well_at_all"]] = Field(
-        description="How well do you understand the important political issues facing our country?"
+
+    political_understanding: Optional[
+        Literal[
+            "extremely_well",
+            "very_well",
+            "moderately_well",
+            "slightly_well",
+            "not_well_at_all",
+        ]
+    ] = Field(
+        description="How well do you understand the important political issues facing our country?",
+        default=None,
     )
-    
-    political_focus: Optional[Literal["never", "some_of_the_time", "half_the_time", "most_of_the_time", "always"]] = Field(
-        description="How often do you pay attention to what’s going on in government and politics?"
+
+    political_focus: Optional[
+        Literal["never", "some_of_the_time", "half_the_time", "most_of_the_time", "always"]
+    ] = Field(
+        description="How often do you pay attention to what’s going on in government and politics?",
+        default=None,
     )
-    
-    voting_likelihood: Optional[Literal["will_not_vote", "probably_will_not_vote", "probably_will_vote", "definitely_will_vote"]] = Field(
-        description="How likely are you to vote in the general election this November?"
+
+    voting_likelihood: Optional[
+        Literal[
+            "will_not_vote",
+            "probably_will_not_vote",
+            "probably_will_vote",
+            "definitely_will_vote",
+        ]
+    ] = Field(
+        description="How likely are you to vote in the general election this November?",
+        default=None,
     )
-    
-    browser_perc: Annotated[
-        float,
+
+    browser_perc_twitter: Annotated[
+        float | None,
         Field(
             ge=0,
             le=1,
-            description="In the last two weeks, what percentage of your social media [twitter/facebook/reddit] has been on a desktop device or laptop?",
+            default=None,
+            description="For Twitter, how often would you say you use social media from your desktop computer (including laptops), as opposed to your mobile?",
         ),
     ]
 
-    mobile_perc: Annotated[
-        float,
+    browser_perc_facebook: Annotated[
+        float | None,
         Field(
             ge=0,
             le=1,
-            description="In the last two weeks, what percentage of your social media [twitter/facebook/reddit] has been on mobile device?",
+            default=None,
+            description="For Facebook, how often would you say you use social media from your desktop computer (including laptops), as opposed to your mobile?",
+        ),
+    ]
+
+    browser_perc_reddit: Annotated[
+        float | None,
+        Field(
+            ge=0,
+            le=1,
+            default=None,
+            description="For Reddit, how often would you say you use social media from your desktop computer (including laptops), as opposed to your mobile?",
         ),
     ]
