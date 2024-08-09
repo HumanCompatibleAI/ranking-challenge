@@ -41,7 +41,6 @@ def fake_request(n_posts=1, n_comments=0, platform=platform):
             session_id=str(uuid4()),
             url=f"https://{platform}.com/{fake.random_element(URI_PATHS[platform])}",
             user_name_hash=hashlib.sha256(fake.name().encode()).hexdigest(),
-            cohort="AB",
             cohort_index=randint(0, 4095),
             platform=platform,
             current_time=time.time(),
