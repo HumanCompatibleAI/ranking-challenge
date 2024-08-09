@@ -107,18 +107,3 @@ extend-select = ["E501"]
 [[tool.poetry.packages]]
 include = "ranking_challenge"
 from = "module/src"
-
-# Developing the PRC python module
-## Running tests
-`pytest .`
-## Releasing a new version
-1. Bump the version number in `pyproject.toml`
-2. `pip install build twine`
-3. `python -m build`
-4. unzip the whl in `dist/` (rename it first) and check that everything inside looks good
-5. `twine check dist/*`
-6. Upload to TestPyPi: `twine upload -r testpypi dist/*`
-7. Check test.pypi.org to see if it looks good
-8. Upload to real PyPI: `twine upload dist/*`
-A nice doc on how to do this:
-<https://realpython.com/pypi-publish-python-package/>
