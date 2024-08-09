@@ -16,7 +16,7 @@ Here's a basic example of how to use the Grafana Metrics Middleware in your Fast
 
 ```python
 from fastapi import FastAPI
-from prc_grafana_metrics_middleware import GrafanaMetricsMiddleware
+from ranking_challenge.grafana_metrics_middleware import GrafanaMetricsMiddleware
 
 app = FastAPI()
 

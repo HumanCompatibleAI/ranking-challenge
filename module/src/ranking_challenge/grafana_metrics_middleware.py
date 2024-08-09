@@ -1,5 +1,6 @@
 import os
 import time
+import warnings
 import requests
 from prometheus_client import CollectorRegistry, Gauge, push_to_gateway
 from fastapi import Request
@@ -25,8 +26,10 @@ class GrafanaMetricsMiddleware(BaseHTTPMiddleware):
         self.grafana_username = os.getenv('GRAFANA_USERNAME')
         self.grafana_password = os.getenv('GRAFANA_PASSWORD')
 
-        if not all([self.grafana_url, self.grafana_username, self.grafana_password]):
-            raise ValueError("Grafana Cloud credentials not properly configured")
+        self.grafana_configured = all([self.grafana_url, self.grafana_username, self.grafana_password])
+        
+        if not self.grafana_configured:
+            warnings.warn("Grafana Cloud credentials not fully configured. Metrics will not be pushed to Grafana.", UserWarning)
 
         # Example custom metric
         self.custom_metrics = {}
@@ -34,21 +37,24 @@ class GrafanaMetricsMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         response = await call_next(request)
 
-        # Check if it's time to push metrics
-        if time.time() - self.last_push > self.push_interval:
+        # Check if it's time to push metrics and if Grafana is configured
+        if self.grafana_configured and (time.time() - self.last_push > self.push_interval):
             self.push_metrics()
             self.last_push = time.time()
 
         return response
 
     def push_metrics(self):
-        if self.grafana_url:
-            push_to_gateway(
-                self.grafana_url,
-                job=f'ranker_metrics_{self.team_id}',
-                registry=self.registry,
-                handler=self._basic_auth_handler
-            )
+        if self.grafana_configured:
+            try:
+                push_to_gateway(
+                    self.grafana_url,
+                    job=f'ranker_metrics_{self.team_id}',
+                    registry=self.registry,
+                    handler=self._basic_auth_handler
+                )
+            except Exception as e:
+                warnings.warn(f"Failed to push metrics to Grafana: {str(e)}", UserWarning)
 
     def _basic_auth_handler(self, url, method, timeout, headers, data):
         return requests.request(
@@ -68,3 +74,7 @@ class GrafanaMetricsMiddleware(BaseHTTPMiddleware):
                 registry=self.registry
             )
         self.custom_metrics[metric_name].set(value)
+
+        # If Grafana is not configured, log the metric locally
+        if not self.grafana_configured:
+            print(f"Local metric (not pushed to Grafana): {metric_name} = {value}")
