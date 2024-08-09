@@ -2,6 +2,7 @@ import os
 import time
 import warnings
 import requests
+import socket
 from prometheus_client import CollectorRegistry, Gauge, push_to_gateway
 from fastapi import Request
 from fastapi.middleware.base import BaseHTTPMiddleware
@@ -43,6 +44,16 @@ class GrafanaMetricsMiddleware(BaseHTTPMiddleware):
             self.last_push = time.time()
 
         return response
+    
+    def get_instance_id(self):
+        # Use ECS_TASK_ID environment variable
+        ecs_task_id = os.getenv('ECS_TASK_ID')
+        if ecs_task_id:
+            return ecs_task_id
+        
+        # Fallback to hostname if ECS_TASK_ID is not set
+        warnings.warn("ECS_TASK_ID not set. Falling back to hostname for instance identification.", UserWarning)
+        return socket.gethostname()
 
     def push_metrics(self):
         if self.grafana_configured:
