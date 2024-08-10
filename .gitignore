@@ -12,6 +12,7 @@ pyvenv.cfg
 build/
 develop-eggs/
 dist/
+module/bin/
 downloads/
 eggs/
 .eggs/
