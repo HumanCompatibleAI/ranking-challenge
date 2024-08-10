@@ -62,6 +62,7 @@ class GrafanaMetricsMiddleware(BaseHTTPMiddleware):
                     self.grafana_url,
                     job=f'ranker_metrics_{self.team_id}',
                     registry=self.registry,
+                    grouping_key={'instance': self.get_instance_id()},
                     handler=self._basic_auth_handler
                 )
             except Exception as e:
