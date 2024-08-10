@@ -2,8 +2,8 @@ import os
 import time
 import warnings
 import requests
-import socket
-from prometheus_client import CollectorRegistry, Gauge, push_to_gateway
+from prometheus_client import CollectorRegistry, Gauge
+from prometheus_client.openmetrics.exposition import generate_latest
 from fastapi import Request
 from fastapi.middleware.base import BaseHTTPMiddleware
 
@@ -32,7 +32,7 @@ class GrafanaMetricsMiddleware(BaseHTTPMiddleware):
         if not self.grafana_configured:
             warnings.warn("Grafana Cloud credentials not fully configured. Metrics will not be pushed to Grafana.", UserWarning)
 
-        # Example custom metric
+        # Custom metrics
         self.custom_metrics = {}
 
     async def dispatch(self, request: Request, call_next):
@@ -44,49 +44,48 @@ class GrafanaMetricsMiddleware(BaseHTTPMiddleware):
             self.last_push = time.time()
 
         return response
-    
-    def get_instance_id(self):
-        # Use ECS_TASK_ID environment variable
-        ecs_task_id = os.getenv('ECS_TASK_ID')
-        if ecs_task_id:
-            return ecs_task_id
-        
-        # Fallback to hostname if ECS_TASK_ID is not set
-        warnings.warn("ECS_TASK_ID not set. Falling back to hostname for instance identification.", UserWarning)
-        return socket.gethostname()
 
     def push_metrics(self):
         if self.grafana_configured:
             try:
-                push_to_gateway(
+                metrics_data = generate_latest(self.registry)
+                response = requests.post(
                     self.grafana_url,
-                    job=f'ranker_metrics_{self.team_id}',
-                    registry=self.registry,
-                    grouping_key={'instance': self.get_instance_id()},
-                    handler=self._basic_auth_handler
+                    data=metrics_data,
+                    auth=(self.grafana_username, self.grafana_password),
+                    headers={'Content-Type': 'application/x-protobuf'},
+                    timeout=10
                 )
+                if response.status_code != 204:
+                    warnings.warn(f"Failed to push metrics to Grafana. Status code: {response.status_code}", UserWarning)
             except Exception as e:
                 warnings.warn(f"Failed to push metrics to Grafana: {str(e)}", UserWarning)
 
-    def _basic_auth_handler(self, url, method, timeout, headers, data):
-        return requests.request(
-            method=method,
-            url=url,
-            auth=(self.grafana_username, self.grafana_password),
-            data=data,
-            timeout=timeout,
-            headers=headers
-        )
+    def add_custom_metric(self, metric_name: str, value: float, description: str = "", labels: dict = None):
+        if labels is None:
+            labels = {}
+        
+        # Always include team_id in labels
+        labels['team_id'] = self.team_id
 
-    def add_custom_metric(self, metric_name: str, value: float, description: str = ""):
-        if metric_name not in self.custom_metrics:
-            self.custom_metrics[metric_name] = Gauge(
-                f'{self.team_id}_{metric_name}',
+        # Add instance_id to labels if provided in environment
+        instance_id = os.getenv('ECS_TASK_ID')
+        if instance_id:
+            labels['instance_id'] = instance_id
+
+        metric_key = (metric_name, tuple(sorted(labels.items())))
+        
+        if metric_key not in self.custom_metrics:
+            self.custom_metrics[metric_key] = Gauge(
+                metric_name,
                 description,
+                labelnames=list(labels.keys()),
                 registry=self.registry
             )
-        self.custom_metrics[metric_name].set(value)
+        
+        self.custom_metrics[metric_key].labels(**labels).set(value)
 
         # If Grafana is not configured, log the metric locally
         if not self.grafana_configured:
-            print(f"Local metric (not pushed to Grafana): {metric_name} = {value}")
+            labels_str = ', '.join(f"{k}={v}" for k, v in labels.items())
+            print(f"Local metric (not pushed to Grafana): {metric_name}{{{labels_str}}} = {value}")
