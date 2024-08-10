@@ -5,7 +5,7 @@ import requests
 from prometheus_client import CollectorRegistry, Gauge
 from prometheus_client.openmetrics.exposition import generate_latest
 from fastapi import Request
-from fastapi.middleware.base import BaseHTTPMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
 
 class GrafanaMetricsMiddleware(BaseHTTPMiddleware):
     def __init__(
