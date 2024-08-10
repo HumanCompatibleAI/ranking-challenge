@@ -81,6 +81,11 @@ async def rank(fastapi_req: Request) -> RankingResponse:
 
     return result
 
+@app.get("/debug/push_metrics")
+async def debug_push_metrics():
+    metrics_middleware.force_push_metrics()
+    return {"message": "Metrics push triggered"}
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)

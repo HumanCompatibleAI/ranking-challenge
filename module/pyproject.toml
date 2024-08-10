@@ -17,7 +17,6 @@ keywords = ["ranking", "social media", "challenge"]
 python = ">=3.10"
 pydantic = ">=2.6.0"
 faker = "*"
-requests = "*"
 prometheus-client = "*"
 fastapi = "*"
 
