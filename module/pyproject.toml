@@ -1,14 +1,12 @@
-# pyproject.toml
-
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "ranking_challenge"
-version = "3.1.1"
+version = "3.2.0"
 description = "The Prosocial Ranking Challenge"
-authors = ["Ian Baker <ian@sonic.net>"]
+authors = ["Ian Baker <ian@sonic.net>", "Haroon Iftikhar <hiftikha@umich.edu>"]
 readme = "README.md"
 license = "MIT"
 homepage = "https://humancompatible.ai/news/2024/01/18/the-prosocial-ranking-challenge-60000-in-prizes-for-better-social-media-algorithms/"
@@ -19,6 +17,9 @@ keywords = ["ranking", "social media", "challenge"]
 python = ">=3.10"
 pydantic = ">=2.6.0"
 faker = "*"
+requests = "*"
+prometheus-client = "*"
+fastapi = "*"
 
 [tool.poetry.dev-dependencies]
 pip-tools = "*"

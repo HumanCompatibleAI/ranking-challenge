@@ -6,6 +6,31 @@ The Prosocial Ranking Challenge is designed to inspire, fund, and test the best 
 
 How do we identify pro- and anti-social content? That's where you come in! We are soliciting ranking algorithms to test, with $60,000 in prize money to be split between ten finalists (as selected by our panel of experts).
 
+# Grafana Metrics Middleware
+
+The middleware included within this package allows submission applications to easily push custom metrics to Grafana Cloud, remember to set your team ID per the keys shared with you.
+
+## Usage
+
+Here's a basic example of how to use the Grafana Metrics Middleware in your FastAPI application:
+
+```python
+from fastapi import FastAPI
+from ranking_challenge.grafana_metrics_middleware import GrafanaMetricsMiddleware
+
+app = FastAPI()
+
+# Initialize the middleware with your team ID
+metrics_middleware = GrafanaMetricsMiddleware(app, team_id="your_team_id")
+app.add_middleware(metrics_middleware)
+
+@app.get("/")
+async def root():
+    # Log a custom metric
+    metrics_middleware.add_custom_metric("requests_count", 1, "Number of requests")
+    return {"message": "Hello World"}
+```
+
 ## pydantic models for the PRC API schema
 
 You can use these models in your Python code, both to generate valid data, and to parse incoming data.
