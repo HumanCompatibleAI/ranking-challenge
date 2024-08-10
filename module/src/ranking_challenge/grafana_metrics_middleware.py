@@ -29,6 +29,10 @@ class GrafanaMetricsMiddleware(BaseHTTPMiddleware):
 
         logger.info(f"Initializing GrafanaMetricsMiddleware with job_name: {job_name}, team_id: {team_id}, push_interval: {push_interval}")
 
+
+        # Custom metrics
+        self.custom_metrics = {}
+        
         # Grafana Cloud configuration
         self.grafana_url = os.getenv('GRAFANA_PUSH_URL')
         self.grafana_username = os.getenv('GRAFANA_USERNAME')
