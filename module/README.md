@@ -31,6 +31,39 @@ async def root():
     return {"message": "Hello World"}
 ```
 
+# Prometheus Metrics Middleware
+
+Here's how you can use the middleware to define your own custom metrics, which the otel will scrape on the `/metrics` endpoint added to your app automatically.
+
+```
+from starlette.applications import Starlette
+from prometheus_metrics_middleware import expose_metrics, create_custom_metrics, CollectorRegistry
+
+app = Starlette() / FastAPI() # your app can be either
+
+# Create a registry
+registry = CollectorRegistry()
+
+# Create custom metrics
+custom_metrics = create_custom_metrics(registry)
+
+# Add more custom metrics if needed
+def update_business_metric(request, response, duration):
+    # Update your business-specific metrics here
+    pass
+
+custom_metrics["business_metric"] = update_business_metric
+
+# Set up the metrics endpoint and middleware
+expose_metrics(
+    app,
+    endpoint="/metrics",
+    registry=registry,
+    custom_metrics=custom_metrics
+)
+
+```
+
 ## pydantic models for the PRC API schema
 
 You can use these models in your Python code, both to generate valid data, and to parse incoming data.
