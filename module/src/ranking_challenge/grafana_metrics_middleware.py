@@ -1,11 +1,8 @@
 import os
 import time
-import warnings
-import requests
 import logging
-import json
 from prometheus_client import CollectorRegistry, Gauge, push_to_gateway
-from prometheus_client.openmetrics.exposition import generate_latest
+from prometheus_client.exposition import basic_auth_handler
 from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 
@@ -17,7 +14,7 @@ class GrafanaMetricsMiddleware(BaseHTTPMiddleware):
         self,
         app,
         team_id: str,
-        push_interval: int = 10,
+        push_interval: int = 5,  # Temporarily reduced for testing
         *args,
         **kwargs
     ):
@@ -40,6 +37,9 @@ class GrafanaMetricsMiddleware(BaseHTTPMiddleware):
             logger.info(f"Grafana Cloud credentials configured successfully. Push URL: {self.grafana_url}")
         else:
             logger.warning("Grafana Cloud credentials not fully configured. Metrics will not be pushed to Grafana.")
+            logger.debug(f"GRAFANA_PUSH_URL: {'SET' if self.grafana_url else 'NOT SET'}")
+            logger.debug(f"GRAFANA_USERNAME: {'SET' if self.grafana_username else 'NOT SET'}")
+            logger.debug(f"GRAFANA_PASSWORD: {'SET' if self.grafana_password else 'NOT SET'}")
 
         # Custom metrics
         self.custom_metrics = {}
@@ -49,66 +49,38 @@ class GrafanaMetricsMiddleware(BaseHTTPMiddleware):
         response = await call_next(request)
 
         # Check if it's time to push metrics and if Grafana is configured
-        if self.grafana_configured and (time.time() - self.last_push > self.push_interval):
+        current_time = time.time()
+        if self.grafana_configured and (current_time - self.last_push > self.push_interval):
             logger.info(f"Push interval reached ({self.push_interval}s), attempting to push metrics")
             self.push_metrics()
-            self.last_push = time.time()
+            self.last_push = current_time
+        else:
+            logger.debug(f"Not pushing metrics. Time since last push: {current_time - self.last_push:.2f}s")
 
         return response
 
     def push_metrics(self):
         if self.grafana_configured:
             try:
-                logger.debug("Generating metrics data")
-                metrics_data = generate_latest(self.registry)
-                logger.info(f"Pushing metrics to Grafana: {self.grafana_url}")
+                logger.debug("Preparing to push metrics to Grafana")
                 
-                # Method 1: Using requests
-                response = requests.post(
+                # Use push_to_gateway instead of manual POST request
+                push_to_gateway(
                     self.grafana_url,
-                    data=metrics_data,
-                    auth=(self.grafana_username, self.grafana_password),
-                    headers={'Content-Type': 'application/x-protobuf'},
-                    timeout=10
+                    job=f'team_{self.team_id}',
+                    registry=self.registry,
+                    handler=self.grafana_auth_handler
                 )
-                logger.debug(f"Push response status code: {response.status_code}")
-                logger.debug(f"Push response content: {response.text}")
                 
-                if response.status_code == 204:
-                    logger.info("Successfully pushed metrics to Grafana using requests")
-                else:
-                    logger.warning(f"Failed to push metrics to Grafana using requests. Status code: {response.status_code}")
-                
-                # Method 2: Using push_to_gateway
-                try:
-                    push_to_gateway(self.grafana_url, job=self.team_id, registry=self.registry)
-                    logger.info("Successfully pushed metrics to Grafana using push_to_gateway")
-                except Exception as e:
-                    logger.error(f"Failed to push metrics using push_to_gateway: {str(e)}")
-                
-                # Method 3: Custom JSON payload
-                json_metrics = {}
-                for metric in self.registry.collect():
-                    for sample in metric.samples:
-                        json_metrics[sample.name] = sample.value
-                
-                json_response = requests.post(
-                    self.grafana_url,
-                    json=json_metrics,
-                    auth=(self.grafana_username, self.grafana_password),
-                    headers={'Content-Type': 'application/json'},
-                    timeout=10
-                )
-                logger.debug(f"JSON push response status code: {json_response.status_code}")
-                logger.debug(f"JSON push response content: {json_response.text}")
-                
-                if json_response.status_code == 204:
-                    logger.info("Successfully pushed metrics to Grafana using JSON")
-                else:
-                    logger.warning(f"Failed to push metrics to Grafana using JSON. Status code: {json_response.status_code}")
-                
+                logger.info("Successfully pushed metrics to Grafana")
             except Exception as e:
                 logger.error(f"Failed to push metrics to Grafana: {str(e)}", exc_info=True)
+        else:
+            logger.warning("Grafana not configured, skipping metric push")
+
+    def grafana_auth_handler(self, url, method, timeout, headers, data):
+        logger.debug(f"Calling Grafana auth handler. URL: {url}, Method: {method}")
+        return basic_auth_handler(url, method, timeout, headers, data, self.grafana_username, self.grafana_password)
 
     def add_custom_metric(self, metric_name: str, value: float, description: str = "", labels: dict = None):
         logger.debug(f"Adding custom metric: {metric_name}, value: {value}, description: {description}, labels: {labels}")
@@ -141,4 +113,8 @@ class GrafanaMetricsMiddleware(BaseHTTPMiddleware):
         labels_str = ', '.join(f"{k}={v}" for k, v in labels.items())
         logger.info(f"Metric added (not yet pushed to Grafana): {metric_name}{{{labels_str}}} = {value}")
 
-logger.info("Enhanced GrafanaMetricsMiddleware module loaded")
+    def force_push_metrics(self):
+        logger.info("Manually triggering metric push")
+        self.push_metrics()
+
+logger.info("Debug-Enhanced GrafanaMetricsMiddleware module loaded")

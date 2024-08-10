@@ -1619,13 +1619,13 @@ files = [
 
 [[package]]
 name = "ranking-challenge"
-version = "3.2.2"
+version = "3.2.3"
 description = "The Prosocial Ranking Challenge"
 optional = false
 python-versions = ">=3.10"
 files = [
-    {file = "ranking_challenge-3.2.2-py3-none-any.whl", hash = "sha256:170e8ee3d2fd176c9647b790dc3ba3bafc4ec2f213dc89c868eb32d80a1c452b"},
-    {file = "ranking_challenge-3.2.2.tar.gz", hash = "sha256:737d659ed89a11cc121e2341bba4b9ee3baa2c77ac801f92223ca28ef82907c1"},
+    {file = "ranking_challenge-3.2.3-py3-none-any.whl", hash = "sha256:96b891d96501a76fba6e1003da2fdc66108ba853737d84723763a3eeb21de41b"},
+    {file = "ranking_challenge-3.2.3.tar.gz", hash = "sha256:fca479a6ba42c85b91d66bceeb5a9361fbcaa29ed7fcd85a1350521d190106b6"},
 ]
 
 [package.dependencies]
