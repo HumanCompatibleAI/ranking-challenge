@@ -26,7 +26,7 @@ This follows Prometheus' pull model, where PRC metrics service polls and fetches
 ## Installation
 
 ```bash
-pip install ranking_challenge
+pip install ranking_challenge prometheus_client
 ```
 
 ## Usage
@@ -36,8 +36,11 @@ Here's how to set up the middleware and define custom metrics:
 ```python
 from starlette.applications import Starlette
 from fastapi import FastAPI
-from prometheus_client import CollectorRegistry, Histogram
-from prometheus_metrics_middleware import expose_metrics, create_custom_metrics
+from ranking_challenge.prometheus_metrics_otel_middleware import (
+    expose_metrics,
+    CollectorRegistry,
+)
+from prometheus_client import Counter, Histogram
 
 # Your app can be either Starlette or FastAPI
 app = FastAPI()
@@ -79,12 +82,17 @@ In this example, we're creating a histogram metric to track the distribution of 
 
 ## Metric Types
 
-Prometheus supports several types of metrics. The most common are:
+Prometheus supports several types of metrics. You'll need to import these from `prometheus_client` for use. The most common are:
 
 1. **Counter**: A cumulative metric that only goes up (e.g., number of requests)
 2. **Gauge**: A metric that can go up and down (e.g., current number of active sessions)
 3. **Histogram**: Samples observations and counts them in configurable buckets (e.g., request durations)
 4. **Summary**: Similar to histogram, but calculates configurable quantiles over a sliding time window
+
+Example Usage:
+```
+from prometheus_client import Counter, Histogram
+```
 
 For more details on metric types, refer to the [Prometheus documentation](https://prometheus.io/docs/concepts/metric_types/).
 
