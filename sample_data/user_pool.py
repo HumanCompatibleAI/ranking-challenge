@@ -21,6 +21,7 @@ class User:
     user_id: str
     user_name_hash: str
     cohort: str
+    cohort_index: int
     activity_level: int
     platforms: list[str]
 

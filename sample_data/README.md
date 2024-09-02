@@ -1,22 +1,3 @@
-# Introduction
-
-Our sample data folder consists of two .py files:
-
-## `data_pull.py`
-
-- This defines our function ‘Data Puller’ which takes a single
-argument (‘platform’) and returns a sample of our data in the
-required json format
-
-## `preprocessing.py`
-
-- Here is where we preprocess our data, specifically:
-
-- Removing errors where found
-
-- Merging sets and removing irrelevant columns
-
-- Hashing columns that require hashing
 
 ## To Use
 
@@ -80,6 +61,18 @@ process of fixing each of these:
 
 1. Our data is also from various times, but should be fairly general
 thematically i.e Not leaning towards particular demographics
+
+## Code
+
+`data_pull.py`
+
+This defines our function ‘Data Puller’ which takes a single
+argument (‘platform’) and returns a sample of our data in the
+required json format
+
+`preprocessing.py`
+
+Here is where we preprocess our data, specifically: removing errors where found, merging sets and removing irrelevant columns, Hashing columns that require hashing.
 
 ## Data
 

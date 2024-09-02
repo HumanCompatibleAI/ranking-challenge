@@ -147,7 +147,7 @@ filtered_reddit = reddit_data[
         "created_at",
         "upvotes",
         "downvotes",
-        "score"
+        # "score"
     ]
 ]
 filtered_reddit.to_csv(os.path.join(script_dir, REDDIT_DATA_FILE), index=False)
