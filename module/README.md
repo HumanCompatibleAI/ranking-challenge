@@ -6,30 +6,105 @@ The Prosocial Ranking Challenge is designed to inspire, fund, and test the best 
 
 How do we identify pro- and anti-social content? That's where you come in! We are soliciting ranking algorithms to test, with $60,000 in prize money to be split between ten finalists (as selected by our panel of experts).
 
-# Grafana Metrics Middleware
+# Prometheus Metrics Middleware
 
-The middleware included within this package allows submission applications to easily push custom metrics to Grafana Cloud, remember to set your team ID per the keys shared with you.
+This middleware provides an easy way to add Prometheus metrics to your rankers. It automatically exposes a `/metrics` endpoint that can be scraped by Prometheus and logged in Grafana.
+
+## What are these metrics for?
+
+Prometheus metrics allow you to monitor and analyze various aspects of your ranker's performance and behavior. These metrics can be visualized in Grafana, allowing you to gain insights into your ranker's health, performance, and usage patterns.
+
+## How it works
+
+1. The middleware collects and stores metrics data as your application runs.
+2. A `/metrics` endpoint is added to your application.
+3. When this endpoint is accessed (by a Prometheus server), it serves the collected metrics data in the Prometheus text-based format.
+4. Prometheus periodically scrapes this endpoint to collect the latest metrics.
+
+This follows Prometheus' pull model, where PRC metrics service polls and fetches metrics from your ranker, rather than your ranker pushing metrics.
+
+## Installation
+
+```bash
+pip install ranking_challenge prometheus_client
+```
 
 ## Usage
 
-Here's a basic example of how to use the Grafana Metrics Middleware in your FastAPI application:
+Here's how to set up the middleware and define custom metrics:
 
 ```python
+from starlette.applications import Starlette
 from fastapi import FastAPI
-from ranking_challenge.grafana_metrics_middleware import GrafanaMetricsMiddleware
+from ranking_challenge.prometheus_metrics_otel_middleware import (
+    expose_metrics,
+    CollectorRegistry,
+)
+from prometheus_client import Counter, Histogram
 
+# Your app can be either Starlette or FastAPI
 app = FastAPI()
 
-# Initialize the middleware with your team ID
-metrics_middleware = GrafanaMetricsMiddleware(app, team_id="your_team_id")
-app.add_middleware(metrics_middleware)
+# Create a registry
+registry = CollectorRegistry()
 
-@app.get("/")
+# Create custom metrics
+custom_metrics = create_custom_metrics(registry)
+
+# Define a custom metric
+content_score = Histogram('content_score', 'Distribution of content scores', ['platform'], registry=registry)
+
+# Define a function to update the custom metric
+def update_content_score(request, response, duration):
+    # This is just an example. In a real ranker, you'd get these values from your actual logic.
+    score = 0.75  # Example score
+    platform = "mobile"  # Example platform
+    content_score.labels(platform=platform).observe(score)
+
+# Add the custom metric to the dictionary
+custom_metrics["content_score"] = update_content_score
+
+# Set up the metrics endpoint and middleware
+expose_metrics(
+    app,
+    endpoint="/metrics",
+    registry=registry,
+    custom_metrics=custom_metrics
+)
+
+# Your application routes and logic go here
+@app.route("/")
 async def root():
-    # Log a custom metric
-    metrics_middleware.add_custom_metric("requests_count", 1, "Number of requests")
     return {"message": "Hello World"}
 ```
+
+In this example, we're creating a histogram metric to track the distribution of content scores across different platforms. Every time a request is processed, the `update_content_score` function will be called, which updates our custom metric.
+
+## Metric Types
+
+Prometheus supports several types of metrics. You'll need to import these from `prometheus_client` for use. The most common are:
+
+1. **Counter**: A cumulative metric that only goes up (e.g., number of requests)
+2. **Gauge**: A metric that can go up and down (e.g., current number of active sessions)
+3. **Histogram**: Samples observations and counts them in configurable buckets (e.g., request durations)
+4. **Summary**: Similar to histogram, but calculates configurable quantiles over a sliding time window
+
+Example Usage:
+```
+from prometheus_client import Counter, Histogram
+```
+
+For more details on metric types, refer to the [Prometheus documentation](https://prometheus.io/docs/concepts/metric_types/).
+
+## Viewing Metrics
+
+Once set up and deployed to production, you can view and analyze the raw metrics in Grafana Cloud under your team's folder.
+
+
+## Learn More
+
+- [Prometheus Data Model Concept](https://prometheus.io/docs/concepts/data_model/)
+- [Grafana](https://grafana.com/)
 
 ## pydantic models for the PRC API schema
 

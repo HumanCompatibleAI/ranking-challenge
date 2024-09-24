@@ -24,7 +24,7 @@ openai = "*"
 nltk = "*"
 httpx = "*"
 uvicorn = { extras = ["standard"], version = "^0.18.3" }
-ranking-challenge = ">=3.2.0"
+ranking-challenge = ">=3.2.4"
 flask = "*"
 python-dotenv = "*"
 redis = ">= 4.4.4"

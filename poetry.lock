@@ -1087,13 +1087,13 @@ files = [
 
 [[package]]
 name = "openai"
-version = "1.40.2"
+version = "1.40.3"
 description = "The official Python library for the openai API"
 optional = false
 python-versions = ">=3.7.1"
 files = [
-    {file = "openai-1.40.2-py3-none-any.whl", hash = "sha256:38068f858f310b4fd4b0ea8734c3efcfde3c15a2978311e1453bd84817231b96"},
-    {file = "openai-1.40.2.tar.gz", hash = "sha256:2180e9070bd36084328248b3ce668964e8ddd2e9019e1d426e31dc54cc117bb5"},
+    {file = "openai-1.40.3-py3-none-any.whl", hash = "sha256:09396cb6e2e15c921a5d872bf92841a60a9425da10dcd962b45fe7c4f48f8395"},
+    {file = "openai-1.40.3.tar.gz", hash = "sha256:f2ffe907618240938c59d7ccc67dd01dc8c50be203c0077240db6758d2f02480"},
 ]
 
 [package.dependencies]
@@ -1645,19 +1645,18 @@ files = [
 
 [[package]]
 name = "ranking-challenge"
-version = "3.2.3"
+version = "3.2.4"
 description = "The Prosocial Ranking Challenge"
 optional = false
 python-versions = ">=3.10"
 files = [
-    {file = "ranking_challenge-3.2.3-py3-none-any.whl", hash = "sha256:96b891d96501a76fba6e1003da2fdc66108ba853737d84723763a3eeb21de41b"},
-    {file = "ranking_challenge-3.2.3.tar.gz", hash = "sha256:fca479a6ba42c85b91d66bceeb5a9361fbcaa29ed7fcd85a1350521d190106b6"},
+    {file = "ranking_challenge-3.2.4-py3-none-any.whl", hash = "sha256:a951346fd22a750d50780d6784ec95d96d78cbcd5caeaf2ea0b5788b0d0a8304"},
+    {file = "ranking_challenge-3.2.4.tar.gz", hash = "sha256:c9f2c254b2b1d920e4b60042004389609d8fbe173d9736dc5ca3fc83ffc66141"},
 ]
 
 [package.dependencies]
 fastapi = "*"
 prometheus-client = "*"
-requests = "*"
 
 [package.extras]
 module = ["faker", "pydantic (>=2.6.0)"]

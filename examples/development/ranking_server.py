@@ -36,7 +36,7 @@ app.add_middleware(
 
 # Initialize the Grafana Metrics Middleware
 TEAM_ID = "development-shuffle"
-metrics_middleware = GrafanaMetricsMiddleware(app, team_id=TEAM_ID)
+metrics_middleware = GrafanaMetricsMiddleware(app, job_name="ranker", team_id=TEAM_ID)
 logger.debug(f"Initialized GrafanaMetricsMiddleware with team_id: {TEAM_ID}")
 
 @app.post("/rank")
