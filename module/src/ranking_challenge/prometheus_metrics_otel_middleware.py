@@ -1,4 +1,4 @@
-from typing import Any, List, Optional, Union, Dict, Callable
+from typing import Any, List, Optional, Union, Dict, Callable, Sequence, Tuple
 from enum import Enum
 from starlette.applications import Starlette
 from starlette.requests import Request
@@ -7,39 +7,49 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from prometheus_client import CONTENT_TYPE_LATEST, CollectorRegistry, generate_latest, multiprocess
 from prometheus_client import Counter, Histogram
 import gzip
+import re
 import os
 import time
+
+import ranking_challenge.routing as routing
+
 
 class PrometheusMiddleware(BaseHTTPMiddleware):
     def __init__(
         self,
         app: Starlette,
         registry: CollectorRegistry = None,
-        custom_metrics: Dict[str, Callable] = None
+        custom_metrics: Dict[str, Callable] = None,
+        excluded_handlers: Sequence[re.Pattern] = (),
     ):
         super().__init__(app)
         self.registry = registry or CollectorRegistry()
         self.custom_metrics = custom_metrics or {}
+        self.excluded_handlers = excluded_handlers
 
         # Default metrics ( we can remove these if not needed, just added to depict the use case of default + custom working in tandem)
         self.requests_total = Counter(
-            'http_requests_total',
-            'Total number of HTTP requests',
-            ['method', 'endpoint', 'status'],
-            registry=self.registry
+            "http_requests_total",
+            "Total number of HTTP requests",
+            ["method", "endpoint", "status"],
+            registry=self.registry,
         )
         self.requests_duration = Histogram(
-            'http_request_duration_seconds',
-            'HTTP request duration in seconds',
-            ['method', 'endpoint'],
-            registry=self.registry
+            "http_request_duration_seconds",
+            "HTTP request duration in seconds",
+            ["method", "endpoint"],
+            registry=self.registry,
         )
 
     async def dispatch(self, request: Request, call_next):
         start_time = time.time()
-        
+
         response = await call_next(request)
-        
+
+        handler, _ = self._get_handler(request)
+        if self._is_handler_excluded(handler):
+            return response
+
         duration = time.time() - start_time
         status_code = response.status_code
         endpoint = request.url.path
@@ -54,6 +64,36 @@ class PrometheusMiddleware(BaseHTTPMiddleware):
 
         return response
 
+    def _get_handler(self, request: Request) -> Tuple[str, bool]:
+        """Extracts either template or (if no template) path.
+
+        Args:
+            request (Request): Python Requests request object.
+
+        Returns:
+            Tuple[str, bool]: Tuple with two elements. First element is either
+                template or if no template the path. Second element tells you
+                if the path is templated or not.
+        """
+        route_name = routing.get_route_name(request)
+        return route_name or request.url.path, True if route_name else False
+
+    def _is_handler_excluded(self, handler: str) -> bool:
+        """Determines if the handler should be ignored.
+
+        Args:
+            handler (str): Handler that handles the request.
+
+        Returns:
+            bool: `True` if excluded, `False` if not.
+        """
+
+        if any(pattern.search(handler) for pattern in self.excluded_handlers):
+            return True
+
+        return False
+
+
 def expose_metrics(
     app: Starlette,
     should_gzip: bool = False,
@@ -62,7 +102,8 @@ def expose_metrics(
     tags: Optional[List[Union[str, Enum]]] = None,
     registry: CollectorRegistry = None,
     custom_metrics: Dict[str, Callable] = None,
-    **kwargs: Any
+    excluded_handlers: Optional[List[Any]] = None,
+    **kwargs: Any,
 ) -> None:
     """Exposes endpoint for metrics and adds PrometheusMiddleware.
 
@@ -79,12 +120,23 @@ def expose_metrics(
         custom_metrics: A dictionary of custom metric functions to be called
             on each request. Each function should accept (request, response, duration)
             as arguments.
+        excluded_handlers: A list of routes to exclude from metrics collection.
         kwargs: Will be passed to app. Only passed to FastAPI app.
     """
     registry = registry or CollectorRegistry()
 
+    default_excluded = set(["/health", "/metrics"])
+    excluded_handlers = [
+        re.compile(path) for path in (default_excluded | set(excluded_handlers or []))
+    ]
+
     # Add PrometheusMiddleware
-    app.add_middleware(PrometheusMiddleware, registry=registry, custom_metrics=custom_metrics)
+    app.add_middleware(
+        PrometheusMiddleware,
+        registry=registry,
+        custom_metrics=custom_metrics,
+        excluded_handlers=excluded_handlers,
+    )
 
     def metrics(request: Request) -> Response:
         """Endpoint that serves Prometheus metrics."""
@@ -104,6 +156,7 @@ def expose_metrics(
     # Try to use FastAPI if available, otherwise fall back to Starlette
     try:
         from fastapi import FastAPI
+
         if isinstance(app, FastAPI):
             app.get(endpoint, include_in_schema=include_in_schema, tags=tags, **kwargs)(metrics)
             return
@@ -113,13 +166,11 @@ def expose_metrics(
     # Fallback to Starlette
     app.add_route(path=endpoint, route=metrics, include_in_schema=include_in_schema)
 
+
 # Example of how to define custom metrics
 def create_custom_metrics(registry: CollectorRegistry) -> Dict[str, Callable]:
     error_counter = Counter(
-        'custom_error_total',
-        'Total number of errors',
-        ['type'],
-        registry=registry
+        "custom_error_total", "Total number of errors", ["type"], registry=registry
     )
 
     def update_error_metric(request: Request, response: Response, duration: float):
