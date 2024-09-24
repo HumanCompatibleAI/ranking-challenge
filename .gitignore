@@ -182,4 +182,7 @@ sample_posts.db
 normalized_posts_facebook.json
 normalized_posts_reddit.json
 normalized_posts_twitter.json
+filtered_jan_2023.json
+filtered_reddit_data.csv
+filtered_comment_post.csv
 

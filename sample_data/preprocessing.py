@@ -133,6 +133,7 @@ reddit_data.rename(
     inplace=True,
 )
 reddit_data["text"] = reddit_data["text"].combine_first(reddit_data["selftext"])
+reddit_data["score"] = reddit_data["upvotes"] - reddit_data["downvotes"]
 
 # Lastly, we select relevant columns and then export to a csv within the 'processed' folder
 filtered_reddit = reddit_data[
@@ -147,7 +148,7 @@ filtered_reddit = reddit_data[
         "created_at",
         "upvotes",
         "downvotes",
-        "score"
+        # "score"
     ]
 ]
 filtered_reddit.to_csv(os.path.join(script_dir, REDDIT_DATA_FILE), index=False)
