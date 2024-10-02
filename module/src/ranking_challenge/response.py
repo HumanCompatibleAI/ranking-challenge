@@ -13,6 +13,13 @@ class NewItem(BaseModel):
     )
     url: HttpUrl = Field(description="The publicly-accessible URL of the content item.")
 
+class RankingResponseMetadata(BaseModel):
+    """"Additional information about the ranking process, stored but not sent to client"""
+
+    intervention_on: Optional[bool] = Field(
+        description="False if intevention configured off, user in control group, or error occurred",
+        default=None
+    )
 
 class RankingResponse(BaseModel):
     """A response to a ranking request"""
@@ -24,3 +31,8 @@ class RankingResponse(BaseModel):
         description="New publicly-accessible items to be inserted into the feed.",
         default=None,
     )
+    metadata: Optional[RankingResponseMetadata] = Field(
+        description="Additional information about the ranking process, stored but not sent to client.",
+        default=None,
+    )
+
