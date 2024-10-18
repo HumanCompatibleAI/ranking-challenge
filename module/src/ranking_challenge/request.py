@@ -136,6 +136,10 @@ class Session(BaseModel):
     current_time: datetime = Field(
         description="The current time according to the user's browser, in UTC, in `YYYY-MM-DD hh:mm:ss` format."
     )
+    prefetch: Optional[bool] = Field(
+        description="Whether this request is a prefetch. These are made by the router to get potential new item urls in advance of ranking. If the ranker usually marks new items 'used', it should not when this flag is set.",
+        default=False,
+    )
 
 
 class RankingRequest(BaseModel):
